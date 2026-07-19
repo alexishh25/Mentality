@@ -51,10 +51,11 @@
 .settings-tab-view .unity-tab-view__content-container {
     flex-grow: 1;
     height: 45%;
+    background-color: rgba(0, 0, 0, 0.59);
 }
 
 .settings-tab-view .unity-tab__content-container {
     padding: 15px;
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: rgba(0, 0, 0, 0);
     flex-grow: 1;
 }

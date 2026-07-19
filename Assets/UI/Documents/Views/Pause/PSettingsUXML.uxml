@@ -1,15 +1,18 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:Template name="GraphicsSettings" src="project://database/Assets/UI/Documents/Views/Settings/GraphicsUXML.uxml?fileID=9197481963319205126&amp;guid=d8481d49869fc414a8340d52d18e86e0&amp;type=3#GraphicsUXML" />
+    <ui:Template name="AudioSettings" src="project://database/Assets/UI/Documents/Views/Settings/AudioUXML.uxml?fileID=9197481963319205126&amp;guid=3b2b44a73d1e93d468729ad7d4dfab82&amp;type=3#AudioUXML" />
+    <ui:Template name="LanguageSettings" src="project://database/Assets/UI/Documents/Views/Settings/LanguageUXML.uxml?fileID=9197481963319205126&amp;guid=0f95fc3b942c5c940a7e9b8fcd0e1f56&amp;type=3#LanguageUXML" />
     <Style src="project://database/Assets/UI/Styles/SettingsUSS.uss?fileID=7433441132597879392&amp;guid=9b404cd7615cf564ead9a91ae927c082&amp;type=3#SettingsUSS" />
+    <ui:VisualElement name="VisualElement" style="flex-grow: 1; position: absolute; left: 5%; bottom: 5%; right: 5%; background-color: rgba(0, 0, 0, 0.77); top: 13.3%; visibility: hidden;" />
     <ui:TabView class="settings-tab-view">
         <ui:Tab label="Graficos">
-            <ui:VisualElement style="flex-grow: 1;" />
-            <ui:Label text="Opciones de Resolucion y Pantalla" class="settings-content-label" />
+            <ui:Instance template="GraphicsSettings" name="GraphicsTab" style="flex-grow: 1;" />
         </ui:Tab>
         <ui:Tab label="Audio">
-            <ui:Label text="Ajustes de Musica y Efectos de Sonido" class="settings-content-label" />
+            <ui:Instance template="AudioSettings" name="AudioTab" style="flex-grow: 1;" />
         </ui:Tab>
         <ui:Tab label="Idioma">
-            <ui:Label text="Seleccionar Idioma de Textos" class="settings-content-label" />
+            <ui:Instance template="LanguageSettings" name="LanguageTab" style="flex-grow: 1;" />
         </ui:Tab>
     </ui:TabView>
 </ui:UXML>

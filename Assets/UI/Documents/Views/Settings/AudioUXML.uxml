@@ -5,5 +5,12 @@
     xmlns:uie="UnityEditor.UIElements"
     xsi:noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd"
 >
-    
+    <Style src="project://database/Assets/UI/Styles/SettingsUSS.uss?fileID=7433441132597879392&amp;guid=9b404cd7615cf564ead9a91ae927c082&amp;type=3#SettingsUSS" />
+    <Style src="project://database/Assets/UI/Styles/SelectorUSS.uss?fileID=7433441132597879392&amp;guid=d89f1369b6d8f1c44a022bc1a374b814&amp;type=3#SelectorUSS" />
+    <ui:VisualElement style="flex-grow: 1; flex-direction: column;">
+        <ui:Label text="Ajustes de Musica y Efectos de Sonido" class="settings-content-label" />
+        <Mentality.Presentation.Views.SelectorButton name="VolumeSelector" content="Volumen General" selections="Silencio:SetVol0, Bajo:SetVol30, Medio:SetVol60, Alto:SetVol100" />
+        <Mentality.Presentation.Views.SelectorButton name="MusicSelector" content="Musica" selections="Silencio:SetMusic0, Bajo:SetMusic30, Medio:SetMusic60, Alto:SetMusic100" />
+        <Mentality.Presentation.Views.SelectorButton name="SfxSelector" content="Efectos (SFX)" selections="Silencio:SetSfx0, Bajo:SetSfx30, Medio:SetSfx60, Alto:SetSfx100" />
+    </ui:VisualElement>
 </ui:UXML>

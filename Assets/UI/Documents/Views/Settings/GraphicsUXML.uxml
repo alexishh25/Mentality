@@ -5,5 +5,13 @@
     xmlns:uie="UnityEditor.UIElements"
     xsi:noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd"
 >
-    
+    <Style src="project://database/Assets/UI/Styles/SettingsUSS.uss?fileID=7433441132597879392&amp;guid=9b404cd7615cf564ead9a91ae927c082&amp;type=3#SettingsUSS" />
+    <Style src="project://database/Assets/UI/Styles/SelectorUSS.uss?fileID=7433441132597879392&amp;guid=d89f1369b6d8f1c44a022bc1a374b814&amp;type=3#SelectorUSS" />
+    <ui:VisualElement style="flex-grow: 1; flex-direction: column;">
+        <ui:Label text="Opciones de Resolucion y Pantalla" class="settings-content-label" />
+        <Mentality.Presentation.Views.SelectorButton name="ResolutionSelector" content="Resolucion" selections="1920x1080:SetResolution1080, 1280x720:SetResolution720, 800x600:SetResolution600" />
+        <Mentality.Presentation.Views.SelectorButton name="QualitySelector" content="Calidad" selections="Bajo:SetQualityLow, Medio:SetQualityMedium, Alto:SetQualityHigh" />
+        <Mentality.Presentation.Views.SelectorButton name="VSyncSelector" content="VSYNC" selections="Desactivado:SetVSyncOff, Activado:SetVSyncOn" />
+        <Mentality.Presentation.Views.SelectorButton name="ScreenModeSelector" content="Modo Pantalla" selections="Pantalla Completa:SetFullscreen, Ventana:SetWindowed" />
+    </ui:VisualElement>
 </ui:UXML>
