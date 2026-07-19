@@ -1,0 +1,15 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles/SettingsUSS.uss?fileID=7433441132597879392&amp;guid=9b404cd7615cf564ead9a91ae927c082&amp;type=3#SettingsUSS" />
+    <ui:TabView class="settings-tab-view">
+        <ui:Tab label="Graficos">
+            <ui:VisualElement style="flex-grow: 1;" />
+            <ui:Label text="Opciones de Resolucion y Pantalla" class="settings-content-label" />
+        </ui:Tab>
+        <ui:Tab label="Audio">
+            <ui:Label text="Ajustes de Musica y Efectos de Sonido" class="settings-content-label" />
+        </ui:Tab>
+        <ui:Tab label="Idioma">
+            <ui:Label text="Seleccionar Idioma de Textos" class="settings-content-label" />
+        </ui:Tab>
+    </ui:TabView>
+</ui:UXML>

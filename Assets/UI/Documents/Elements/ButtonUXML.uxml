@@ -1,0 +1,4 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:me="Mentality.Presentation.Views" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Documents/Elements/ButtonUSS.uss?fileID=7433441132597879392&amp;guid=49524d7b6231e50428f235b106fc641b&amp;type=3#ButtonUSS" />
+    <me:MenuButton text="Button" name="Button" />
+</ui:UXML>

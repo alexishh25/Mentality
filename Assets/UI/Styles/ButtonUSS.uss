@@ -1,0 +1,25 @@
+.menu-button {
+    position: absolute;
+    top: 25%;
+    left: 0%;
+    right: 0%;
+    bottom: 25%;
+    font-size: 200%;
+    background-color: rgba(188, 188, 188, 0);
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    background-image: url("project://database/Assets/Sprites/UI/buttons.png?fileID=-1690250691&guid=6c81aaae7d273fd49a434613de5d300c&type=3#buttons_normal");
+    -unity-font-definition: url("project://database/Assets/Fonts/m3x6.ttf?fileID=12800000&guid=44f9e4e98ef6b0c4f8e4b05596790f4e&type=3#m3x6");
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-center;
+}
+
+.menu-button:hover {
+    background-image: url("project://database/Assets/Sprites/UI/buttons.png?fileID=-874921997&guid=6c81aaae7d273fd49a434613de5d300c&type=3#buttons_hover");
+}
+
+.menu-button:active {
+    background-image: url("project://database/Assets/Sprites/UI/buttons.png?fileID=-622946926&guid=6c81aaae7d273fd49a434613de5d300c&type=3#buttons_active");
+}

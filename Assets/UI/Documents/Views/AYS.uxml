@@ -1,0 +1,14 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:me="Mentality.Presentation.Views" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Styles/ButtonUSS.uss?fileID=7433441132597879392&amp;guid=49524d7b6231e50428f235b106fc641b&amp;type=3#ButtonUSS" />
+    <ui:VisualElement style="flex-grow: 1;">
+        <ui:Label text="¿Estas seguro?" style="position: absolute; top: 15%; left: 0%; bottom: 15%; right: 0%; -unity-background-scale-mode: scale-to-fit; -unity-text-align: upper-center; font-size: 40%; -unity-font-definition: url(&quot;project://database/Assets/Fonts/m3x6.ttf?fileID=12800000&amp;guid=44f9e4e98ef6b0c4f8e4b05596790f4e&amp;type=3#m3x6&quot;); color: rgb(255, 255, 255);" />
+    </ui:VisualElement>
+    <ui:VisualElement style="flex-grow: 1; flex-direction: row; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0;">
+        <ui:VisualElement style="width: 100%; position: relative; margin-right: 10%; margin-left: 5%;">
+            <me:MenuButton text="Si" />
+        </ui:VisualElement>
+        <ui:VisualElement style="width: 100%; position: relative; margin-right: 5%;">
+            <me:MenuButton text="No" name="MenuButton" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
