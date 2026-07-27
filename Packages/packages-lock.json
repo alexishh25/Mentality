@@ -1,5 +1,14 @@
 {
   "dependencies": {
+    "com.sinanata.designsystem": {
+      "version": "https://github.com/sinanata/unity-ui-toolkit-design-system.git?path=/Assets/DesignSystem",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.modules.unitywebrequest": "1.0.0"
+      },
+      "hash": "8d01a3c62400091e92a097c688e087b5ba3759bd"
+    },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
       "depth": 0,
