@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 public class InputRepository : MonoBehaviour
 {
     [SerializeField] public InputActionAsset inputActions;
-    [SerializeField] private string initialActionMap = "";
+    // [SerializeField] private string initialActionMap = "";
 
     // Explicit interface implementation to avoid renaming the serialized field
     // InputActionAsset IInputService.inputActions => inputActions;
