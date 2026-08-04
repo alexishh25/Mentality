@@ -9,6 +9,12 @@ namespace UnityUI.Services
 	public class ButtonService
 	{
         private readonly ButtonRepository _buttonRepository;
+
+        public ButtonService(ButtonRepository buttonRepository)
+        {
+            _buttonRepository = buttonRepository;
+        }
+
         public void PlayHoverSFX() => _buttonRepository.PlayHoverSFX();
         public void PlayClickSFX() => _buttonRepository.PlayClickSFX();
         public void PlayCancelSFX() => _buttonRepository.PlayCancelSFX();

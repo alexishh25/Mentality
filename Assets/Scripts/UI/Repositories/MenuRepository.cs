@@ -5,7 +5,7 @@ using UnityUI.Models;
 
 namespace UnityUI.Repositories
 {
-	public class MenuRepository : MonoBehaviour
+	public class MenuRepository
 	{
 		public List<MenuModel> ObtenerGuardado()
         {

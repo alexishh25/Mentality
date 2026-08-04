@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 using UnityUI.Services;
+using VContainer;
 
 namespace UnityUI.Views
 {
@@ -21,6 +22,12 @@ namespace UnityUI.Views
 
 		//private InputService _inputService;
         private ButtonService _buttonService;
+
+        [Inject]
+        public void Construct(ButtonService buttonService)
+        {
+            _buttonService = buttonService;
+        }
 
         protected virtual void Awake()
         {

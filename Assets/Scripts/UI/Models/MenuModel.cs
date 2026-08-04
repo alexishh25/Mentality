@@ -10,10 +10,10 @@ namespace UnityUI.Models
 
         public string LatestSavedGameName { get; set; }
 
-        public UnityCommand NewPartyCommand { get; }
-        public UnityCommand ContinueCommand { get; }
-        public UnityCommand OptionsCommand { get; }
-        public UnityCommand ExitCommand { get; }
+        public UnityHandler NewPartyHandler { get; }
+        public UnityHandler ContinueHandler { get; }
+        public UnityHandler OptionsHandler { get; }
+        public UnityHandler ExitHandler { get; }
 
     }
 

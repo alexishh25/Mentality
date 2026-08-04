@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using UnityUI.ViewModels;
 using UnityUI.Services;
+using VContainer;
 
 namespace UnityUI.Views
 {
@@ -14,26 +15,22 @@ namespace UnityUI.Views
 
 		private MenuViewModel _menuViewModel;
 
+        [Inject]
+        public void Construct(MenuViewModel menuViewModel)
+        {
+            _menuViewModel = menuViewModel;
+        }
+
 		protected override void Awake()
 		{
 			base.Awake();
-			
-			// Buscamos o creamos el componente MenuService en la escena
-			var menuService = FindFirstObjectByType<MenuService>();
-			if (menuService == null)
-			{
-				var go = new GameObject("MenuService");
-				menuService = go.AddComponent<MenuService>();
-			}
-
-			_menuViewModel = new MenuViewModel(menuService);
 		}
 
 		protected override void OnInitialize(VisualElement root)
 		{
 			newpartyButton = root.Q<Button>("newBtn");
-			loadpartyButton = root.Q<Button>("loadBtn");
-			settingsButton = root.Q<Button>("settingsBtn");
+			loadpartyButton = root.Q<Button>("continueBtn");
+			settingsButton = root.Q<Button>("optionsBtn");
 			exitButton = root.Q<Button>("exitBtn");
 		}
 
