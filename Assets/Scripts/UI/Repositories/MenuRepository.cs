@@ -1,12 +1,19 @@
 using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityUI.Models;
+using UnityEngine.SceneManagement;
+using Mentality.UI.Models;
+using Mentality.UI.Views;
+using Mentality.UI.Services;
 
-namespace UnityUI.Repositories
+namespace Mentality.UI.Repositories
 {
 	public class MenuRepository
 	{
+        public void IniciarNuevaPartida()
+        {
+            SceneManager.LoadScene("SampleScene");
+        }
 		public List<MenuModel> ObtenerGuardado()
         {
             // Aquí iría la lógica para obtener los datos del guardado desde PlayerPrefs, JSON, etc.
@@ -17,6 +24,19 @@ namespace UnityUI.Repositories
                 new MenuModel { HasSavedGame = false, LatestSavedGameName = "Partida2" },
                 new MenuModel { HasSavedGame = true, LatestSavedGameName = "Partida3" }
             };
+        }
+
+        public void AbrirOptions(UIService uiService)
+        {
+            uiService.ChangeScreen(ScreenType.Options);
+        }
+        public void Salir()
+        {
+            #if UNITY_EDITOR
+			UnityEditor.EditorApplication.isPlaying = false;
+			#else
+			Application.Quit();
+			#endif
         }
     }
 

@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace UnityUI.ViewModels
+namespace Mentality.UI.ViewModels
 {
     public class UnityBaseViewModel : INotifyPropertyChanged, INotifyBindablePropertyChanged
     {

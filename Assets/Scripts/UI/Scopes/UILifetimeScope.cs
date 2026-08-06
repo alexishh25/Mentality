@@ -1,38 +1,36 @@
 using UnityEngine;
-using UnityEngine.UIElements;
-using UnityUI.Views;
-using UnityUI.Repositories;
-using UnityUI.Services;
-using UnityUI.ViewModels;
+using Mentality.UI.Repositories;
+using Mentality.UI.Services;
+using Mentality.UI.ViewModels;
 using VContainer;
 using VContainer.Unity;
 
-public class UILifetimeScope : LifetimeScope
+namespace Mentality.UI
 {
-    [SerializeField] private UIDocument uiDocument;
-    [SerializeField] private UIDoc uiDoc;
-    [SerializeField] private BaseView baseView;
-
-    protected override void Configure(IContainerBuilder builder)
+    public class UILifetimeScope : LifetimeScope
     {
-        if (uiDoc != null)
-            builder.RegisterComponent(uiDoc);
+        [SerializeField] private UIDoc uiDoc;
 
-        if (uiDocument != null)
-            builder.RegisterComponent(uiDocument);
+        protected override void Configure(IContainerBuilder builder)
+        {
+            if (uiDoc != null)
+                builder.RegisterComponent(uiDoc);
 
-        if (baseView != null)
-            builder.RegisterComponent(baseView);
+            builder.Register<UIRepository>(Lifetime.Singleton);
+            builder.Register<UIService>(Lifetime.Singleton);
+            
+            // Repositories & Services
+            builder.Register<ButtonRepository>(Lifetime.Singleton);
+            builder.Register<ButtonService>(Lifetime.Singleton);
+            builder.Register<MenuRepository>(Lifetime.Singleton);
+            builder.Register<MenuService>(Lifetime.Singleton);
+            builder.Register<MenuSettingsRepository>(Lifetime.Singleton);
+            builder.Register<MenuSettingsService>(Lifetime.Singleton);
 
-        builder.Register<UIRepository>(Lifetime.Singleton);
-        builder.Register<UIService>(Lifetime.Singleton);
-
-        builder.Register<ButtonRepository>(Lifetime.Singleton);
-        builder.Register<ButtonService>(Lifetime.Singleton);
-
-        builder.Register<MenuRepository>(Lifetime.Singleton);
-        builder.Register<MenuService>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
-
-        builder.Register<MenuViewModel>(Lifetime.Transient);
+            // ViewModels
+            builder.Register<UnityBaseViewModel>(Lifetime.Transient);
+            builder.Register<MenuViewModel>(Lifetime.Transient);
+            builder.Register<MenuSettingsViewModel>(Lifetime.Singleton);
+        }
     }
 }

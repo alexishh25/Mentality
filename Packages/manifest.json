@@ -1,7 +1,6 @@
 {
   "dependencies": {
     "com.kylewbanks.scenerefattribute": "https://github.com/KyleBanks/scene-ref-attribute.git",
-    "com.sinanata.designsystem": "https://github.com/sinanata/unity-ui-toolkit-design-system.git?path=/Assets/DesignSystem",
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.ai.navigation": "2.0.14",
     "com.unity.cinemachine": "3.1.7",

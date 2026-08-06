@@ -1,33 +1,37 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using Mentality.UI.Repositories;
 
-public class UIService
+namespace Mentality.UI.Services
 {
-    private readonly UIRepository _uiRepository;
-
-    public UIService(UIRepository uiRepository)
+    public class UIService
     {
-        _uiRepository = uiRepository;
-    }
+        private readonly UIRepository _uiRepository;
 
-    public void RegisterScreens(ScreenEntry[] screens, ScreenType initialScreen, UIDocument uiDocument)
-    {
-        _uiRepository.RegisterScreens(screens, initialScreen, uiDocument);
-    }
+        public UIService(UIRepository uiRepository)
+        {
+            _uiRepository = uiRepository;
+        }
 
-    public void ChangeScreen(ScreenType type)
-    {
-        // Omitimos TransitionScreenData ya que quitamos las transiciones
-        _uiRepository.ChangeScreen(type);
-    }
+        public void RegisterScreens(ScreenEntry[] screens, ScreenType initialScreen, UIDocument uiDocument)
+        {
+            _uiRepository.RegisterScreens(screens, initialScreen, uiDocument);
+        }
 
-    public void EnableUI()
-    {
-        _uiRepository.EnableUI();
-    }
+        public void ChangeScreen(ScreenType type)
+        {
+            // Omitimos TransitionScreenData ya que quitamos las transiciones
+            _uiRepository.ChangeScreen(type);
+        }
 
-    public void DisableUI()
-    {
-        _uiRepository.DisableUI();
+        public void EnableUI()
+        {
+            _uiRepository.EnableUI();
+        }
+
+        public void DisableUI()
+        {
+            _uiRepository.DisableUI();
+        }
     }
 }

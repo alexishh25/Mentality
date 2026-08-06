@@ -1,10 +1,9 @@
 using UnityEngine;
 using UnityEngine.UIElements;
-using UnityUI.ViewModels;
-using UnityUI.Services;
+using Mentality.UI.ViewModels;
 using VContainer;
 
-namespace UnityUI.Views
+namespace Mentality.UI.Views
 {
 	public class MenuView : BaseView
 	{
@@ -15,11 +14,11 @@ namespace UnityUI.Views
 
 		private MenuViewModel _menuViewModel;
 
-        [Inject]
-        public void Construct(MenuViewModel menuViewModel)
-        {
-            _menuViewModel = menuViewModel;
-        }
+		[Inject]
+		public void Construct(MenuViewModel menuViewModel)
+		{
+			_menuViewModel = menuViewModel;
+		}
 
 		protected override void Awake()
 		{
@@ -36,17 +35,21 @@ namespace UnityUI.Views
 
 		protected override void OnBind()
 		{
-			// Vinculamos acciones al hacer click
-			if (newpartyButton != null) newpartyButton.clicked += OnNewPartyClicked;
+			if (_menuViewModel == null) return;
+
+			// Vinculamos acciones al hacer click a los comandos del ViewModel
+			if (newpartyButton != null) newpartyButton.clicked += _menuViewModel.NewGameCommand.Execute;
 			if (loadpartyButton != null) loadpartyButton.clicked += OnLoadPartyClicked;
-			if (settingsButton != null) settingsButton.clicked += OnSettingsClicked;
-			if (exitButton != null) exitButton.clicked += OnExitClicked;
+			if (settingsButton != null) settingsButton.clicked += _menuViewModel.OpenSettingsCommand.Execute;
+			if (exitButton != null) exitButton.clicked += _menuViewModel.ExitGameCommand.Execute;
 		}
 
 		protected override void OnUnbind()
 		{
+			if (_menuViewModel == null) return;
+
 			// Limpiamos eventos al cerrar la pantalla
-			if (newpartyButton != null) newpartyButton.clicked -= OnNewPartyClicked;
+			if (newpartyButton != null) newpartyButton.clicked -= _menuViewModel.NewGameCommand.Execute;
 			if (loadpartyButton != null) loadpartyButton.clicked -= OnLoadPartyClicked;
 			if (settingsButton != null) settingsButton.clicked -= OnSettingsClicked;
 			if (exitButton != null) exitButton.clicked -= OnExitClicked;
@@ -60,10 +63,14 @@ namespace UnityUI.Views
 		private void OnLoadPartyClicked()
 		{
 			var saves = _menuViewModel?.GetSaveData();
-			Debug.Log($"[MenuView] Cargar partida. Slots de guardado encontrados: {saves?.Count ?? 0}");
-			// Aquí abrirías el menú de cargas pasando los datos a otra pantalla
+			if (saves != null)
+			{
+				foreach (var save in saves)
+				{
+					Debug.Log($"Elija: {save.LatestSavedGameName}");
+				}
+			}
 		}
-
 		private void OnSettingsClicked()
 		{
 			_menuViewModel?.OpenSettings();

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace UnityUI.Repositories
+namespace Mentality.UI.Repositories
 {
 	public class ButtonRepository
 	{

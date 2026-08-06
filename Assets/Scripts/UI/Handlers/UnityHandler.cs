@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace UnityUI.Commands
+namespace Mentality.UI.Commands
 {
     public class UnityHandler
     {

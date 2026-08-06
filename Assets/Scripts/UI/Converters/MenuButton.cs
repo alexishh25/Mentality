@@ -1,6 +1,6 @@
 using UnityEngine.UIElements;
 
-namespace Mentality.Presentation.Views
+namespace Mentality.UI.Views
 {
     [UxmlElement]
     public partial class MenuButton : Button

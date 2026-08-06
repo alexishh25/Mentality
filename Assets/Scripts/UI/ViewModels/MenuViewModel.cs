@@ -1,22 +1,31 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityUI.Models;
-using UnityUI.Services;
+using UnityEngine.SceneManagement;
+using Mentality.UI.Models;
+using Mentality.UI.Services;
+using Mentality.UI.Commands;
 
-namespace UnityUI.ViewModels
+namespace Mentality.UI.ViewModels
 {
 	public class MenuViewModel : UnityBaseViewModel
 	{
 		private readonly MenuService _menuService;
 
+		public UnityHandler NewGameCommand { get; }
+		public UnityHandler OpenSettingsCommand { get; }
+		public UnityHandler ExitGameCommand { get; }
+
 		public MenuViewModel(MenuService menuService)
 		{
 			_menuService = menuService;
+			NewGameCommand = new UnityHandler(NewGame);
+			OpenSettingsCommand = new UnityHandler(OpenSettings);
+			ExitGameCommand = new UnityHandler(ExitGame);
 		}
 
 		public void NewGame()
 		{
-			Debug.Log("[MenuViewModel] Confirmación: Click recibido en 'Nueva Partida'. Todo funciona correctamente.");
+			_menuService.IniciarNuevaPartida();
 		}
 
 		public List<MenuModel> GetSaveData()
@@ -26,18 +35,13 @@ namespace UnityUI.ViewModels
 
 		public void OpenSettings()
 		{
-			Debug.Log("[MenuViewModel] Confirmación: Click recibido en 'Configuración'. Todo funciona correctamente.");
+			_menuService.AbrirOptions();
 		}
 
 		public void ExitGame()
 		{
 			Debug.Log("[MenuViewModel] Saliendo del juego...");
-			#if UNITY_EDITOR
-			UnityEditor.EditorApplication.isPlaying = false;
-			#else
-			Application.Quit();
-			#endif
+			_menuService.Salir();
 		}
 	}
-
 }

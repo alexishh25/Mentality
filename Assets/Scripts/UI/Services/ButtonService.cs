@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
-using UnityUI.Repositories;
+using Mentality.UI.Repositories;
 
-namespace UnityUI.Services
+namespace Mentality.UI.Services
 {
 	public class ButtonService
 	{

@@ -2,16 +2,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
-using UnityUI.Services;
+using Mentality.UI.Services;
 using VContainer;
 
-namespace UnityUI.Views
+namespace Mentality.UI.Views
 {
 	public abstract class BaseView : MonoBehaviour
 	{
-		[Header("UI Toolkit Settings")]
-		[SerializeField] protected UIDocument uiDocument;
-
 		[Header("Cancel button name")]
 		[SerializeField] private string cancelBtnName = "cancelButton";
 
@@ -21,12 +18,14 @@ namespace UnityUI.Views
         private InputAction _cancelAction;
 
 		//private InputService _inputService;
-        private ButtonService _buttonService;
+        protected ButtonService _buttonService;
+        public UIService _uiService;
 
         [Inject]
-        public void Construct(ButtonService buttonService)
+        public void Construct(ButtonService buttonService, UIService uiService)
         {
             _buttonService = buttonService;
+            _uiService = uiService;
         }
 
         protected virtual void Awake()
