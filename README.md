@@ -1,85 +1,119 @@
-# Mentality - Arquitectura y Patrón de Diseño (SOLID)
+# Mentality - Arquitectura y Patrón de Diseño (Clean Architecture & SOLID)
 
-Este proyecto está estructurado bajo los principios de **Clean Architecture** y **SOLID**, adaptados al entorno de desarrollo en Unity. La arquitectura busca separar la lógica pura del juego del motor gráfico, permitiendo mayor modularidad, testabilidad y escalabilidad.
+Este proyecto está estructurado bajo los principios de **Clean Architecture**, **SOLID**, y patrones de presentación modernos (**MVP** y **MVVM**).
 
 ---
 
 ## 📂 Estructura del Proyecto
 
-Las carpetas principales dentro de `Assets/` se dividen en lógica de desarrollo y assets estáticos:
+Las carpetas principales de código dentro de `Assets/Scripts/` se dividen de la siguiente manera:
 
 ```
-Assets/
-├── Scripts/                  # Código fuente C# estructurado en SOLID
-│   ├── Domain/               # Capa de Dominio (Reglas de negocio puras, sin dependencias de Unity)
-│   │   ├── Models/           # Entidades del juego y datos puros
-│   │   └── Interfaces/       # Contratos esenciales (Interfaces de dominio)
-│   │
-│   ├── Application/          # Capa de Aplicación (Casos de uso y servicios coordinadores)
-│   │   └── Interfaces/       # Abstracciones para servicios necesarios (ej. guardado, red)
-│   │
-│   ├── Infrastructure/       # Capa de Infraestructura (Implementaciones tecnológicas y dependencias externas)
-│   │   └── Persistence/      # Guardado local, Base de datos (JSON, PlayerPrefs)
-│   │
-│   └── Presentation/         # Capa de Presentación (Controladores, Vistas y entrada de Unity)
-│       ├── Controllers/      # Controladores de juego (MonoBehaviours que reciben entrada del usuario)
-│       ├── Views/            # Componentes visuales encargados de la interfaz (UI Toolkit, Canvas)
-│       └── Presenters/       # Intermediarios que conectan reactivamente los Modelos con las Vistas
+Assets/Scripts/
+├── Player/                   # Módulo completo del Jugador (Patrón MVP)
+│   ├── Models/               # Estado, configuración de velocidad, gravedad, linterna (PlayerModel)
+│   ├── Presenters/           # Cerebro del jugador (PlayerPresenter), C# puro que implementa ITickable
+│   ├── Scopes/               # Ámbito de inyección de dependencias local (PlayerLifetimeScope)
+│   ├── Services/             # Abstracción y servicio de entrada física (IPlayerInputService, PlayerInputService)
+│   └── Views/                # Componentes físicos de Unity (PlayerView) que manejan cámaras y CharacterController
 │
-├── UI/                       # Recursos visuales y estilos de UI Toolkit (No Scripts)
-│   ├── Documents/            # Archivos .uxml (Layouts y árbol visual)
-│   ├── Styles/               # Archivos .uss (Hojas de estilo)
-│   └── PanelSettings/        # Configuraciones de resolución y escalado
-│
-├── Audio/                    # Audio y sonido ordenado
-│   ├── Music/                # Banda sonora y temas de fondo (BGM)
-│   └── SFX/                  # Efectos de sonido rápidos (UI, pisadas, impactos)
-│
-├── Shaders/                  # Archivos de Shaders y lógicas gráficas
-├── ScriptableObjects/        # Configuración de datos estáticos persistentes en el Editor
-├── Sprites/                  # Texturas y elementos 2D
-├── Prefabs/                  # Plantillas de GameObjects listos para instanciar
-└── Materials/                # Materiales de renderizado
+├── UI/                       # Módulo del Menú y la Interfaz de Usuario (Patrón MVVM/MVP)
+   ├── Commands/             # Comandos genéricos de enlace de acciones (UnityCommand)
+   ├── Models/               # Estructuras de datos para UI (MenuModel)
+   ├── Repositories/         # Datos simulados o persistidos (MenuRepository, ButtonRepository)
+   ├── Scopes/               # Ámbito de inyección de dependencias para la UI (UILifetimeScope)
+   ├── Services/             # Servicios lógicos (MenuService, ButtonService)
+   ├── ViewModels/           # Capa intermedia de estado de UI (MenuViewModel, UnityBaseViewModel)
+   └── Views/                # Vistas enlazadas a UI Toolkit (MenuView, BaseView)
+   └──UIDoc.cs              # Coordinador de escena que asocia ScreenEntries (ScreenType + UXML + BaseView)
 ```
 
 ---
 
-## 🛠️ Aplicación de Principios SOLID en el Código
+## ⚡ Pilares de la Arquitectura Actual
 
-El proyecto inicializa con una plantilla del **Sistema de Salud y Persistencia**, que ilustra la aplicación práctica de cada principio:
+### 1. Inyección de Dependencias (VContainer)
+El proyecto utiliza **VContainer** para gestionar el ciclo de vida e inyectar dependencias automáticamente en lugar de usar Singleton globales o búsquedas costosas como `FindFirstObjectByType`.
 
-### 1. S - Single Responsibility Principle (Responsabilidad Única)
-Cada componente tiene una única razón para cambiar:
-* **[Health.cs](Assets/Scripts/Domain/Models/Health.cs):** Solo calcula la salud, daño y curación. No sabe cómo se dibuja en pantalla ni cómo se guarda en disco.
-* **[HealthBarView.cs](Assets/Scripts/Presentation/Views/HealthBarView.cs):** Solo se encarga de actualizar los sliders y textos en la UI.
-* **[JsonSaveService.cs](Assets/Scripts/Infrastructure/Persistence/JsonSaveService.cs):** Solo se encarga de escribir y leer archivos en formato JSON.
+```mermaid
+graph TD
+    subgraph LifetimeScope [LifetimeScope: UILifetimeScope / PlayerLifetimeScope]
+        Configure[1. Configure Method] --> Register[2. Register Services & Entry Points]
+    end
+    Register -->|Builds Container| Container[3. Container]
+    Container -->|Auto Injects| View[MonoBehaviour Views]
+    Container -->|Instantiates & Runs| EntryPoints[Entry Points: Presenters / IInitializable]
+```
 
-### 2. O - Open/Closed Principle (Abierto/Cerrado)
-El comportamiento debe ser extensible sin modificar el código existente.
-* Los comportamientos externos o extensiones interactúan con el modelo de salud a través de eventos expuestos (`OnHealthChanged`, `OnDeath`) y métodos abiertos. No es necesario modificar la clase `Health` para agregar efectos visuales de daño, partículas o sonidos de muerte; otros scripts pueden suscribirse a sus eventos.
+*   **[UILifetimeScope](file:///d:/Github/Mentality/Assets/Scripts/UI/Scopes/UILifetimeScope.cs)**: Registra la vista de menú (`BaseView` / `MenuView`), repositorios, servicios y el `MenuViewModel`.
+*   **[PlayerLifetimeScope](file:///d:/Github/Mentality/Assets/Scripts/Player/Scopes/Player/PlayerLifetimeScope.cs)**: Registra la vista (`PlayerView`), el modelo de datos (`PlayerModel`), la abstracción de entrada (`PlayerInputService`) y el presentador (`PlayerPresenter`).
 
-### 3. L - Liskov Substitution Principle (Sustitución de Liskov)
-Las subclases o implementaciones deben ser sustituibles por sus interfaces base sin alterar el funcionamiento del programa.
-* Si el sistema de combate requiere dañar algo, interactúa con la interfaz **[IDamageable.cs](Assets/Scripts/Domain/Interfaces/IDamageable.cs)**. Ya sea el jugador, un enemigo o un barril explosivo el que implemente la interfaz, el sistema los tratará a todos por igual sin necesidad de conocer su tipo concreto.
+### 2. Patrón MVP para el Jugador (Model-View-Presenter)
+El flujo del jugador está desacoplado de `MonoBehaviour` usando puntos de entrada de VContainer:
 
-### 4. I - Interface Segregation Principle (Segregación de Interfaces)
-Es mejor tener interfaces pequeñas y específicas que una interfaz genérica y sobrecargada.
-* En lugar de una interfaz masiva como `ICharacter`, dividimos las responsabilidades en interfaces finas como **[IDamageable.cs](Assets/Scripts/Domain/Interfaces/IDamageable.cs)** (recibe daño) e **[IHealable.cs](Assets/Scripts/Domain/Interfaces/IHealable.cs)** (recibe curación). Si un elemento de entorno (como una pared destructible) puede recibir daño pero no curarse, solo implementará `IDamageable`.
+```mermaid
+graph LR
+    InputService[PlayerInputService] -->|Reads Input| Presenter[PlayerPresenter C# Pure / ITickable]
+    Presenter -->|Updates State| Model[PlayerModel C# Pure]
+    Presenter -->|Calls Methods| View[PlayerView MonoBehaviour]
+    View -->|Unity Events / Physics| Unity[Unity Engine]
+```
 
-### 5. D - Dependency Inversion Principle (Inversión de Dependencias)
-Los módulos de alto nivel no deben depender de módulos de bajo nivel; ambos deben depender de abstracciones.
-* **[PlayerController.cs](Assets/Scripts/Presentation/Controllers/PlayerController.cs)** no interactúa directamente con `JsonSaveService` de la capa de infraestructura. En su lugar, depende de la abstracción **[ISaveService.cs](Assets/Scripts/Application/Interfaces/ISaveService.cs)**. Esto permite cambiar el guardado JSON local por un sistema de guardado en la nube (ej. PlayFab) sin cambiar una sola línea de código dentro del controlador del jugador.
+*   **Model ([PlayerModel](file:///d:/Github/Mentality/Assets/Scripts/Player/Models/PlayerModel.cs))**: Clase C# pura que almacena velocidades, gravedad y estado de salto/linterna.
+*   **View ([PlayerView](file:///d:/Github/Mentality/Assets/Scripts/Player/Views/PlayerView.cs))**: Componente MonoBehaviour que interactúa con `CharacterController`, `Animator` y `CinemachineCamera`.
+*   **Presenter ([PlayerPresenter](file:///d:/Github/Mentality/Assets/Scripts/Player/Presenters/PlayerPresenter.cs))**: Clase C# pura. Implementa `ITickable` (involucrándose directamente en el `Update` de Unity gracias a VContainer). Traduce las entradas del `PlayerInputService` en comportamientos de movimiento y cámara, y actualiza el `PlayerModel` y la `PlayerView`.
+
+### 3. Patron MVVM para la UI (Model-View-ViewModel)
+El módulo de interfaz de usuario utiliza el patrón **MVVM** para separar la lógica de presentación del diseño visual en Unity (UI Toolkit):
+
+```mermaid
+graph LR
+    UIDocument[UIDocument / UXML] <-->|Binding| View[MenuView MonoBehaviour / BaseView]
+    View -->|Invokes Commands| ViewModel[MenuViewModel C# Pure]
+    ViewModel -->|Calls| Service[MenuService]
+    Service -->|Gets/Saves Data| Repository[MenuRepository]
+    Repository <-->|Raw Data| Model[MenuModel]
+```
+
+*   **Model ([MenuModel](file:///d:/Github/Mentality/Assets/Scripts/UI/Models/MenuModel.cs))**: Representa los datos y el estado puro del juego (por ejemplo, información sobre si hay partidas guardadas). No conoce la existencia de la UI ni de los ViewModels.
+*   **ViewModel ([MenuViewModel](file:///d:/Github/Mentality/Assets/Scripts/UI/ViewModels/MenuViewModel.cs))**: Es una clase C# pura encargada de procesar la lógica de la UI y exponer los comandos/operaciones (como `NewGame()`, `GetSaveData()`, `ExitGame()`). **No tiene dependencias de componentes de Unity** (`Button`, `VisualElement`), lo que facilita las pruebas unitarias automatizadas.
+*   **View ([MenuView](file:///d:/Github/Mentality/Assets/Scripts/UI/Views/MenuView.cs))**: Formada por el diseño en UI Toolkit (`.uxml`/`.uss`) y la clase `MenuView`. Su única función es realizar el *binding* (enlace): asocia los elementos visuales del árbol UI (`root.Q<Button>("newBtn")`) con las interacciones del usuario y las delega directamente a las funciones lógicas del `MenuViewModel`.
+*   **Coordinador ([UIDoc](file:///d:/Github/Mentality/Assets/Scripts/UI/UIDoc.cs) / [UIService](file:///d:/Github/Mentality/Assets/Scripts/Domain/Services/UIService.cs))**: Orquesta la instanciación de las vistas y de la transición entre pantallas (como cambiar del Menú Principal a Opciones) inyectando y montando los elementos visuales en el `UIDocument` de la escena.
 
 ---
 
-## ⚡ Cómo Usar las Plantillas Creadas
+## 🛠️ Aplicación de Principios SOLID
 
-1. Crea un GameObject en tu escena llamado `Player` y agrégale el componente `PlayerController`.
-2. Crea un Slider de UI y agrégale el componente `HealthBarView`.
-3. Arrastra tu `HealthBarView` al campo `Health Bar View` del `PlayerController` en el Inspector de Unity.
-4. Presiona **Play**:
-   * Teclas de prueba configuradas en `PlayerController`:
-     * **[Space]** -> Recibir 10 de daño.
-     * **[H]** -> Curar 10 de salud.
-     * **[S]** -> Guardar la salud actual a un archivo JSON.
-     * **[L]** -> Cargar la salud guardada desde el archivo JSON.
+El proyecto es un excelente ejemplo práctico de SOLID:
+
+1.  **S - Single Responsibility (Responsabilidad Única)**:
+    *   `PlayerModel` solo contiene datos.
+    *   `PlayerView` solo controla componentes de renderizado y físicas de Unity.
+    *   `PlayerInputService` solo lee valores del nuevo *Input System*.
+    *   `PlayerPresenter` se encarga exclusivamente de la lógica de negocio y enlace de los anteriores.
+2.  **O - Open/Closed (Abierto/Cerrado)**:
+    *   El sistema de pantallas (`UIService`) permite registrar nuevas vistas y tipos de pantallas (`ScreenType`) simplemente añadiéndolas al array de `UIDoc` en el Inspector de Unity, sin tener que modificar la clase principal de UI.
+3.  **L - Liskov Substitution (Sustitución de Liskov)**:
+    *   `MenuView` puede ser tratado indistintamente como un `BaseView` por el sistema de pantallas `UIDoc`, permitiendo inicialización genérica y registro de eventos de cancelación unificados.
+4.  **I - Interface Segregation (Segregación de Interfaces)**:
+    *   La entrada se abstrae bajo **[IPlayerInputService](file:///d:/Github/Mentality/Assets/Scripts/Player/Services/Interfaces/IPlayerInputService.cs)**, exponiendo únicamente propiedades de lectura de movimiento y botones, aislando la lógica del presentador del framework específico de entrada.
+5.  **D - Dependency Inversion (Inversión de Dependencias)**:
+    *   Los presentadores y viewmodels no instancian sus servicios con `new`. VContainer resuelve estas dependencias a través de inyección en constructor (`Constructor Injection`) o por método (`[Inject]`), dependiendo de abstracciones.
+
+---
+
+## 🧩 Paquetes/Frameworks utilizados
+
+Se muestra un lista siguiente de los paquetes externos utilizados:
+
+- **UI Toolkit Timeline** (`dev.krajnc.uitoolkittimeline`)
+    - Integra el sistema de **Timeline** de Unity con la interfaz de usuario basada en **UI Toolkit**. Permite secuenciar, animar y controlar elementos de la interfaz mediante líneas de tiempo, facilitando la creación de transiciones y animaciones complejas.
+
+- **VContainer** (`jp.hadashikick.vcontainer`)
+    - Contenedor de **Inyección de Dependencias (Dependency Injection, DI)** de alto rendimiento para Unity. Favorece una arquitectura desacoplada, mejora la mantenibilidad del código y optimiza la gestión del ciclo de vida de las dependencias con un impacto mínimo en el rendimiento.
+
+- **SceneRefAttribute** (`com.kylewbanks.scenerefattribute`)
+    - Proporciona un atributo personalizado para el Inspector de Unity que permite asignar escenas mediante referencias seguras. Evita el uso de nombres de escenas escritos manualmente, reduciendo errores y facilitando el mantenimiento del proyecto.
+
+- **Unity UI Toolkit Design System** (`com.sinanata.designsystem`)
+    - Sistema de diseño desarrollado para **UI Toolkit** que ofrece componentes reutilizables, estilos consistentes y una estructura escalable para la construcción de interfaces de usuario. Facilita la implementación de una identidad visual uniforme en toda la aplicación.

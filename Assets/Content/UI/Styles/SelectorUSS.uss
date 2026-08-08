@@ -1,0 +1,55 @@
+.selector-button {
+    flex-grow: 0;
+    height: 50px;
+    margin-bottom: 10px;
+    flex-direction: row;
+    align-items: center;
+}
+
+.selector-button__description {
+    flex-grow: 1;
+    -unity-text-align: middle-left;
+    margin-left: 10px;
+    -unity-font-definition: url("project://database/Assets/Fonts/m3x6.ttf?fileID=12800000&guid=44f9e4e98ef6b0c4f8e4b05596790f4e&type=3#m3x6");
+    font-size: 40px;
+    color: rgb(255, 255, 255);
+    width: 0%;
+}
+
+.selector-button__controls-container {
+    flex-grow: 1;
+    flex-direction: row;
+    align-items: center;
+}
+
+.selector-button__arrow {
+    flex-grow: 0;
+    flex-shrink: 1;
+    width: 5%;
+    background-color: rgba(0, 0, 0, 0);
+    color: rgba(27, 27, 27, 0);
+    border-left-color: rgba(0, 0, 0, 0);
+    border-right-color: rgba(0, 0, 0, 0);
+    border-top-color: rgba(0, 0, 0, 0);
+    border-bottom-color: rgba(0, 0, 0, 0);
+    -unity-background-scale-mode: scale-to-fit;
+    background-position-y: bottom 0;
+    background-image: url("project://database/Assets/Sprites/UI/arrow.png?fileID=-434453748&guid=d272d62a378e8a849ae200f492a73455&type=3#arrow_0");
+    -unity-background-image-tint-color: rgb(0, 73, 207);
+}
+
+.selector-button__arrow:hover {
+    -unity-background-image-tint-color: rgb(96, 203, 255);
+}
+
+.selector-button__arrow--left {
+    scale: -1 1;
+}
+
+.selector-button__label {
+    flex-grow: 3;
+    -unity-text-align: middle-center;
+    -unity-font-definition: url("project://database/Assets/Fonts/m3x6.ttf?fileID=12800000&guid=44f9e4e98ef6b0c4f8e4b05596790f4e&type=3#m3x6");
+    font-size: 40px;
+    color: rgb(255, 255, 255);
+}

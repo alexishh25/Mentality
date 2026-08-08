@@ -1,0 +1,61 @@
+.settings-tab-view {
+    position: absolute;
+    top: 5%;
+    left: 5%;
+    bottom: 5%;
+    right: 5%;
+}
+
+.settings-tab-view .unity-tab__header-label {
+    -unity-font-definition: url("project://database/Assets/Fonts/m3x6.ttf?fileID=12800000&guid=44f9e4e98ef6b0c4f8e4b05596790f4e&type=3#m3x6");
+    font-size: 32px;
+    color: rgb(255, 255, 255);
+}
+
+.settings-tab-view .unity-tab-view__header-container {
+    background-color: transparent;
+    height: 45px;
+    border-bottom-width: 2px;
+    border-bottom-color: rgb(255, 255, 255);
+    flex-direction: row;
+}
+
+.settings-tab-view .unity-tab__header {
+    background-color: rgb(0, 19, 97);
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    margin-right: 5px;
+    padding: 5px 15px;
+}
+
+.settings-tab-view .unity-tab__header:hover {
+    background-color: rgb(42, 61, 201);
+}
+
+.settings-tab-view .unity-tab__header:checked {
+    background-color: rgb(15, 56, 184);
+}
+
+.settings-tab-view .unity-tab__header-underline {
+    background-color: rgb(255, 255, 255);
+    height: 3px;
+}
+
+.settings-tab-view .settings-content-label {
+    -unity-font-definition: url("project://database/Assets/Fonts/m3x6.ttf?fileID=12800000&guid=44f9e4e98ef6b0c4f8e4b05596790f4e&type=3#m3x6");
+    font-size: 48px;
+    color: rgb(220, 220, 220);
+    margin-bottom: 10px;
+}
+
+.settings-tab-view .unity-tab-view__content-container {
+    flex-grow: 1;
+    height: 45%;
+    background-color: rgba(0, 0, 0, 0.59);
+}
+
+.settings-tab-view .unity-tab__content-container {
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0);
+    flex-grow: 1;
+}
