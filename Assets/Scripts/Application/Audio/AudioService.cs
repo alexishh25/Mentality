@@ -1,35 +1,33 @@
 using Composition.Interfaces;
+using Infrastructure.Audio;
 using UnityEngine;
 
 namespace Composition.Services
 {
     public class AudioService : IAudioService
     {
-        private readonly AudioConfigSO _config;
+        private readonly IMusicPlayer _musicPlayer;
+        private readonly ISFXPlayer _sfxPlayer;
 
-        public AudioService(AudioConfigSO config)
+        public AudioService(IMusicPlayer musicPlayer, ISFXPlayer sfxPlayer)
         {
-            _config = config;
-        }
-        public void PlayMusic(AudioClip clip, float start, float end)
-        {
-            
+            _musicPlayer = musicPlayer;
+            _sfxPlayer = sfxPlayer;
         }
 
-        public void PlaySFX(AudioClip clip, float volume = 1)
+        public void PlayMusic(MusicTrackSO track, float volumeMultiplier = 1f, float pitch = 1f, bool loop = true)
         {
-            
+            _musicPlayer.Play(track, volumeMultiplier, pitch, loop);
+        }
+
+        public void PlaySFX(SFXTrackSO track, float volumeMultiplier = 1f, float pitch = 1f)
+        {
+            _sfxPlayer.Play(track, volumeMultiplier, pitch);
         }
 
         public void StopMusic()
         {
-            
-        }
-
-        public void CheckLoop()
-        {
-            
+            _musicPlayer.Stop();
         }
     }
-
 }

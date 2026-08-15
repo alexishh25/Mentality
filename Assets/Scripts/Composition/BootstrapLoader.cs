@@ -1,5 +1,8 @@
+using Mentality.Application.Scene;
+using Composition.Interfaces;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using VContainer;
 
 public static class PerformBootStrap
 {
@@ -26,10 +29,11 @@ public static class PerformBootStrap
 public class BootstrapLoader : MonoBehaviour
 {
     public static BootstrapLoader Instance { get; private set; }
+
     private void Awake()
     {
         // If GameManager already exists, Bootstrap was already loaded
-        if (Instance != null)
+        if (Instance != null && Instance != this)
         {
             Debug.LogWarning($"Multiple instances of BootstrapLoader detected! This should not happen. Destroying duplicate.");
             gameObject.SetActive(false);
@@ -41,4 +45,5 @@ public class BootstrapLoader : MonoBehaviour
 
         DontDestroyOnLoad(gameObject);
     }
+    
 }

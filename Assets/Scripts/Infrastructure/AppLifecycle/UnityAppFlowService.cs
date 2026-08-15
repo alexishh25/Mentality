@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Mentality.Application.AppLifecycle;
 
 namespace Mentality.Infrastructure.AppLifecycle
 {

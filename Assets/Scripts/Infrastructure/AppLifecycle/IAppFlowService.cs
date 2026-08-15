@@ -1,4 +1,4 @@
-namespace Mentality.Application.AppLifecycle
+namespace Mentality.Infrastructure.AppLifecycle
 {
     public interface IAppFlowService
     {

@@ -1,12 +1,11 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace Composition.Interfaces
 {
     public interface IAudioService
     {
-        void PlayMusic(AudioClip clip, float start, float end);
-        void PlaySFX(AudioClip clip, float volume = 1f);
+        void PlayMusic(MusicTrackSO track, float volumeMultiplier = 1f, float pitch = 1f, bool loop = true);
+        void PlaySFX(SFXTrackSO track, float volumeMultiplier = 1f, float pitch = 1f);
         void StopMusic();
-        void CheckLoop();
     }
 }

@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Mentality.Application.AppLifecycle;
+using Mentality.Infrastructure.AppLifecycle;
 using Mentality.UI.Models;
 using Mentality.UI.Services;
 

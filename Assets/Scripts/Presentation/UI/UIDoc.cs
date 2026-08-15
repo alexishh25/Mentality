@@ -1,4 +1,5 @@
 using System;
+using Composition.Interfaces;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Mentality.UI.Views;
@@ -30,17 +31,27 @@ namespace Mentality.UI
         [SerializeField] private UIDocument uIDocument;
         [SerializeField] private ScreenEntry[] screens;
 
+        [Header("Audio de Escena")]
+        [SerializeField] private MusicTrackSO sceneMusic;
+        
         private UIService _uiService;
+        private IAudioService _audioService;
 
         [Inject]
-        public void Construct(UIService uiService)
+        public void Construct(UIService uiService, IObjectResolver container)
         {
             _uiService = uiService;
+            if (container != null && container.TryResolve<IAudioService>(out var audioService))
+            {
+                _audioService = audioService;
+            }
         }
 
         public void Start()
         {
             _uiService.RegisterScreens(screens, initialScreen, uIDocument);
+            if (sceneMusic != null && _audioService != null)
+                _audioService.PlayMusic(sceneMusic);
         }
     }
 }

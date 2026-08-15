@@ -1,5 +1,4 @@
 using UnityEngine;
-using Mentality.Application.AppLifecycle;
 using Mentality.Infrastructure.AppLifecycle;
 using Mentality.UI.Repositories;
 using Mentality.UI.Services;
@@ -36,6 +35,7 @@ namespace Mentality.UI
             builder.Register<UnityBaseViewModel>(Lifetime.Transient);
             builder.Register<MenuViewModel>(Lifetime.Transient);
             builder.Register<MenuSettingsViewModel>(Lifetime.Singleton);
+            
         }
     }
 }
