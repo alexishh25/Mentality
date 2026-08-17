@@ -26,6 +26,13 @@ public class PlayerView : MonoBehaviour
     [SerializeField]
     private CinemachineBasicMultiChannelPerlin fpvNoiseComponent;
 
+    [Header("UI Pointer / Crosshair")]
+    [SerializeField] private GameObject pointerUI;
+
+    [Header("Interaction Settings")]
+    [SerializeField] private float interactDistance = 5f;
+    [SerializeField] private LayerMask interactableLayer;
+
 
     private void Awake()
     {
@@ -64,6 +71,7 @@ public class PlayerView : MonoBehaviour
             if (characterRenderer != null) characterRenderer.enabled = true;
 
             // En 3ra persona iniciamos sin rotar y con cursor visible
+            SetPointerUIState(false);
             SetThirdPersonOrbitState(false);
         }
         else
@@ -73,6 +81,7 @@ public class PlayerView : MonoBehaviour
             if (characterRenderer != null) characterRenderer.enabled = false;
 
             // En 1ra persona siempre bloqueado
+            SetPointerUIState(true);
             BloquearCursor(true);
         }
     }
@@ -106,5 +115,35 @@ public class PlayerView : MonoBehaviour
         {
             fpvNoiseComponent.AmplitudeGain = amplitude;
         }
+    }
+
+    public void SetPointerUIState(bool active)
+    {
+        if (pointerUI != null)
+        {
+            pointerUI.SetActive(active);
+        }
+    }
+
+    //public bool PerformFirstPersonRaycast(out RaycastHit hitInfo)
+    //{
+    //    Ray ray = new Ray(CameraTransform.position, CameraTransform.forward);
+    //    return Physics.Raycast(ray, out hitInfo, interactDistance, interactableLayer);
+    //}
+
+    public bool PerformFirstPersonRaycast(out RaycastHit hitInfo)
+    {
+        Ray ray = new Ray(CameraTransform.position, CameraTransform.forward);
+
+        // Dibujar el rayo en la vista de escena de Unity (durante 2 segundos en verde)
+        Debug.DrawRay(ray.origin, ray.direction * interactDistance, Color.green, 2f);
+
+        bool result = Physics.Raycast(ray, out hitInfo, interactDistance, interactableLayer);
+        return result;
+    }
+
+    public void PlayActionFeedback(Vector3 point)
+    {
+        Debug.Log($"[PlayerView] Impacto o interacción en la posición: {point}");
     }
 }

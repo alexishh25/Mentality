@@ -13,6 +13,7 @@ public class PlayerInputService : IPlayerInputService, IInitializable, IDisposab
     public bool IsRightClickPressed => Mouse.current != null && Mouse.current.rightButton.isPressed;
     public bool FlashlightPressed => _inputActions.Player.Flashlight.WasPressedThisFrame();
     public bool SwitchCameraPressed => _inputActions.Player.SwitchCamera.WasPressedThisFrame();
+    public bool ActionPressed => _inputActions.Player.Attack.WasPressedThisFrame();
 
     public PlayerInputService()
     {

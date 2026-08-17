@@ -1,3 +1,5 @@
+using Gameplay;
+
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -19,6 +21,7 @@ public class BackendLifetimeScope : LifetimeScope
         // Control del proceso Python
 
         builder.Register<BackendLauncher>(Lifetime.Singleton).AsImplementedInterfaces();
+        //builder.RegisterComponentInHierarchy<TouchableObject>();
 
 
         // Presenter

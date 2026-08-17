@@ -2,7 +2,7 @@
 using UnityEngine;
 using VContainer.Unity;
 
-public class PlayerPresenter : ITickable
+public class PlayerPresenter : ITickable, IStartable
 {
     private readonly IPlayerInputService _inputService;
     private readonly PlayerModel _model;
@@ -25,6 +25,7 @@ public class PlayerPresenter : ITickable
         ActualizarEstadoSuelo();
         ProcesarOrbitTerceraPersona();
         ProcesarLinterna();
+        ProcesarAccionClic();
 
         Vector3 velocidadHorizontal = CalcularMovimientoHorizontal();
         CalcularMovimientoVertical();
@@ -186,6 +187,24 @@ public class PlayerPresenter : ITickable
         else
         {
             _view.SetHeadBobbingAmplitude(0f);
+        }
+    }
+
+    private void ProcesarAccionClic()
+    {
+        if (_model.CurrentPerspective != CameraPerspective.FirstPerson || !_inputService.ActionPressed)
+            return;
+
+        if (_view.PerformFirstPersonRaycast(out RaycastHit hit))
+        {
+            // 1. Disparamos el feedback visual/sonoro en el punto del impacto
+            _view.PlayActionFeedback(hit.point);
+
+            // 2. Le pasamos la posición del jugador al objeto tocado
+            if (hit.collider.TryGetComponent<Gameplay.ITouchable>(out var touchable))
+            {
+                touchable.Touch(_view.transform.position);
+            }
         }
     }
 }

@@ -1,11 +1,7 @@
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 
 public interface IApiClient
 {
-    Task<T> Get<T>(string endpoint);
-
-    Task<TResponse> Post<TRequest, TResponse>(
-        string endpoint,
-        TRequest data
-    );
+    UniTask<T> Get<T>(string endpoint);
+    UniTask<TResponse> Post<TRequest, TResponse>(string endpoint, TRequest data);
 }

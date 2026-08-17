@@ -1,61 +1,56 @@
-using System;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
+using System;
+using System.Text;
+using UnityEngine;
+using UnityEngine.Networking;
 using VContainer.Unity;
 
-
-public class ApiClient : IApiClient, IInitializable, IDisposable
+public class ApiClient : IApiClient, IInitializable
 {
-
-    private readonly HttpClient _client;
-
     private readonly string _baseUrl = "http://127.0.0.1:8000";
-
-
-    public ApiClient()
-    {
-        _client = new HttpClient();
-    }
-
 
     public void Initialize()
     {
-        UnityEngine.Debug.Log( "API Client inicializado");
+        Debug.Log("[ApiClient] Inicializado correctamente.");
     }
 
-    public async Task<T> Get<T>(string endpoint)
+    public async UniTask<T> Get<T>(string endpoint)
     {
+        using (UnityWebRequest request = UnityWebRequest.Get($"{_baseUrl}{endpoint}"))
+        {
+            await request.SendWebRequest();
 
-        var response = await _client.GetAsync(_baseUrl + endpoint);
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError($"[ApiClient] GET Error ({endpoint}): {request.error} | {request.downloadHandler.text}");
+                return default;
+            }
 
-        string json = await response.Content.ReadAsStringAsync();
-
-        return JsonConvert.DeserializeObject<T>(json);
+            return JsonConvert.DeserializeObject<T>(request.downloadHandler.text);
+        }
     }
 
-
-
-
-    public async Task<TResponse> Post<TRequest, TResponse>(string endpoint,TRequest data)
+    public async UniTask<TResponse> Post<TRequest, TResponse>(string endpoint, TRequest data)
     {
         string json = JsonConvert.SerializeObject(data);
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
 
-        var content =new StringContent( json,Encoding.UTF8,"application/json");
+        using (UnityWebRequest request = new UnityWebRequest($"{_baseUrl}{endpoint}", "POST"))
+        {
+            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.SetRequestHeader("Content-Type", "application/json");
 
-        var response = await _client.PostAsync( _baseUrl + endpoint,content);
+            await request.SendWebRequest();
 
-        string result =await response.Content.ReadAsStringAsync();
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError($"[ApiClient] POST Error ({endpoint}): {request.error} | {request.downloadHandler.text}");
+                return default;
+            }
 
-        return JsonConvert.DeserializeObject<TResponse>(result);
-
+            return JsonConvert.DeserializeObject<TResponse>(request.downloadHandler.text);
+        }
     }
-
-
-    public void Dispose()
-    {
-        _client.Dispose();
-    }
-
 }

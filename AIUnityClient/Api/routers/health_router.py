@@ -6,5 +6,5 @@ router = APIRouter(prefix="/health", tags=["Health"])
 @router.get("")
 async def health():
     return {
-        "status": "Botame tu GAAAA"
+        "status": "Iniciando API - IA"
     }
