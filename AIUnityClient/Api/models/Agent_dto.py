@@ -21,3 +21,18 @@ class ComandoDuplicado(BaseModel):
     positions: List[Posicion]
     duration_seconds: float = 5.0
 
+
+class AIResponseSchema(BaseModel):
+    total_objects_calculated: int = Field(
+        description="Cantidad total de objetos a generar según los toques y contexto."
+    )
+    reasoning: str = Field(
+        description="Razón breve de la cantidad de objetos y distribución elegida."
+    )
+    duration_seconds: float = Field(
+        default=5.0, description="Tiempo de vida en segundos antes de desaparecer."
+    )
+    calculated_positions: List[Posicion] = Field(
+        description="Lista de coordenadas (x, y, z) alrededor del jugador o punto de toque."
+    )
+

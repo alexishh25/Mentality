@@ -7,6 +7,8 @@ public class PlayerPresenter : ITickable, IStartable
     private readonly IPlayerInputService _inputService;
     private readonly PlayerModel _model;
     private readonly PlayerView _view;
+    private PlayerGameplayMode? _appliedMode;
+    private CameraPerspective _explorationPerspective;
 
     public PlayerPresenter(IPlayerInputService inputService, PlayerModel model, PlayerView view)
     {
@@ -17,10 +19,25 @@ public class PlayerPresenter : ITickable, IStartable
 
     public void Start()
     {
-        _view.ActualizarCamaras(_model.CurrentPerspective);
+        ActualizarModoDeJuego();
     }
     public void Tick()
     {
+        ActualizarModoDeJuego();
+
+        if (_model.GameplayMode == PlayerGameplayMode.Rhythm)
+        {
+            // Cinemachine conserva el giro de camara. El cuerpo no se desplaza
+            // ni acumula gravedad, y se reutiliza la interaccion existente.
+            _model.Velocity = Vector3.zero;
+            ActualizarEstadoSuelo();
+            _view.SetHeadBobbingAmplitude(0f);
+            ActualizarAnimaciones(0f);
+            ProcesarLinterna();
+            ProcesarAccionClic();
+            return;
+        }
+
         ProcesarCambioCamara();
         ActualizarEstadoSuelo();
         ProcesarOrbitTerceraPersona();
@@ -38,6 +55,39 @@ public class PlayerPresenter : ITickable, IStartable
         float velocidadNormalizada = velocidadHorizontal.magnitude / _model.MoveSpeed;
         ProcesarHeadBobbing(velocidadNormalizada);
         ActualizarAnimaciones(velocidadNormalizada);
+    }
+
+    private void ActualizarModoDeJuego()
+    {
+        if (_appliedMode == _model.GameplayMode)
+            return;
+
+        if (_model.GameplayMode == PlayerGameplayMode.Rhythm)
+        {
+            _explorationPerspective = _model.CurrentPerspective;
+            _model.CurrentPerspective = CameraPerspective.FirstPerson;
+            _model.Velocity = Vector3.zero;
+            _view.SetRhythmMode(true);
+        }
+        else
+        {
+            if (_appliedMode == PlayerGameplayMode.Rhythm)
+            {
+                _model.CurrentPerspective = _explorationPerspective;
+                _model.Velocity = Vector3.zero;
+
+                if (_model.CurrentPerspective == CameraPerspective.ThirdPerson)
+                {
+                    _model.IsFlashlightOn = false;
+                    _view.SetFlashlightState(false);
+                }
+            }
+
+            _view.SetRhythmMode(false);
+        }
+
+        _view.ActualizarCamaras(_model.CurrentPerspective);
+        _appliedMode = _model.GameplayMode;
     }
 
     private void ActualizarEstadoSuelo()

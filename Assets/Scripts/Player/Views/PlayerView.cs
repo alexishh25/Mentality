@@ -33,6 +33,14 @@ public class PlayerView : MonoBehaviour
     [SerializeField] private float interactDistance = 5f;
     [SerializeField] private LayerMask interactableLayer;
 
+    [Header("Rhythm Interaction")]
+    [Min(0.1f)]
+    [Tooltip("Alcance del clic en modo ritmico. Debe cubrir la distancia de aparicion de las palabras.")]
+    [SerializeField] private float rhythmInteractDistance = 100f;
+
+    private bool _isRhythmMode;
+    private bool _savedApplyRootMotion;
+
 
     private void Awake()
     {
@@ -43,6 +51,30 @@ public class PlayerView : MonoBehaviour
     {
         Controller = GetComponent<CharacterController>();
         if (Camera.main != null) CameraTransform = Camera.main.transform;
+    }
+
+    public void SetRhythmMode(bool active)
+    {
+        if (_isRhythmMode == active)
+            return;
+
+        _isRhythmMode = active;
+        if (active)
+        {
+            // Las animaciones tampoco deben desplazar al jugador fijo.
+            if (Animator != null)
+            {
+                _savedApplyRootMotion = Animator.applyRootMotion;
+                Animator.applyRootMotion = false;
+            }
+
+            SetHeadBobbingAmplitude(0f);
+            SetThirdPersonOrbitState(false);
+        }
+        else if (Animator != null)
+        {
+            Animator.applyRootMotion = _savedApplyRootMotion;
+        }
     }
 
     // Método para activar/desactivar la rotación de 3ra persona y el cursor
@@ -60,6 +92,13 @@ public class PlayerView : MonoBehaviour
     {
         Cursor.lockState = bloquear ? CursorLockMode.Locked : CursorLockMode.None;
         Cursor.visible = !bloquear;
+    }
+
+    public void SetFirstPersonLookEnabled(bool active)
+    {
+        if (FirstPersonCamera != null &&
+            FirstPersonCamera.TryGetComponent<CinemachineInputAxisController>(out var inputController))
+            inputController.enabled = active;
     }
 
     public void ActualizarCamaras(CameraPerspective perspectiva)
@@ -134,11 +173,12 @@ public class PlayerView : MonoBehaviour
     public bool PerformFirstPersonRaycast(out RaycastHit hitInfo)
     {
         Ray ray = new Ray(CameraTransform.position, CameraTransform.forward);
+        float distance = _isRhythmMode ? rhythmInteractDistance : interactDistance;
 
         // Dibujar el rayo en la vista de escena de Unity (durante 2 segundos en verde)
-        Debug.DrawRay(ray.origin, ray.direction * interactDistance, Color.green, 2f);
+        Debug.DrawRay(ray.origin, ray.direction * distance, Color.green, 2f);
 
-        bool result = Physics.Raycast(ray, out hitInfo, interactDistance, interactableLayer);
+        bool result = Physics.Raycast(ray, out hitInfo, distance, interactableLayer);
         return result;
     }
 

@@ -1,8 +1,13 @@
+from __future__ import annotations
 from fastapi import APIRouter, HTTPException
 import random
+from services import ai_service
 from models.Agent_dto import EventoToqueObjeto, ComandoDuplicado, Posicion
+from services.ai_service import AIService
 
 router = APIRouter(prefix="/gameplay", tags=["Gameplay Mechanics"])
+
+ai_service = AIService()
 
 @router.post("/object-touch", response_model=ComandoDuplicado)
 async def procesar_toque_objeto(evento: EventoToqueObjeto):
@@ -32,3 +37,12 @@ async def procesar_toque_objeto(evento: EventoToqueObjeto):
         positions=posiciones_spawn,
         duration_seconds=5.0
     )
+
+@router.post("/touch-event", response_model=ComandoDuplicado)
+async def handle_touch_event(event: EventoToqueObjeto):
+    try:
+        # Llama 3 calcula las posiciones y la cantidad
+        command = ai_service.process_touch_event(event)
+        return command
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error procesando la IA: {str(e)}")

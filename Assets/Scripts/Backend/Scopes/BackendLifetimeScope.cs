@@ -11,6 +11,14 @@ public class BackendLifetimeScope : LifetimeScope
 
     protected override void Configure(IContainerBuilder builder)
     {
+        // Una escena de prueba offline puede usar el contenedor raiz sin iniciar Python/Ollama.
+        var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+        foreach (var root in scene.GetRootGameObjects())
+        {
+            var settings = root.GetComponentInChildren<BackendSceneSettings>(true);
+            if (settings != null && !settings.EnableBackend)
+                return;
+        }
 
 
         // Servicios HTTP
