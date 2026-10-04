@@ -192,11 +192,20 @@ public static class RhythmTestSceneBuilder
         RectTransform beatRect = Rect("Beat pulse", top, new Vector2(0, 1), new Vector2(0, 1), new Vector2(810, -40), new Vector2(16, 16));
         Image beat = beatRect.gameObject.AddComponent<Image>();
         beat.color = new Color(0.35f, 0.95f, 0.8f);
+        Text score = TextElement("Score and combo", top, "PUNTOS 0\nCOMBO 0 / x1\nMEJOR RACHA 0",
+            new Vector2(940, -22), new Vector2(480, 105), 24, Color.white);
+        Text result = TextElement("Judgment feedback", root.transform, "", Vector2.zero,
+            new Vector2(600, 90), 28, Color.white);
+        result.rectTransform.anchorMin = result.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+        result.rectTransform.pivot = new Vector2(0.5f, 1f);
+        result.rectTransform.anchoredPosition = new Vector2(0, -70);
+        result.alignment = TextAnchor.UpperCenter;
+        result.horizontalOverflow = HorizontalWrapMode.Wrap;
 
         RectTransform footer = Rect("Footer", root.transform, Vector2.zero, new Vector2(1, 0), Vector2.zero, new Vector2(0, 95));
         footer.pivot = new Vector2(0.5f, 0);
         footer.gameObject.AddComponent<Image>().color = new Color(0.02f, 0.035f, 0.055f, 0.9f);
-        Text hint = TextElement("Controls", footer, "APUNTA Y HAZ CLIC | ESC libera el cursor | R reinicia", new Vector2(48, -30), new Vector2(1800, 40), 22, new Color(0.8f, 0.85f, 0.9f));
+        Text hint = TextElement("Controls", footer, "APUNTA Y HAZ CLIC | ESC / P pausa | R reinicia", new Vector2(48, -30), new Vector2(1800, 40), 22, new Color(0.8f, 0.85f, 0.9f));
 
         RectTransform sight = Rect("Crosshair", root.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(24, 24));
         crosshair = sight.gameObject;
@@ -211,6 +220,8 @@ public static class RhythmTestSceneBuilder
         SetReferenceOrBool(hud, "rhythmText", rhythm);
         SetReferenceOrBool(hud, "cursorText", hint);
         SetReferenceOrBool(hud, "beatIndicator", beat);
+        SetReferenceOrBool(hud, "scoreText", score);
+        SetReferenceOrBool(hud, "resultText", result);
         return hud;
     }
 

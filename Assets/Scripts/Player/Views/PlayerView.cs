@@ -170,13 +170,13 @@ public class PlayerView : MonoBehaviour
     //    return Physics.Raycast(ray, out hitInfo, interactDistance, interactableLayer);
     //}
 
-    public bool PerformFirstPersonRaycast(out RaycastHit hitInfo)
+    public bool PerformFirstPersonRaycast(out RaycastHit hitInfo, bool drawDebug = true)
     {
         Ray ray = new Ray(CameraTransform.position, CameraTransform.forward);
         float distance = _isRhythmMode ? rhythmInteractDistance : interactDistance;
 
         // Dibujar el rayo en la vista de escena de Unity (durante 2 segundos en verde)
-        Debug.DrawRay(ray.origin, ray.direction * distance, Color.green, 2f);
+        if (drawDebug) Debug.DrawRay(ray.origin, ray.direction * distance, Color.green, 2f);
 
         bool result = Physics.Raycast(ray, out hitInfo, distance, interactableLayer);
         return result;

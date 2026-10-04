@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60fd8234581d462fae65cb6d3686216d, type: 3}
+  m_Name: Waltz_of_the_Abandoned
+  m_EditorClassIdentifier: Assembly-CSharp::Gameplay.Rhythm.Models.MusicalSongAsset
+  MusicClip: {fileID: 8300000, guid: a34f7c6477794230a1419e5d165e2c71, type: 3}
+  AnalysisJson: {fileID: 4900000, guid: 65bf60306e714c95b34c94262784ecbe, type: 3}
+  AnalyzedAudioFile: Waltz_of_the_Abandoned (1).mp3

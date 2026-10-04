@@ -9,6 +9,7 @@ public class PlayerPresenter : ITickable, IStartable
     private readonly PlayerView _view;
     private PlayerGameplayMode? _appliedMode;
     private CameraPerspective _explorationPerspective;
+    private TargetView _aimedRhythmTarget;
 
     public PlayerPresenter(IPlayerInputService inputService, PlayerModel model, PlayerView view)
     {
@@ -34,11 +35,13 @@ public class PlayerPresenter : ITickable, IStartable
             _view.SetHeadBobbingAmplitude(0f);
             ActualizarAnimaciones(0f);
             ProcesarLinterna();
+            ProcesarApuntadoRitmico();
             ProcesarAccionClic();
             return;
         }
 
         ProcesarCambioCamara();
+        if (_aimedRhythmTarget != null) { _aimedRhythmTarget.SetAimed(false); _aimedRhythmTarget = null; }
         ActualizarEstadoSuelo();
         ProcesarOrbitTerceraPersona();
         ProcesarLinterna();
@@ -256,5 +259,28 @@ public class PlayerPresenter : ITickable, IStartable
                 touchable.Touch(_view.transform.position);
             }
         }
+    }
+
+    private void ProcesarApuntadoRitmico()
+    {
+        TargetView target = null;
+        if (_view.PerformFirstPersonRaycast(out RaycastHit hit, false)) target = hit.collider.GetComponent<TargetView>();
+        bool moved = false;
+        if (target != _aimedRhythmTarget && _aimedRhythmTarget != null)
+        {
+            Vector3 before = _aimedRhythmTarget.Position;
+            _aimedRhythmTarget.SetAimed(false);
+            moved |= (_aimedRhythmTarget.Position - before).sqrMagnitude > 0.0000001f;
+        }
+        _aimedRhythmTarget = target;
+        // La evasion actualiza el collider; ProcesarAccionClic realiza otro raycast despues.
+        if (target != null)
+        {
+            Vector3 before = target.Position;
+            target.SetAimed(true);
+            moved |= (target.Position - before).sqrMagnitude > 0.0000001f;
+        }
+        // Los raycasts deben consultar la posicion nueva aun con autoSyncTransforms desactivado.
+        if (moved) Physics.SyncTransforms();
     }
 }
