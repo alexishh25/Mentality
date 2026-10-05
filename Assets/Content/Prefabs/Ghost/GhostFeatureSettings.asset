@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6025375c17a246dc918949e5d2655b29, type: 3}
+  m_Name: GhostFeatureSettings
+  m_EditorClassIdentifier: Assembly-CSharp::Gameplay.Ghosts.Models.GhostFeatureSettings
+  DecoyPrefabs:
+  - {fileID: 6472730491335880258, guid: 57f55a5b85f244acb92b841e1d7a4a0f, type: 3}
+  - {fileID: 6472730491335880258, guid: b197a41db0be4e1c960f4b5b1df42f97, type: 3}
+  - {fileID: 6472730491335880258, guid: d8f8a6b70513462cb3265674a410c013, type: 3}
+  OffbeatSpawnChance: 1
+  MinimumSpawnSeparationSeconds: 1.5
+  MinimumSilenceSeconds: 0.8
+  PassThroughDistance: 3
+  RandomSeed: 1741
+  MaximumSanity: 100
+  SanityLossPerClick: 12
+  MaximumStaticOpacity: 0.4
+  ScreamerChancePerClick: 0.08
+  ScreamerDurationSeconds: 0.22
+  EnableRandomScreamer: 1
+  NoiseTextureWidth: 160
+  NoiseTextureHeight: 90
+  NoiseRefreshRate: 12
