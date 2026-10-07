@@ -2,10 +2,14 @@
 using UnityEngine;
 
 public enum CameraPerspective { ThirdPerson, FirstPerson }
+public enum PlayerGameplayMode { Exploration, Rhythm }
 
 [System.Serializable]
 public class PlayerModel
 {
+    [Header("Gameplay Mode")]
+    public PlayerGameplayMode GameplayMode = PlayerGameplayMode.Exploration;
+
     [Header("Settings")]
     public float MoveSpeed = 5.0f;
     public float RotationSpeed = 10.0f;

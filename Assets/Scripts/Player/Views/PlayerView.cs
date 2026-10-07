@@ -26,6 +26,21 @@ public class PlayerView : MonoBehaviour
     [SerializeField]
     private CinemachineBasicMultiChannelPerlin fpvNoiseComponent;
 
+    [Header("UI Pointer / Crosshair")]
+    [SerializeField] private GameObject pointerUI;
+
+    [Header("Interaction Settings")]
+    [SerializeField] private float interactDistance = 5f;
+    [SerializeField] private LayerMask interactableLayer;
+
+    [Header("Rhythm Interaction")]
+    [Min(0.1f)]
+    [Tooltip("Alcance del clic en modo ritmico. Debe cubrir la distancia de aparicion de las palabras.")]
+    [SerializeField] private float rhythmInteractDistance = 100f;
+
+    private bool _isRhythmMode;
+    private bool _savedApplyRootMotion;
+
 
     private void Awake()
     {
@@ -36,6 +51,30 @@ public class PlayerView : MonoBehaviour
     {
         Controller = GetComponent<CharacterController>();
         if (Camera.main != null) CameraTransform = Camera.main.transform;
+    }
+
+    public void SetRhythmMode(bool active)
+    {
+        if (_isRhythmMode == active)
+            return;
+
+        _isRhythmMode = active;
+        if (active)
+        {
+            // Las animaciones tampoco deben desplazar al jugador fijo.
+            if (Animator != null)
+            {
+                _savedApplyRootMotion = Animator.applyRootMotion;
+                Animator.applyRootMotion = false;
+            }
+
+            SetHeadBobbingAmplitude(0f);
+            SetThirdPersonOrbitState(false);
+        }
+        else if (Animator != null)
+        {
+            Animator.applyRootMotion = _savedApplyRootMotion;
+        }
     }
 
     // Método para activar/desactivar la rotación de 3ra persona y el cursor
@@ -55,6 +94,13 @@ public class PlayerView : MonoBehaviour
         Cursor.visible = !bloquear;
     }
 
+    public void SetFirstPersonLookEnabled(bool active)
+    {
+        if (FirstPersonCamera != null &&
+            FirstPersonCamera.TryGetComponent<CinemachineInputAxisController>(out var inputController))
+            inputController.enabled = active;
+    }
+
     public void ActualizarCamaras(CameraPerspective perspectiva)
     {
         if (perspectiva == CameraPerspective.ThirdPerson)
@@ -64,6 +110,7 @@ public class PlayerView : MonoBehaviour
             if (characterRenderer != null) characterRenderer.enabled = true;
 
             // En 3ra persona iniciamos sin rotar y con cursor visible
+            SetPointerUIState(false);
             SetThirdPersonOrbitState(false);
         }
         else
@@ -73,6 +120,7 @@ public class PlayerView : MonoBehaviour
             if (characterRenderer != null) characterRenderer.enabled = false;
 
             // En 1ra persona siempre bloqueado
+            SetPointerUIState(true);
             BloquearCursor(true);
         }
     }
@@ -106,5 +154,36 @@ public class PlayerView : MonoBehaviour
         {
             fpvNoiseComponent.AmplitudeGain = amplitude;
         }
+    }
+
+    public void SetPointerUIState(bool active)
+    {
+        if (pointerUI != null)
+        {
+            pointerUI.SetActive(active);
+        }
+    }
+
+    //public bool PerformFirstPersonRaycast(out RaycastHit hitInfo)
+    //{
+    //    Ray ray = new Ray(CameraTransform.position, CameraTransform.forward);
+    //    return Physics.Raycast(ray, out hitInfo, interactDistance, interactableLayer);
+    //}
+
+    public bool PerformFirstPersonRaycast(out RaycastHit hitInfo, bool drawDebug = true)
+    {
+        Ray ray = new Ray(CameraTransform.position, CameraTransform.forward);
+        float distance = _isRhythmMode ? rhythmInteractDistance : interactDistance;
+
+        // Dibujar el rayo en la vista de escena de Unity (durante 2 segundos en verde)
+        if (drawDebug) Debug.DrawRay(ray.origin, ray.direction * distance, Color.green, 2f);
+
+        bool result = Physics.Raycast(ray, out hitInfo, distance, interactableLayer);
+        return result;
+    }
+
+    public void PlayActionFeedback(Vector3 point)
+    {
+        Debug.Log($"[PlayerView] Impacto o interacción en la posición: {point}");
     }
 }

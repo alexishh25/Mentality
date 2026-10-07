@@ -2,11 +2,14 @@
 using UnityEngine;
 using VContainer.Unity;
 
-public class PlayerPresenter : ITickable
+public class PlayerPresenter : ITickable, IStartable
 {
     private readonly IPlayerInputService _inputService;
     private readonly PlayerModel _model;
     private readonly PlayerView _view;
+    private PlayerGameplayMode? _appliedMode;
+    private CameraPerspective _explorationPerspective;
+    private TargetView _aimedRhythmTarget;
 
     public PlayerPresenter(IPlayerInputService inputService, PlayerModel model, PlayerView view)
     {
@@ -17,14 +20,32 @@ public class PlayerPresenter : ITickable
 
     public void Start()
     {
-        _view.ActualizarCamaras(_model.CurrentPerspective);
+        ActualizarModoDeJuego();
     }
     public void Tick()
     {
+        ActualizarModoDeJuego();
+
+        if (_model.GameplayMode == PlayerGameplayMode.Rhythm)
+        {
+            // Cinemachine conserva el giro de camara. El cuerpo no se desplaza
+            // ni acumula gravedad, y se reutiliza la interaccion existente.
+            _model.Velocity = Vector3.zero;
+            ActualizarEstadoSuelo();
+            _view.SetHeadBobbingAmplitude(0f);
+            ActualizarAnimaciones(0f);
+            ProcesarLinterna();
+            ProcesarApuntadoRitmico();
+            ProcesarAccionClic();
+            return;
+        }
+
         ProcesarCambioCamara();
+        if (_aimedRhythmTarget != null) { _aimedRhythmTarget.SetAimed(false); _aimedRhythmTarget = null; }
         ActualizarEstadoSuelo();
         ProcesarOrbitTerceraPersona();
         ProcesarLinterna();
+        ProcesarAccionClic();
 
         Vector3 velocidadHorizontal = CalcularMovimientoHorizontal();
         CalcularMovimientoVertical();
@@ -37,6 +58,39 @@ public class PlayerPresenter : ITickable
         float velocidadNormalizada = velocidadHorizontal.magnitude / _model.MoveSpeed;
         ProcesarHeadBobbing(velocidadNormalizada);
         ActualizarAnimaciones(velocidadNormalizada);
+    }
+
+    private void ActualizarModoDeJuego()
+    {
+        if (_appliedMode == _model.GameplayMode)
+            return;
+
+        if (_model.GameplayMode == PlayerGameplayMode.Rhythm)
+        {
+            _explorationPerspective = _model.CurrentPerspective;
+            _model.CurrentPerspective = CameraPerspective.FirstPerson;
+            _model.Velocity = Vector3.zero;
+            _view.SetRhythmMode(true);
+        }
+        else
+        {
+            if (_appliedMode == PlayerGameplayMode.Rhythm)
+            {
+                _model.CurrentPerspective = _explorationPerspective;
+                _model.Velocity = Vector3.zero;
+
+                if (_model.CurrentPerspective == CameraPerspective.ThirdPerson)
+                {
+                    _model.IsFlashlightOn = false;
+                    _view.SetFlashlightState(false);
+                }
+            }
+
+            _view.SetRhythmMode(false);
+        }
+
+        _view.ActualizarCamaras(_model.CurrentPerspective);
+        _appliedMode = _model.GameplayMode;
     }
 
     private void ActualizarEstadoSuelo()
@@ -187,5 +241,46 @@ public class PlayerPresenter : ITickable
         {
             _view.SetHeadBobbingAmplitude(0f);
         }
+    }
+
+    private void ProcesarAccionClic()
+    {
+        if (_model.CurrentPerspective != CameraPerspective.FirstPerson || !_inputService.ActionPressed)
+            return;
+
+        if (_view.PerformFirstPersonRaycast(out RaycastHit hit))
+        {
+            // 1. Disparamos el feedback visual/sonoro en el punto del impacto
+            _view.PlayActionFeedback(hit.point);
+
+            // 2. Le pasamos la posición del jugador al objeto tocado
+            if (hit.collider.TryGetComponent<Gameplay.ITouchable>(out var touchable))
+            {
+                touchable.Touch(_view.transform.position);
+            }
+        }
+    }
+
+    private void ProcesarApuntadoRitmico()
+    {
+        TargetView target = null;
+        if (_view.PerformFirstPersonRaycast(out RaycastHit hit, false)) target = hit.collider.GetComponent<TargetView>();
+        bool moved = false;
+        if (target != _aimedRhythmTarget && _aimedRhythmTarget != null)
+        {
+            Vector3 before = _aimedRhythmTarget.Position;
+            _aimedRhythmTarget.SetAimed(false);
+            moved |= (_aimedRhythmTarget.Position - before).sqrMagnitude > 0.0000001f;
+        }
+        _aimedRhythmTarget = target;
+        // La evasion actualiza el collider; ProcesarAccionClic realiza otro raycast despues.
+        if (target != null)
+        {
+            Vector3 before = target.Position;
+            target.SetAimed(true);
+            moved |= (target.Position - before).sqrMagnitude > 0.0000001f;
+        }
+        // Los raycasts deben consultar la posicion nueva aun con autoSyncTransforms desactivado.
+        if (moved) Physics.SyncTransforms();
     }
 }
