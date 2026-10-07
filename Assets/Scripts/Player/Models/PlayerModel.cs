@@ -1,7 +1,6 @@
 // PlayerModel.cs
 using UnityEngine;
-
-public enum CameraPerspective { ThirdPerson, FirstPerson }
+using Mentality.Domain.Player;
 
 [System.Serializable]
 public class PlayerModel
@@ -15,18 +14,25 @@ public class PlayerModel
     [Header("Camera Settings")]
     public CameraPerspective CurrentPerspective = CameraPerspective.ThirdPerson;
 
-    [Header("Flashlight Settings")]
-    public bool IsFlashlightOn = false;
-
     [Header("Head Bobbing Settings")]
     public float BobbingAmplitude = 0.5f;
 
-    // Estado en tiempo de ejecución
+    // Estado en tiempo de ejecución de física de Unity
     public Vector3 Velocity;
-    public bool IsGrounded;
 
-    //Hash de Animacion
+    // Hashes de Animación
     public readonly int SpeedHash = Animator.StringToHash("Speed");
     public readonly int IsGroundedHash = Animator.StringToHash("IsGround");
     public readonly int JumpHash = Animator.StringToHash("Jump");
-}
+
+    private PlayerState _state;
+
+    public PlayerState GetOrCreateState()
+    {
+        if (_state == null)
+        {
+            _state = new PlayerState(MoveSpeed, RotationSpeed, Gravity, JumpHeight, BobbingAmplitude, CurrentPerspective);
+        }
+        return _state;
+    }
+}

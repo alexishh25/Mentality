@@ -1,6 +1,7 @@
 // PlayerView.cs
 using Unity.Cinemachine;
 using UnityEngine;
+using Mentality.Domain.Player;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerView : MonoBehaviour

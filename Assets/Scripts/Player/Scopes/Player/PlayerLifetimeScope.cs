@@ -2,6 +2,7 @@
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
+using Mentality.Domain.Player;
 
 public class PlayerLifetimeScope : LifetimeScope
 {
@@ -14,11 +15,14 @@ public class PlayerLifetimeScope : LifetimeScope
         builder.RegisterInstance(playerView);
         builder.RegisterInstance(playerModel);
 
-        // 2. Registrar Servicios (Input)
+        // 2. Registrar el Estado de Dominio
+        builder.Register(container => playerModel.GetOrCreateState(), Lifetime.Scoped);
+
+        // 3. Registrar Servicios (Input)
         builder.Register<PlayerInputService>(Lifetime.Singleton)
                .AsImplementedInterfaces();
 
-        // 3. Registrar el Presenter en el ciclo Tickable de Unity
+        // 4. Registrar el Presenter en el ciclo Tickable de Unity
         builder.RegisterEntryPoint<PlayerPresenter>(Lifetime.Scoped);
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Composition.Interfaces;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -8,45 +9,34 @@ namespace Mentality.UI.Repositories
 	public class ButtonRepository
 	{
         [Header("Efectos de sonido")]
+        [SerializeField] public SFXTrackSO sfx_buttonhover;
+        [SerializeField] public SFXTrackSO sfx_clickbutton;
+        [SerializeField] public SFXTrackSO sfx_cancelbutton;
 
-        [SerializeField] public AudioClip sfx_buttonhover;
-        [SerializeField] public AudioClip sfx_clickbutton;
-        [SerializeField] public AudioClip sfx_cancelbutton;
+        private readonly IAudioService _audioService;
 
-        // private ISoundService soundService;
-        // private IAnimationUIService animationService;
-
-        private void Start()
+        public ButtonRepository(IAudioService audioService = null)
         {
-            // soundService = ServiceLocator.Get<ISoundService>();
-            //animationService = ServiceLocator.Get<IAnimationUIService>();
+            _audioService = audioService;
         }
 
         public void PlayHoverSFX()
         {
-            //if (soundService != null)
-             //    soundService.PlaySFX(sfx_buttonhover);
-            //else
-            //    Debug.LogWarning("SoundManager not found. Cannot play hover sound.");
+            if (_audioService != null && sfx_buttonhover != null)
+                _audioService.PlaySFX(sfx_buttonhover);
         }
 
         public void PlayClickSFX()
         {
-            // if (soundService != null)
-            //    soundService.PlaySFX(sfx_clickbutton);
-            //else
-                Debug.LogWarning("SoundManager not found. Cannot play click sound.");
+            if (_audioService != null && sfx_clickbutton != null)
+                _audioService.PlaySFX(sfx_clickbutton);
         }
 
         public void PlayCancelSFX()
         {
-            // if (soundService != null)
-            //    soundService.PlaySFX(sfx_cancelbutton);
-            // else
-            //    Debug.LogWarning("SoundManager not found. Cannot play cancel sound.");
+            if (_audioService != null && sfx_cancelbutton != null)
+                _audioService.PlaySFX(sfx_cancelbutton);
         }
-
-
 
         // Allows subscribing or unsubscribing multiple buttons to their respective click event handlers efficiently.
         public void ManageButtonActions(bool suscribe, params (Button button, Action handler)[] buttonActions)
@@ -64,35 +54,33 @@ namespace Mentality.UI.Repositories
 
         public void AlternateRegisterHoverSFX(bool register, List<Button> buttonhoverActions)
         {
+            if (buttonhoverActions == null) return;
+
             foreach (var button in buttonhoverActions)
             {
                 if (button == null) continue;
 
                 if (register)
                 {
-                    // button.RegisterCallback<PointerEnterEvent>(OnHoverPointer);
-                    // button.RegisterCallback<FocusInEvent>(OnHoverFocus);
+                    button.RegisterCallback<PointerEnterEvent>(OnHoverPointer);
+                    button.RegisterCallback<FocusInEvent>(OnHoverFocus);
                 }
                 else
                 {
-                    // button.UnregisterCallback<PointerEnterEvent>(OnHoverPointer);
-                    // button.UnregisterCallback<FocusInEvent>(OnHoverFocus);
+                    button.UnregisterCallback<PointerEnterEvent>(OnHoverPointer);
+                    button.UnregisterCallback<FocusInEvent>(OnHoverFocus);
                 }
             }
         }
 
         public void OnHoverPointer(PointerEnterEvent evt)
         {
-            // if (evt.target is Button button)
-            // animationService.Shake(button);
             PlayHoverSFX();
         }
+
         public void OnHoverFocus(FocusInEvent evt)
         {
-            // if (evt.target is Button button)
-            //   animationService.Shake(button);
             PlayHoverSFX();
         }
     }
-
-}
+}

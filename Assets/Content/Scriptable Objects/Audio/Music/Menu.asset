@@ -9,6 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d4f70a14b16c23d459b3dc952af5df17, type: 3}
-  m_Name: Audio
-  m_EditorClassIdentifier: Assembly-CSharp::GameConfigSO
+  m_Script: {fileID: 11500000, guid: 751069959aa50ae489bf81336cdbff6e, type: 3}
+  m_Name: Menu
+  m_EditorClassIdentifier: Assembly-CSharp::MusicTrackSO
+  bgm: {fileID: 8300000, guid: 0d5249f936a255740a8a744c1844fe03, type: 3}
+  loopStartTime: 0
+  loopEndTime: 0

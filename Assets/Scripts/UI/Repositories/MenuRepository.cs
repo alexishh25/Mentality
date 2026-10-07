@@ -1,23 +1,26 @@
-using NUnit.Framework;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.SceneManagement;
+using Mentality.Infrastructure.AppLifecycle;
 using Mentality.UI.Models;
-using Mentality.UI.Views;
 using Mentality.UI.Services;
 
 namespace Mentality.UI.Repositories
 {
-	public class MenuRepository
-	{
+    public class MenuRepository
+    {
+        private readonly IAppFlowService _appFlowService;
+
+        public MenuRepository(IAppFlowService appFlowService)
+        {
+            _appFlowService = appFlowService;
+        }
+
         public void IniciarNuevaPartida()
         {
-            SceneManager.LoadScene("SampleScene");
+            _appFlowService.IniciarNuevaPartida("SampleScene");
         }
-		public List<MenuModel> ObtenerGuardado()
+
+        public List<MenuModel> ObtenerGuardado()
         {
-            // Aquí iría la lógica para obtener los datos del guardado desde PlayerPrefs, JSON, etc.
-            // Por ahora, devolvemos una lista simulada
             return new List<MenuModel>
             {
                 new MenuModel { HasSavedGame = true, LatestSavedGameName = "Partida1" },
@@ -30,14 +33,10 @@ namespace Mentality.UI.Repositories
         {
             uiService.ChangeScreen(ScreenType.Options);
         }
+
         public void Salir()
         {
-            #if UNITY_EDITOR
-			UnityEditor.EditorApplication.isPlaying = false;
-			#else
-			Application.Quit();
-			#endif
+            _appFlowService.SalirJuego();
         }
     }
-
 }

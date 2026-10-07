@@ -1,4 +1,5 @@
 using UnityEngine;
+using Mentality.Infrastructure.AppLifecycle;
 using Mentality.UI.Repositories;
 using Mentality.UI.Services;
 using Mentality.UI.ViewModels;
@@ -16,6 +17,9 @@ namespace Mentality.UI
             if (uiDoc != null)
                 builder.RegisterComponent(uiDoc);
 
+            // Registrar Infraestructura / Aplicación
+            builder.Register<UnityAppFlowService>(Lifetime.Singleton).As<IAppFlowService>();
+
             builder.Register<UIRepository>(Lifetime.Singleton);
             builder.Register<UIService>(Lifetime.Singleton);
             
@@ -31,6 +35,7 @@ namespace Mentality.UI
             builder.Register<UnityBaseViewModel>(Lifetime.Transient);
             builder.Register<MenuViewModel>(Lifetime.Transient);
             builder.Register<MenuSettingsViewModel>(Lifetime.Singleton);
+            
         }
     }
 }

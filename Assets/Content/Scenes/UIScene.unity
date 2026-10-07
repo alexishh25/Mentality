@@ -633,6 +633,7 @@ MonoBehaviour:
   - type: 1
     visualAsset: {fileID: 9197481963319205126, guid: 7fdeab71513826f4799c14ab5db3dbbc, type: 3}
     logicComponent: {fileID: 393141916}
+  sceneMusic: {fileID: 11400000, guid: 685ae40fb56d133499f1de6515736a54, type: 2}
 --- !u!1 &1491198768
 GameObject:
   m_ObjectHideFlags: 0

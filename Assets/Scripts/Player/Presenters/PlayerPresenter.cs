@@ -1,24 +1,28 @@
 // PlayerPresenter.cs
 using UnityEngine;
 using VContainer.Unity;
+using Mentality.Domain.Player;
 
 public class PlayerPresenter : ITickable
 {
     private readonly IPlayerInputService _inputService;
     private readonly PlayerModel _model;
     private readonly PlayerView _view;
+    private readonly PlayerState _state;
 
     public PlayerPresenter(IPlayerInputService inputService, PlayerModel model, PlayerView view)
     {
         _inputService = inputService;
         _model = model;
         _view = view;
+        _state = model.GetOrCreateState();
     }
 
     public void Start()
     {
-        _view.ActualizarCamaras(_model.CurrentPerspective);
+        _view.ActualizarCamaras(_state.CurrentPerspective);
     }
+
     public void Tick()
     {
         ProcesarCambioCamara();
@@ -34,108 +38,70 @@ public class PlayerPresenter : ITickable
         _view.Controller.Move(velocidadFinal * Time.deltaTime);
 
         // --- ACTUALIZAMOS LAS ANIMACIONES ---
-        float velocidadNormalizada = velocidadHorizontal.magnitude / _model.MoveSpeed;
+        float velocidadNormalizada = velocidadHorizontal.magnitude / _state.MoveSpeed;
         ProcesarHeadBobbing(velocidadNormalizada);
         ActualizarAnimaciones(velocidadNormalizada);
     }
 
     private void ActualizarEstadoSuelo()
     {
-        _model.IsGrounded = _view.Controller.isGrounded;
+        _state.IsGrounded = _view.Controller.isGrounded;
 
-        if (_model.IsGrounded && _model.Velocity.y < 0)
+        if (_state.IsGrounded && _model.Velocity.y < 0)
         {
             _model.Velocity.y = -2f;
         }
     }
+
     private void ProcesarOrbitTerceraPersona()
     {
-        if (_model.CurrentPerspective == CameraPerspective.ThirdPerson)
+        if (_state.CurrentPerspective == CameraPerspective.ThirdPerson)
         {
             bool holdingRightClick = _inputService.IsRightClickPressed;
             _view.SetThirdPersonOrbitState(holdingRightClick);
         }
     }
-    //private void ProcesarCambioCamara()
-    //{
-    //    if (_inputService.SwitchCameraPressed)
-    //    {
-    //        _model.CurrentPerspective = _model.CurrentPerspective == CameraPerspective.ThirdPerson
-    //            ? CameraPerspective.FirstPerson
-    //            : CameraPerspective.ThirdPerson;
-
-    //        _view.ActualizarCamaras(_model.CurrentPerspective);
-    //    }
-    //}
 
     private void ProcesarCambioCamara()
     {
         if (_inputService.SwitchCameraPressed)
         {
-            _model.CurrentPerspective = _model.CurrentPerspective == CameraPerspective.ThirdPerson
-                ? CameraPerspective.FirstPerson
-                : CameraPerspective.ThirdPerson;
+            // Ejecutar regla de dominio (cambia perspectiva y apaga linterna si pasa a 3ra persona)
+            _state.SwitchPerspective();
 
-            // Regla de seguridad: Si pasa a 3ª persona, apaga la linterna
-            if (_model.CurrentPerspective == CameraPerspective.ThirdPerson && _model.IsFlashlightOn)
-            {
-                _model.IsFlashlightOn = false;
-                _view.SetFlashlightState(false);
-            }
-
-            _view.ActualizarCamaras(_model.CurrentPerspective);
+            _view.SetFlashlightState(_state.IsFlashlightOn);
+            _view.ActualizarCamaras(_state.CurrentPerspective);
         }
     }
-
-    //private Vector3 CalcularMovimientoHorizontal()
-    //{
-    //    Vector2 input = _inputService.MoveInput;
-    //    Vector3 direccion = new Vector3(input.x, 0f, input.y).normalized;
-
-    //    if (direccion.magnitude >= 0.1f)
-    //    {
-    //        float anguloObjetivo = Mathf.Atan2(direccion.x, direccion.z) * Mathf.Rad2Deg + _view.CameraTransform.eulerAngles.y;
-
-    //        float anguloSuave = Mathf.LerpAngle(_view.transform.eulerAngles.y, anguloObjetivo, Time.deltaTime * _model.RotationSpeed);
-    //        _view.transform.rotation = Quaternion.Euler(0f, anguloSuave, 0f);
-
-    //        Vector3 direccionMovimiento = Quaternion.Euler(0f, anguloObjetivo, 0f) * Vector3.forward;
-    //        return direccionMovimiento.normalized * _model.MoveSpeed;
-    //    }
-
-    //    return Vector3.zero;
-    //}
 
     private Vector3 CalcularMovimientoHorizontal()
     {
         Vector2 input = _inputService.MoveInput;
         Vector3 direction = new Vector3(input.x, 0f, input.y).normalized;
 
-        if (_model.CurrentPerspective == CameraPerspective.FirstPerson)
+        if (_state.CurrentPerspective == CameraPerspective.FirstPerson)
         {
             // --- LÓGICA EN 1ª PERSONA ---
-            // El cuerpo del jugador siempre se alinea con el eje Y de la cámara
             Vector3 targetRotation = new Vector3(0f, _view.CameraTransform.eulerAngles.y, 0f);
             _view.transform.rotation = Quaternion.Euler(targetRotation);
 
             if (direction.magnitude >= 0.1f)
             {
-                // El movimiento es relativo a la orientación del jugador/cámara
                 Vector3 moveDirection = _view.transform.right * input.x + _view.transform.forward * input.y;
-                return moveDirection.normalized * _model.MoveSpeed;
+                return moveDirection.normalized * _state.MoveSpeed;
             }
         }
         else
         {
-            // --- LÓGICA EN 3ª PERSONA (La que ya teníamos) ---
+            // --- LÓGICA EN 3ª PERSONA ---
             if (direction.magnitude >= 0.1f)
             {
                 float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + _view.CameraTransform.eulerAngles.y;
-                float angle = Mathf.LerpAngle(_view.transform.eulerAngles.y, targetAngle, Time.deltaTime * _model.RotationSpeed);
+                float angle = Mathf.LerpAngle(_view.transform.eulerAngles.y, targetAngle, Time.deltaTime * _state.RotationSpeed);
                 _view.transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
                 Vector3 moveDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
-                return moveDirection.normalized * _model.MoveSpeed;
+                return moveDirection.normalized * _state.MoveSpeed;
             }
         }
 
@@ -144,44 +110,39 @@ public class PlayerPresenter : ITickable
 
     private void CalcularMovimientoVertical()
     {
-        if (_inputService.JumpPressed && _model.IsGrounded)
+        if (_inputService.JumpPressed && _state.IsGrounded)
         {
-            _model.Velocity.y = Mathf.Sqrt(_model.JumpHeight * -2f * _model.Gravity);
+            // Calcular velocidad de salto desde el Dominio
+            _model.Velocity.y = _state.CalculateJumpVerticalVelocity();
 
-            // Disparar la animación de salto cuando presiona el botón
+            // Disparar animación en la Vista
             _view.DispararGatilloAnimacion(_model.JumpHash);
         }
 
-        _model.Velocity.y += _model.Gravity * Time.deltaTime;
+        _model.Velocity.y += _state.Gravity * Time.deltaTime;
     }
 
     private void ActualizarAnimaciones(float velocidadMovimiento)
     {
-        // Enviamos los datos actualizados a la View
         _view.ActualizarVelocidadAnimacion(_model.SpeedHash, velocidadMovimiento);
-        _view.ActualizarEstadoSueloAnimacion(_model.IsGroundedHash, _model.IsGrounded);
+        _view.ActualizarEstadoSueloAnimacion(_model.IsGroundedHash, _state.IsGrounded);
     }
 
     private void ProcesarLinterna()
     {
-        // Solo permitir accionar si estamos en Primera Persona
-        if (_model.CurrentPerspective == CameraPerspective.FirstPerson)
+        if (_inputService.FlashlightPressed)
         {
-            if (_inputService.FlashlightPressed)
-            {
-                _model.IsFlashlightOn = !_model.IsFlashlightOn;
-                _view.SetFlashlightState(_model.IsFlashlightOn);
-            }
+            // Ejecutar regla de dominio
+            bool isNowOn = _state.ToggleFlashlight();
+            _view.SetFlashlightState(isNowOn);
         }
     }
 
     private void ProcesarHeadBobbing(float velocidadNormalizada)
     {
-        // Solo aplica en 1ª persona, cuando toca el suelo y la velocidad es relevante
-        if (_model.CurrentPerspective == CameraPerspective.FirstPerson && _model.IsGrounded && velocidadNormalizada > 0.1f)
+        if (_state.CurrentPerspective == CameraPerspective.FirstPerson && _state.IsGrounded && velocidadNormalizada > 0.1f)
         {
-            // Puedes escalar el bamboleo según la velocidad si en el futuro agregas sprint/correr
-            _view.SetHeadBobbingAmplitude(_model.BobbingAmplitude * velocidadNormalizada);
+            _view.SetHeadBobbingAmplitude(_state.BobbingAmplitude * velocidadNormalizada);
         }
         else
         {

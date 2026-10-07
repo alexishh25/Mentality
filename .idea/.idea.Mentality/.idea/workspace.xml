@@ -4,36 +4,58 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3b311b54-b024-48c1-99b3-b35c1747b0cf" name="Changes" comment="" />
+    <list default="true" id="3b311b54-b024-48c1-99b3-b35c1747b0cf" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Application/Scene/ISceneService.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Application/Scene/ISceneService.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Application/Scene/UnitySceneService.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Application/Scene/UnitySceneService.cs.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Mentality/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Mentality/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Content/Audio/Music/button_pressed.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Content/Audio/Music/button_pressed.wav.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Content/Audio/Music/button_select.wav" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Content/Audio/Music/button_select.wav.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Content/Scenes/Bootstrap.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Content/Scenes/Bootstrap.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Content/Scenes/UIScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Content/Scenes/UIScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Content/Scriptable Objects/Configs/AudioConfig.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Content/Scriptable Objects/Configs/AudioConfig.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/InputSystem_Actions.inputactions" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/InputSystem_Actions.inputactions" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Application/AppLifeCycle.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Application/AppLifeCycle/IAppFlowService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Infrastructure/AppLifecycle/IAppFlowService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Application/AppLifeCycle/IAppFlowService.cs.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Infrastructure/AppLifecycle/IAppFlowService.cs.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Application/Audio/AudioService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Application/Audio/AudioService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Application/Audio/IAudioService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Application/Audio/IAudioService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Composition/BootstrapLoader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Composition/BootstrapLoader.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Composition/Configs/AudioConfigSO.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Composition/Configs/AudioConfigSO.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Composition/LifetimeScopes/GameRootScope.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Composition/LifetimeScopes/GameRootScope.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Infrastructure/AppLifecycle/UnityAppFlowService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Infrastructure/AppLifecycle/UnityAppFlowService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Infrastructure/Audio/IMusicPlayer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Infrastructure/Audio/IMusicPlayer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Infrastructure/Audio/ISFXPlayer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Infrastructure/Audio/ISFXPlayer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Infrastructure/Audio/MusicPlayer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Infrastructure/Audio/MusicPlayer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Infrastructure/Audio/SFXPlayer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Infrastructure/Audio/SFXPlayer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Presentation/UI/Repositories/MenuRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Presentation/UI/Repositories/MenuRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Presentation/UI/Scopes/UILifetimeScope.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Presentation/UI/Scopes/UILifetimeScope.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Presentation/UI/UIDoc.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Presentation/UI/UIDoc.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DpaMonitoringSettings">
+    <option name="firstShow" value="false" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/Assets/Readme.asset" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Scripts/GameConfigSO.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Scripts/GameRootScope.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Scripts/Player/Scopes/Player/PlayerLifetimeScope.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/Repositories/MenuRepository.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/Repositories/MenuSettingsRepository.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/Repositories/UIRepository.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/Scopes/UILifetimeScope.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/Services/MenuService.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/Services/MenuSettingsService.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/Services/UIService.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/UIDoc.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/ViewModels/MenuSettingsViewModel.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/ViewModels/MenuViewModel.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/ViewModels/UnityBaseViewModel.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/Views/BaseView.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/Views/OptionsView.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/Application/Scene/ISceneService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/Composition/Configs/Audio/SFXTrackSO.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.shadergraph@3cfe1d1f3f8c/Editor/Data/Util/ScreenSpaceType.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/jp.hadashikick.vcontainer@dcf16cda6a65/Runtime/Internal/ReflectionInjector.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/jp.hadashikick.vcontainer@dcf16cda6a65/Runtime/Unity/LifetimeScope.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/jp.hadashikick.vcontainer@dcf16cda6a65/Runtime/Unity/VContainerSettings.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
@@ -48,11 +70,13 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;Attach to Unity Editor.Attach to Unity Editor.executor&quot;: &quot;Debug&quot;,
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;ui-toolkit-alexis&quot;,
+    &quot;Standalone Player.Start Unity.executor&quot;: &quot;Debug&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;bootstrap&amp;&amp;soap-task&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -111,6 +135,10 @@
       <workItem from="1785934298435" duration="5543000" />
       <workItem from="1785976341462" duration="8392000" />
       <workItem from="1786051005001" duration="3242000" />
+      <workItem from="1786189455904" duration="3888000" />
+      <workItem from="1786669762532" duration="10684000" />
+      <workItem from="1786715675177" duration="5900000" />
+      <workItem from="1786746007083" duration="7932000" />
     </task>
     <servers />
   </component>
