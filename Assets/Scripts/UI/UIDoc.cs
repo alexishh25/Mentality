@@ -12,7 +12,8 @@ namespace Mentality.UI
         MainMenu,
         Options,
         LoadData,
-        Loading
+        Loading,
+        Pause
     }
 
     [Serializable]
@@ -30,6 +31,10 @@ namespace Mentality.UI
         [SerializeField] private UIDocument uIDocument;
         [SerializeField] private ScreenEntry[] screens;
 
+        [Header("Gameplay")]
+        [Tooltip("Si está activo, oculta el UIDocument tras registrar pantallas (p. ej. overlay de pausa en SampleScene).")]
+        [SerializeField] private bool hideUiAfterRegister;
+
         private UIService _uiService;
 
         [Inject]
@@ -41,6 +46,8 @@ namespace Mentality.UI
         public void Start()
         {
             _uiService.RegisterScreens(screens, initialScreen, uIDocument);
+            if (hideUiAfterRegister)
+                _uiService.DisableUI();
         }
     }
 }

@@ -48,11 +48,11 @@ namespace Mentality.UI.Views
 		{
 			if (_menuViewModel == null) return;
 
-			// Limpiamos eventos al cerrar la pantalla
+			// Limpiamos eventos al cerrar la pantalla (mismos handlers que OnBind)
 			if (newpartyButton != null) newpartyButton.clicked -= _menuViewModel.NewGameCommand.Execute;
 			if (loadpartyButton != null) loadpartyButton.clicked -= OnLoadPartyClicked;
-			if (settingsButton != null) settingsButton.clicked -= OnSettingsClicked;
-			if (exitButton != null) exitButton.clicked -= OnExitClicked;
+			if (settingsButton != null) settingsButton.clicked -= _menuViewModel.OpenSettingsCommand.Execute;
+			if (exitButton != null) exitButton.clicked -= _menuViewModel.ExitGameCommand.Execute;
 		}
 
 		private void OnNewPartyClicked()

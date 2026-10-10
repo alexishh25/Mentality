@@ -8,6 +8,8 @@ public interface IPlayerInputService
     bool SwitchCameraPressed { get; }
     bool IsRightClickPressed { get; }
     bool FlashlightPressed { get; }
+    /// <summary>Escape / Start — permanece activo aunque se llame a DisableInput().</summary>
+    bool PausePressed { get; }
     void EnableInput();
     void DisableInput();
 }

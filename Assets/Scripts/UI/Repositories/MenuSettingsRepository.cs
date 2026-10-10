@@ -4,6 +4,9 @@ namespace Mentality.UI.Repositories
 {
     public class MenuSettingsRepository
     {
-        public void ReturntoMenu(UIService uiService) => uiService.ChangeScreen(ScreenType.MainMenu);
+        /// <summary>
+        /// Regresa a la pantalla previa (MainMenu o Pause). Si no hay historial, MainMenu.
+        /// </summary>
+        public void ReturntoMenu(UIService uiService) => uiService.GoBack(ScreenType.MainMenu);
     }
 }

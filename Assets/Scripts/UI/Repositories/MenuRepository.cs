@@ -1,18 +1,18 @@
-using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Mentality.UI.Models;
-using Mentality.UI.Views;
 using Mentality.UI.Services;
 
 namespace Mentality.UI.Repositories
 {
 	public class MenuRepository
 	{
+        public const string GameplaySceneName = "SampleScene";
+
         public void IniciarNuevaPartida()
         {
-            SceneManager.LoadScene("SampleScene");
+            SceneManager.LoadScene(GameplaySceneName);
         }
 		public List<MenuModel> ObtenerGuardado()
         {
