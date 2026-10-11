@@ -1,0 +1,117 @@
+/* Pantallas de MG01: Game Over, Recompensa y Pausa. Mismos tokens que HudUSS. */
+:root {
+    --hud-panel-bg: rgba(14, 14, 19, 0.92);
+    --hud-panel-border: rgb(42, 42, 51);
+    --hud-text-primary: rgb(237, 230, 216);
+    --hud-text-secondary: rgb(143, 136, 124);
+    --sanity-high: rgb(143, 209, 138);
+    --sanity-critical: rgb(224, 38, 63);
+}
+
+.mg01-screen {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(7, 7, 10, 0.85);
+    -unity-font-definition: url("project://database/Assets/Content/Fonts/m3x6.ttf?fileID=12800000&guid=44f9e4e98ef6b0c4f8e4b05596790f4e&type=3#m3x6");
+    color: var(--hud-text-primary);
+}
+
+.mg01-card {
+    width: 920px;
+    padding: 40px 56px;
+    border-radius: 12px;
+    border-width: 2px;
+    border-color: var(--hud-panel-border);
+    background-color: var(--hud-panel-bg);
+    align-items: stretch;
+}
+
+.mg01-screen--defeat .mg01-card {
+    border-color: rgba(224, 38, 63, 0.9);
+}
+
+.mg01-title {
+    font-size: 72px;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    padding: 0;
+    margin-bottom: 12px;
+    color: var(--hud-text-primary);
+}
+
+.mg01-screen--defeat .mg01-title {
+    color: var(--sanity-critical);
+}
+
+.mg01-subtitle,
+.mg01-reward {
+    font-size: 30px;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    padding: 0;
+    margin-bottom: 24px;
+    color: var(--hud-text-secondary);
+}
+
+.mg01-reward {
+    color: var(--sanity-critical);
+}
+
+.mg01-closing {
+    font-size: 28px;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    padding: 0;
+    margin-top: 24px;
+    color: var(--hud-text-primary);
+}
+
+.mg01-stats {
+    padding: 8px 0;
+}
+
+.mg01-stat-row {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom-width: 1px;
+    border-color: var(--hud-panel-border);
+}
+
+.mg01-stat-label {
+    font-size: 28px;
+    padding: 0;
+    color: var(--hud-text-secondary);
+}
+
+.mg01-stat-value {
+    font-size: 28px;
+    padding: 0;
+    -unity-text-align: middle-right;
+    color: var(--hud-text-primary);
+}
+
+.mg01-buttons {
+    flex-direction: row;
+    justify-content: center;
+    margin-top: 32px;
+}
+
+/* MenuButton es absoluto (top/bottom 25%): el slot define su tamano. */
+.mg01-button-slot {
+    position: relative;
+    width: 340px;
+    height: 110px;
+    margin: 0 12px;
+}
+
+.mg01-pause-slot {
+    position: relative;
+    width: 100%;
+    height: 110px;
+}

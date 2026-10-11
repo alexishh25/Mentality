@@ -1,18 +1,24 @@
-using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Mentality.Gameplay.MG01;
 using Mentality.UI.Models;
-using Mentality.UI.Views;
 using Mentality.UI.Services;
 
 namespace Mentality.UI.Repositories
 {
 	public class MenuRepository
 	{
+        private readonly MG01ConfigSO _mg01Config;
+
+        public MenuRepository(MG01ConfigSO mg01Config)
+        {
+            _mg01Config = mg01Config;
+        }
+
         public void IniciarNuevaPartida()
         {
-            SceneManager.LoadScene("SampleScene");
+            SceneManager.LoadScene(_mg01Config.MG01SceneName);
         }
 		public List<MenuModel> ObtenerGuardado()
         {

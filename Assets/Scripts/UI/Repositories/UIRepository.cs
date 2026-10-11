@@ -31,14 +31,26 @@ namespace Mentality.UI.Repositories
         }
 
         // Called by UIController/MenuUIManager in each scene to register available screens
-        public void RegisterScreens(ScreenEntry[] screens, ScreenType initialScreen, UIDocument uiDocument)
+        public void RegisterScreens(ScreenEntry[] screens, ScreenType initialScreen, UIDocument uiDocument, bool showInitialScreen = true)
         {
             registeredScreens = screens;
             uIDocument = uiDocument;
             if (uIDocument != null)
                 root = uIDocument.rootVisualElement;
 
-            ChangeScreen(initialScreen);
+            if (showInitialScreen)
+                ChangeScreen(initialScreen);
+        }
+
+        public void HideScreen()
+        {
+            if (currentLogic != null)
+            {
+                currentLogic.Dispose();
+                currentLogic = null;
+            }
+
+            root?.Clear();
         }
 
         public void ChangeScreen(ScreenType type)

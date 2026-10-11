@@ -1,0 +1,45 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:me="Mentality.UI.Views" editor-extension-mode="False">
+    <Style src="/Assets/Content/UI/Styles/HudUSS.uss" />
+    <ui:VisualElement name="hudRoot" picking-mode="Ignore" class="hud-root">
+        <ui:VisualElement name="hudTop" picking-mode="Ignore" class="hud-row hud-row--top">
+            <ui:VisualElement name="sanityPanel" picking-mode="Ignore" class="sanity-panel sanity--high">
+                <ui:VisualElement name="sanityGlow" picking-mode="Ignore" class="sanity-panel__glow" />
+                <ui:VisualElement name="sanityPortrait" picking-mode="Ignore" class="sanity-portrait">
+                    <ui:VisualElement name="sanityPortraitArt" picking-mode="Ignore" class="sanity-portrait__art" />
+                    <ui:VisualElement name="sanityHitFlash" picking-mode="Ignore" class="sanity-portrait__flash" />
+                </ui:VisualElement>
+                <ui:VisualElement name="sanityInfo" picking-mode="Ignore" class="sanity-info">
+                    <ui:VisualElement name="sanityHeader" picking-mode="Ignore" class="sanity-header">
+                        <ui:VisualElement picking-mode="Ignore" class="sanity-header__group">
+                            <ui:Label name="sanityLabel" text="CORDURA" picking-mode="Ignore" class="sanity-label" />
+                            <ui:Label name="sanityDamage" text="−10" picking-mode="Ignore" class="sanity-damage" />
+                        </ui:VisualElement>
+                        <ui:VisualElement picking-mode="Ignore" class="sanity-header__group">
+                            <ui:Label name="sanityValue" text="100" picking-mode="Ignore" class="sanity-value" />
+                            <ui:Label name="sanityMax" text="/100" picking-mode="Ignore" class="sanity-max" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <me:SanityWedgeBar name="sanityBar" value="1" segments="10" class="sanity-bar" />
+                    <ui:Label name="sanityStatus" text="MENTE ESTABLE" picking-mode="Ignore" class="sanity-status" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="abilityChip" picking-mode="Ignore" class="hud-ability">
+                <ui:Label name="abilityName" text="PUÑO" picking-mode="Ignore" class="hud-ability__name" />
+                <ui:Label name="abilityState" text="BLOQUEADO" picking-mode="Ignore" class="hud-ability__state" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="hudBottom" picking-mode="Ignore" class="hud-row hud-row--bottom">
+            <ui:Label name="levelCaption" text="MG01 · CANTA SI PUEDES" picking-mode="Ignore" class="hud-caption" />
+            <ui:VisualElement name="progressGroup" picking-mode="Ignore" class="hud-progress">
+                <ui:Label name="songLabel" text="CANCIÓN" picking-mode="Ignore" class="hud-progress__label" />
+                <ui:VisualElement name="progressTrack" picking-mode="Ignore" class="hud-progress__track">
+                    <ui:VisualElement name="progressFill" picking-mode="Ignore" class="hud-progress__fill" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:Label name="aimHint" text="CLIC SOBRE LAS PALABRAS HOSTILES" picking-mode="Ignore" class="hud-caption" />
+        </ui:VisualElement>
+        <ui:VisualElement name="reticle" picking-mode="Ignore" class="hud-reticle">
+            <ui:VisualElement name="reticleDot" picking-mode="Ignore" class="hud-reticle__dot" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

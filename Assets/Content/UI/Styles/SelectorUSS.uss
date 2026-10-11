@@ -35,11 +35,11 @@
     -unity-background-scale-mode: scale-to-fit;
     background-position-y: bottom 0;
     background-image: url("project://database/Assets/Sprites/UI/arrow.png?fileID=-434453748&guid=d272d62a378e8a849ae200f492a73455&type=3#arrow_0");
-    -unity-background-image-tint-color: rgb(0, 73, 207);
+    -unity-background-image-tint-color: rgb(207, 0, 0);
 }
 
 .selector-button__arrow:hover {
-    -unity-background-image-tint-color: rgb(96, 203, 255);
+    -unity-background-image-tint-color: rgb(255, 96, 96);
 }
 
 .selector-button__arrow--left {

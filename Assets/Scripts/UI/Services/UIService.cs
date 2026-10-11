@@ -13,9 +13,9 @@ namespace Mentality.UI.Services
             _uiRepository = uiRepository;
         }
 
-        public void RegisterScreens(ScreenEntry[] screens, ScreenType initialScreen, UIDocument uiDocument)
+        public void RegisterScreens(ScreenEntry[] screens, ScreenType initialScreen, UIDocument uiDocument, bool showInitialScreen = true)
         {
-            _uiRepository.RegisterScreens(screens, initialScreen, uiDocument);
+            _uiRepository.RegisterScreens(screens, initialScreen, uiDocument, showInitialScreen);
         }
 
         public void ChangeScreen(ScreenType type)
@@ -23,6 +23,8 @@ namespace Mentality.UI.Services
             // Omitimos TransitionScreenData ya que quitamos las transiciones
             _uiRepository.ChangeScreen(type);
         }
+
+        public void HideScreen() => _uiRepository.HideScreen();
 
         public void EnableUI()
         {

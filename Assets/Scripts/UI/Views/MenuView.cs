@@ -8,7 +8,6 @@ namespace Mentality.UI.Views
 	public class MenuView : BaseView
 	{
 		private Button newpartyButton;
-		private Button loadpartyButton;
 		private Button settingsButton;
 		private Button exitButton;
 
@@ -28,7 +27,6 @@ namespace Mentality.UI.Views
 		protected override void OnInitialize(VisualElement root)
 		{
 			newpartyButton = root.Q<Button>("newBtn");
-			loadpartyButton = root.Q<Button>("continueBtn");
 			settingsButton = root.Q<Button>("optionsBtn");
 			exitButton = root.Q<Button>("exitBtn");
 		}
@@ -39,7 +37,6 @@ namespace Mentality.UI.Views
 
 			// Vinculamos acciones al hacer click a los comandos del ViewModel
 			if (newpartyButton != null) newpartyButton.clicked += _menuViewModel.NewGameCommand.Execute;
-			if (loadpartyButton != null) loadpartyButton.clicked += OnLoadPartyClicked;
 			if (settingsButton != null) settingsButton.clicked += _menuViewModel.OpenSettingsCommand.Execute;
 			if (exitButton != null) exitButton.clicked += _menuViewModel.ExitGameCommand.Execute;
 		}
@@ -50,14 +47,8 @@ namespace Mentality.UI.Views
 
 			// Limpiamos eventos al cerrar la pantalla
 			if (newpartyButton != null) newpartyButton.clicked -= _menuViewModel.NewGameCommand.Execute;
-			if (loadpartyButton != null) loadpartyButton.clicked -= OnLoadPartyClicked;
-			if (settingsButton != null) settingsButton.clicked -= OnSettingsClicked;
-			if (exitButton != null) exitButton.clicked -= OnExitClicked;
-		}
-
-		private void OnNewPartyClicked()
-		{
-			_menuViewModel?.NewGame();
+			if (settingsButton != null) settingsButton.clicked -= _menuViewModel.OpenSettingsCommand.Execute;
+			if (exitButton != null) exitButton.clicked -= _menuViewModel.ExitGameCommand.Execute;
 		}
 
 		private void OnLoadPartyClicked()
@@ -70,15 +61,6 @@ namespace Mentality.UI.Views
 					Debug.Log($"Elija: {save.LatestSavedGameName}");
 				}
 			}
-		}
-		private void OnSettingsClicked()
-		{
-			_menuViewModel?.OpenSettings();
-		}
-
-		private void OnExitClicked()
-		{
-			_menuViewModel?.ExitGame();
 		}
 	}
 }

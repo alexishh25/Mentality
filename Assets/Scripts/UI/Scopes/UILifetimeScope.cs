@@ -1,4 +1,5 @@
 using UnityEngine;
+using Mentality.Gameplay.MG01;
 using Mentality.UI.Repositories;
 using Mentality.UI.Services;
 using Mentality.UI.ViewModels;
@@ -10,11 +11,15 @@ namespace Mentality.UI
     public class UILifetimeScope : LifetimeScope
     {
         [SerializeField] private UIDoc uiDoc;
+        [Tooltip("Opcional. Sin asset se usan los valores por defecto (escena MG01 = SampleScene).")]
+        [SerializeField] private MG01ConfigSO mg01Config;
 
         protected override void Configure(IContainerBuilder builder)
         {
             if (uiDoc != null)
                 builder.RegisterComponent(uiDoc);
+
+            builder.RegisterInstance(mg01Config != null ? mg01Config : MG01ConfigSO.CreateDefault());
 
             builder.Register<UIRepository>(Lifetime.Singleton);
             builder.Register<UIService>(Lifetime.Singleton);

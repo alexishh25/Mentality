@@ -1,0 +1,20 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:me="Mentality.UI.Views" editor-extension-mode="False">
+    <ui:Template name="ResultStats" src="/Assets/Content/UI/Documents/Views/Results/ResultStatsUXML.uxml" />
+    <Style src="project://database/Assets/Content/UI/Styles/ButtonUSS.uss?fileID=7433441132597879392&amp;guid=49524d7b6231e50428f235b106fc641b&amp;type=3#ButtonUSS" />
+    <Style src="/Assets/Content/UI/Styles/ResultsUSS.uss" />
+    <ui:VisualElement name="gameOverScreen" class="mg01-screen mg01-screen--defeat">
+        <ui:VisualElement name="card" class="mg01-card">
+            <ui:Label name="titleLabel" text="Perdiste la cordura" class="mg01-title" />
+            <ui:Label name="subtitleLabel" text="El encuentro se detuvo." class="mg01-subtitle" />
+            <ui:Instance template="ResultStats" name="stats" />
+            <ui:VisualElement name="buttons" class="mg01-buttons">
+                <ui:VisualElement class="mg01-button-slot">
+                    <me:MenuButton name="retryBtn" text="Reintentar" />
+                </ui:VisualElement>
+                <ui:VisualElement class="mg01-button-slot">
+                    <me:MenuButton name="menuBtn" text="Volver al menú" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

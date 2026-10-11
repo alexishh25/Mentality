@@ -28,6 +28,10 @@
 # Visual Studio cache directory
 .vs/
 
+#IA
+.cursor
+.ai
+
 # Gradle cache directory
 .gradle/
 

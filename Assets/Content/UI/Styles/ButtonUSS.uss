@@ -10,7 +10,7 @@
     border-right-width: 0;
     border-bottom-width: 0;
     border-left-width: 0;
-    background-image: url("project://database/Assets/Content/Audio/SFX/UI/buttons.png?fileID=-1690250691&guid=6c81aaae7d273fd49a434613de5d300c&type=3#buttons_normal");
+    background-image: url("project://database/Assets/Content/Sprites/buttons/boton-default.svg?fileID=7388822144124034973&guid=b952a0fed181b924b956f16bbf7664d8&type=3#boton-default");
     -unity-font-definition: url("project://database/Assets/Content/Fonts/m3x6.ttf?fileID=12800000&guid=44f9e4e98ef6b0c4f8e4b05596790f4e&type=3#m3x6");
     color: rgb(255, 255, 255);
     -unity-text-align: middle-center;
@@ -19,9 +19,9 @@
 }
 
 .menu-button:hover {
-    background-image: url("project://database/Assets/Content/Audio/SFX/UI/buttons.png?fileID=-874921997&guid=6c81aaae7d273fd49a434613de5d300c&type=3#buttons_hover");
+    background-image: url("project://database/Assets/Content/Sprites/buttons/boton-hover.svg?fileID=7388822144124034973&guid=6c1004b24a2db7847a2ddc92a3cc5ba4&type=3#boton-hover");
 }
 
 .menu-button:active {
-    background-image: url("project://database/Assets/Content/Audio/SFX/UI/buttons.png?fileID=-622946926&guid=6c81aaae7d273fd49a434613de5d300c&type=3#buttons_active");
+    background-image: url("project://database/Assets/Content/Sprites/buttons/boton-pressed.svg?fileID=7388822144124034973&guid=6b9e87e010f99f94fa04956f74892e34&type=3#boton-pressed");
 }

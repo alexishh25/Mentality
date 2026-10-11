@@ -21,7 +21,7 @@
 }
 
 .settings-tab-view .unity-tab__header {
-    background-color: rgb(0, 19, 97);
+    background-color: rgb(97, 0, 0);
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
     margin-right: 5px;
@@ -29,11 +29,11 @@
 }
 
 .settings-tab-view .unity-tab__header:hover {
-    background-color: rgb(42, 61, 201);
+    background-color: rgb(201, 42, 42);
 }
 
 .settings-tab-view .unity-tab__header:checked {
-    background-color: rgb(15, 56, 184);
+    background-color: rgb(184, 15, 15);
 }
 
 .settings-tab-view .unity-tab__header-underline {

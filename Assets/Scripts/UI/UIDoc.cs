@@ -11,8 +11,11 @@ namespace Mentality.UI
     {
         MainMenu,
         Options,
-        LoadData,
-        Loading
+        LoadMinigame,
+        // Agregar valores siempre al final: ScreenEntry se serializa como entero en las escenas.
+        GameOver,
+        Reward,
+        Pause
     }
 
     [Serializable]
@@ -27,6 +30,8 @@ namespace Mentality.UI
     {
         [Header("Screens available in this scene")]
         [SerializeField] private ScreenType initialScreen;
+        [Tooltip("Desactivar en escenas de gameplay: las pantallas (Game Over, Recompensa, Pausa) se muestran por eventos.")]
+        [SerializeField] private bool showInitialScreen = true;
         [SerializeField] private UIDocument uIDocument;
         [SerializeField] private ScreenEntry[] screens;
 
@@ -40,7 +45,7 @@ namespace Mentality.UI
 
         public void Start()
         {
-            _uiService.RegisterScreens(screens, initialScreen, uIDocument);
+            _uiService.RegisterScreens(screens, initialScreen, uIDocument, showInitialScreen);
         }
     }
 }

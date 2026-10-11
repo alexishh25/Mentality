@@ -1,0 +1,311 @@
+/* HUD MG01 — tokens del Figma "HUD Sanity Bar" (node 15:160). Referencia 1920x1080. */
+:root {
+    --hud-panel-bg: rgba(14, 14, 19, 0.8);
+    --hud-panel-border: rgb(42, 42, 51);
+    --hud-track: rgb(7, 7, 10);
+    --hud-portrait-bg: rgb(207, 198, 184);
+    --hud-text-primary: rgb(237, 230, 216);
+    --hud-text-secondary: rgb(143, 136, 124);
+    --sanity-high: rgb(143, 209, 138);
+    --sanity-mid: rgb(232, 197, 71);
+    --sanity-low: rgb(224, 122, 46);
+    --sanity-critical: rgb(224, 38, 63);
+    --sanity-damage: rgb(224, 38, 63);
+    --sanity-ghost-trail: rgba(237, 230, 216, 0.85);
+}
+
+.hud-root {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 48px;
+    -unity-font-definition: url("project://database/Assets/Content/Fonts/m3x6.ttf?fileID=12800000&guid=44f9e4e98ef6b0c4f8e4b05596790f4e&type=3#m3x6");
+    color: var(--hud-text-primary);
+}
+
+.hud-row {
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.hud-row--top {
+    align-items: flex-start;
+}
+
+.hud-row--bottom {
+    align-items: flex-end;
+}
+
+/* ---------- Panel de cordura (480 x 100) ---------- */
+
+.sanity-panel {
+    flex-direction: row;
+    align-items: center;
+    width: 480px;
+    min-height: 100px;
+    padding: 16px;
+    border-radius: 12px;
+    border-width: 1px;
+    border-color: var(--hud-panel-border);
+    background-color: var(--hud-panel-bg);
+}
+
+.sanity-panel__glow {
+    position: absolute;
+    left: -8px;
+    top: -8px;
+    right: -8px;
+    bottom: -8px;
+    border-radius: 20px;
+    border-width: 6px;
+    border-color: rgba(224, 38, 63, 0.45);
+    display: none;
+}
+
+.sanity-portrait {
+    width: 72px;
+    height: 72px;
+    flex-shrink: 0;
+    margin-right: 16px;
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: var(--hud-panel-border);
+    background-color: var(--hud-portrait-bg);
+    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Placeholder del cerebro (sin la imagen con marca de agua). Asignar retratos en HudView para reemplazarlo. */
+.sanity-portrait__art {
+    width: 54px;
+    height: 44px;
+    border-radius: 22px;
+    background-color: rgb(201, 139, 139);
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.sanity-portrait__flash {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(224, 38, 63, 0.5);
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: 0.25s;
+}
+
+.sanity-info {
+    width: 360px;
+    flex-direction: column;
+}
+
+.sanity-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 8px;
+}
+
+.sanity-header__group {
+    flex-direction: row;
+    align-items: flex-end;
+}
+
+.sanity-label {
+    font-size: 24px;
+    letter-spacing: 4px;
+    color: var(--hud-text-primary);
+    padding: 0;
+    margin: 0;
+}
+
+.sanity-damage {
+    font-size: 24px;
+    margin-left: 8px;
+    padding: 0;
+    color: var(--sanity-damage);
+    display: none;
+}
+
+.sanity-value {
+    font-size: 44px;
+    padding: 0;
+    margin: 0;
+    -unity-text-align: lower-right;
+    color: var(--sanity-high);
+}
+
+.sanity-max {
+    font-size: 22px;
+    margin-left: 2px;
+    padding: 0;
+    color: var(--hud-text-secondary);
+}
+
+.sanity-bar {
+    width: 360px;
+    height: 24px;
+    --wedge-track-color: rgba(7, 7, 10, 0.9);
+    --wedge-outline-color: rgba(143, 136, 124, 0.45);
+    --wedge-outline-width: 1.5;
+    --wedge-divider-color: rgba(7, 7, 10, 0.85);
+    --wedge-ghost-color: rgba(237, 230, 216, 0.85);
+    --wedge-gradient-0: rgb(142, 15, 36);
+    --wedge-gradient-1: rgb(224, 38, 63);
+    --wedge-gradient-2: rgb(232, 197, 71);
+    --wedge-gradient-3: rgb(143, 209, 138);
+}
+
+.sanity-status {
+    margin-top: 8px;
+    font-size: 18px;
+    letter-spacing: 2px;
+    padding: 0;
+    color: var(--hud-text-secondary);
+}
+
+/* ---------- Estados (clases que alterna HudView) ---------- */
+
+.sanity--high .sanity-value { color: var(--sanity-high); }
+.sanity--mid .sanity-value { color: var(--sanity-mid); }
+.sanity--low .sanity-value { color: var(--sanity-low); }
+.sanity--critical .sanity-value { color: var(--sanity-critical); }
+
+.sanity--high .sanity-portrait__art { background-color: rgb(201, 139, 139); }
+.sanity--mid .sanity-portrait__art { background-color: rgb(176, 134, 122); }
+.sanity--low .sanity-portrait__art { background-color: rgb(150, 112, 96); }
+.sanity--critical .sanity-portrait__art { background-color: rgb(84, 70, 60); }
+
+.sanity--critical,
+.sanity--hit {
+    border-width: 2px;
+    border-color: rgba(224, 38, 63, 0.9);
+}
+
+.sanity--critical .sanity-portrait,
+.sanity--hit .sanity-portrait {
+    border-width: 2px;
+    border-color: var(--sanity-critical);
+}
+
+.sanity--critical .sanity-panel__glow {
+    display: flex;
+}
+
+.sanity--critical .sanity-status,
+.sanity--hit .sanity-status {
+    color: var(--sanity-critical);
+}
+
+.sanity--critical .sanity-bar,
+.sanity--hit .sanity-bar {
+    --wedge-outline-color: rgba(224, 38, 63, 0.9);
+}
+
+.sanity--hit .sanity-value { color: var(--sanity-damage); }
+.sanity--hit .sanity-damage { display: flex; }
+.sanity--hit .sanity-portrait__flash { opacity: 1; }
+
+/* ---------- Chip de habilidad ---------- */
+
+.hud-ability {
+    align-items: flex-end;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: var(--hud-panel-border);
+    background-color: var(--hud-panel-bg);
+    opacity: 0.7;
+}
+
+.hud-ability__name {
+    font-size: 22px;
+    letter-spacing: 3px;
+    padding: 0;
+    color: var(--hud-text-primary);
+}
+
+.hud-ability__state {
+    font-size: 16px;
+    letter-spacing: 2px;
+    padding: 0;
+    color: var(--hud-text-secondary);
+}
+
+.hud-ability--unlocked {
+    opacity: 1;
+    border-color: var(--sanity-critical);
+}
+
+.hud-ability--unlocked .hud-ability__state {
+    color: var(--sanity-critical);
+}
+
+/* ---------- Pie: nivel, progreso de cancion y pista ---------- */
+
+.hud-caption {
+    font-size: 20px;
+    letter-spacing: 2px;
+    padding: 0;
+    color: var(--hud-text-secondary);
+}
+
+.hud-progress {
+    flex-grow: 1;
+    max-width: 720px;
+    margin: 0 48px;
+}
+
+.hud-progress__label {
+    font-size: 16px;
+    letter-spacing: 2px;
+    padding: 0;
+    margin-bottom: 6px;
+    color: var(--hud-text-secondary);
+}
+
+.hud-progress__track {
+    height: 6px;
+    border-radius: 3px;
+    border-width: 1px;
+    border-color: rgba(143, 136, 124, 0.45);
+    background-color: rgba(7, 7, 10, 0.9);
+    overflow: hidden;
+}
+
+.hud-progress__fill {
+    width: 0;
+    height: 100%;
+    background-color: rgba(237, 230, 216, 0.8);
+}
+
+/* ---------- Reticula (40x40: anillo r=14, 1.5px, #EDE6D8 @70% + punto r=2) ---------- */
+
+.hud-reticle {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 28px;
+    height: 28px;
+    margin-left: -14px;
+    margin-top: -14px;
+    border-radius: 14px;
+    border-width: 1.5px;
+    border-color: rgba(237, 230, 216, 0.7);
+    align-items: center;
+    justify-content: center;
+}
+
+.hud-reticle__dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 2px;
+    background-color: rgba(237, 230, 216, 0.7);
+}

@@ -4,19 +4,35 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3b311b54-b024-48c1-99b3-b35c1747b0cf" name="Changes" comment="" />
+    <list default="true" id="3b311b54-b024-48c1-99b3-b35c1747b0cf" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Mentality/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Mentality/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Content/UI/Documents/Views/Menu/MenuUXML.uxml" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Content/UI/Documents/Views/Menu/MenuUXML.uxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Content/UI/Documents/Views/Pause/PauseUXML.uxml" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Content/UI/Documents/Views/Pause/PauseUXML.uxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Content/UI/Styles/ButtonUSS.uss" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Content/UI/Styles/ButtonUSS.uss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Content/UI/Styles/SelectorUSS.uss" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Content/UI/Styles/SelectorUSS.uss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Content/UI/Styles/SettingsUSS.uss" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Content/UI/Styles/SettingsUSS.uss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Repositories/MenuRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Repositories/MenuRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Repositories/UIRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Repositories/UIRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Scopes/UILifetimeScope.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Scopes/UILifetimeScope.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Services/UIService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Services/UIService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/UIDoc.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/UIDoc.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Views/MenuView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Views/MenuView.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/EditorBuildSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/EditorBuildSettings.asset" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="9" />
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/Assets/Content/Scenes/SampleScene.unity" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Readme.asset" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Scripts/GameConfigSO.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/Scripts/GameRootScope.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Player/Scopes/Player/PlayerLifetimeScope.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/Repositories/MenuRepository.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/Repositories/MenuSettingsRepository.cs" root0="FORCE_HIGHLIGHTING" />
@@ -34,6 +50,11 @@
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.shadergraph@3cfe1d1f3f8c/Editor/Data/Util/ScreenSpaceType.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/jp.hadashikick.vcontainer@dcf16cda6a65/Runtime/Internal/ReflectionInjector.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/jp.hadashikick.vcontainer@dcf16cda6a65/Runtime/Unity/LifetimeScope.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/jp.hadashikick.vcontainer@dcf16cda6a65/Runtime/Unity/VContainerSettings.cs" root0="SKIP_HIGHLIGHTING" />
+  </component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
   </component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
@@ -49,10 +70,11 @@
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;ui-toolkit-alexis&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;ui-toolkit-base-alexis&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -111,6 +133,10 @@
       <workItem from="1785934298435" duration="5543000" />
       <workItem from="1785976341462" duration="8392000" />
       <workItem from="1786051005001" duration="3242000" />
+      <workItem from="1791377789523" duration="41000" />
+      <workItem from="1791562635143" duration="346000" />
+      <workItem from="1791601602194" duration="863000" />
+      <workItem from="1791688619952" duration="1086000" />
     </task>
     <servers />
   </component>

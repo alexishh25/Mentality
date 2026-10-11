@@ -1,0 +1,20 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="statsBlock" class="mg01-stats">
+        <ui:VisualElement class="mg01-stat-row">
+            <ui:Label name="statWordsLabel" text="Palabras destruidas" class="mg01-stat-label" />
+            <ui:Label name="statWordsValue" text="0" class="mg01-stat-value" />
+        </ui:VisualElement>
+        <ui:VisualElement class="mg01-stat-row">
+            <ui:Label name="statHitsLabel" text="Impactos" class="mg01-stat-label" />
+            <ui:Label name="statHitsValue" text="0" class="mg01-stat-value" />
+        </ui:VisualElement>
+        <ui:VisualElement class="mg01-stat-row">
+            <ui:Label name="statGhostsLabel" text="Clics en fantasmas" class="mg01-stat-label" />
+            <ui:Label name="statGhostsValue" text="0" class="mg01-stat-value" />
+        </ui:VisualElement>
+        <ui:VisualElement class="mg01-stat-row">
+            <ui:Label name="statSanityLabel" text="Cordura restante" class="mg01-stat-label" />
+            <ui:Label name="statSanityValue" text="0 / 100" class="mg01-stat-value" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
