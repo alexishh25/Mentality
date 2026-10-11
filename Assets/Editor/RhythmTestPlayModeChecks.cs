@@ -6,6 +6,7 @@ using Gameplay.Rhythm.Models;
 using Gameplay.Rhythm.Presenters;
 using Gameplay.Rhythm.Services;
 using Gameplay.Rhythm.Views;
+using Mentality.UI.Views;
 using Gameplay.Rhythm.Scopes;
 using Unity.Cinemachine;
 using UnityEditor;
@@ -14,7 +15,10 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 using VContainer;
+using Cursor = UnityEngine.Cursor;
+using MouseButton = UnityEngine.InputSystem.LowLevel.MouseButton;
 using Object = UnityEngine.Object;
 
 // Prueba de integracion en el editor: usa los contenedores, raycast e Input System reales.
@@ -227,14 +231,22 @@ public static class RhythmTestPlayModeChecks
                     _playerModel = scope.Container.Resolve<PlayerModel>();
                     _playerInput = scope.Container.Resolve<IPlayerInputService>();
                     var hud = scope.Container.Resolve<RhythmHudView>();
-                    var serializedHud = new SerializedObject(hud);
-                    var sanityFill = serializedHud.FindProperty("sanityFill").objectReferenceValue as UnityEngine.UI.Image;
-                    var resultText = serializedHud.FindProperty("resultText").objectReferenceValue as UnityEngine.UI.Text;
-                    Check(sanityFill != null && !sanityFill.raycastTarget && Mathf.Approximately(sanityFill.rectTransform.anchorMax.x, _model.Sanity / 100f), "HUD presenta cordura sin bloquear clics");
-                    Check(resultText != null && !resultText.raycastTarget,
+                    var hudRoot = hud.GetComponent<UIDocument>().rootVisualElement;
+                    Check(hudRoot != null, "HUD de UI Toolkit enlazado");
+                    var sanityBar = hudRoot.Q<SanityWedgeBar>("sanityTrack");
+                    var combo = hudRoot.Q<Label>("comboLabel");
+                    Check(sanityBar != null && sanityBar.pickingMode == PickingMode.Ignore
+                        && Mathf.Approximately(sanityBar.value, _model.Sanity / (float)RhythmGameModel.MaximumSanity),
+                        "HUD presenta cordura sin bloquear clics");
+                    Check(combo != null && combo.pickingMode == PickingMode.Ignore,
                         "Feedback de precision asignado sin bloquear clics");
-                    Check(!hud.transform.Find("Top panel").gameObject.activeSelf
-                        && !hud.transform.Find("Footer").gameObject.activeSelf, "HUD anterior oculto durante el juego");
+                    var legacyCanvas = hud.GetComponent<Canvas>();
+                    var legacyTop = hud.transform.Find("Top panel");
+                    var legacyFooter = hud.transform.Find("Footer");
+                    Check((legacyCanvas == null || !legacyCanvas.enabled)
+                        && (legacyTop == null || !legacyTop.gameObject.activeSelf)
+                        && (legacyFooter == null || !legacyFooter.gameObject.activeSelf),
+                        "HUD anterior oculto durante el juego");
                     Check(_model.IsPlaying, "Sesion ritmica iniciada");
                     if (_config.AnalyzedSong != null)
                     {
@@ -408,23 +420,27 @@ public static class RhythmTestPlayModeChecks
                     Check(_model.Sanity == 0 && _model.IsGameOver && !_model.IsPlaying, "Cinco colisiones reales agotan cordura y terminan la partida");
                     Check(!_conductor.IsPlaying && _factory.ActiveTargetCount == 0,
                         "Game Over detiene musica y limpia palabras");
-                    var gameOverHud = Object.FindFirstObjectByType<RhythmHudView>();
-                    var gameOverPanel = gameOverHud.transform.Find("Game Over");
-                    Check(gameOverPanel != null && gameOverPanel.gameObject.activeSelf,
-                        "Pantalla Game Over visible");
+                    var gameOverAudio = FindRuntime("Game Over audio")?.GetComponent<AudioSource>();
+                    Check(gameOverAudio != null && gameOverAudio.isPlaying && gameOverAudio.loop
+                        && gameOverAudio.clip == _config.GameOverClip && gameOverAudio.spatialBlend == 0f,
+                        "Derrota reproduce el soundtrack de game over");
+                    var gameOverScreen = FindScreen("gameOverScreen");
+                    Check(gameOverScreen != null, "Pantalla Game Over visible");
                     Check(Cursor.lockState == CursorLockMode.None && Cursor.visible,
                         "Cursor disponible en Game Over");
+                    var restartButton = gameOverScreen.Q<Button>("restartBtn");
                     Check(Object.FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>() != null
-                        && gameOverHud.GetComponentInParent<Canvas>().GetComponent<UnityEngine.UI.GraphicRaycaster>() != null,
+                        && restartButton != null && restartButton.panel != null,
                         "Interfaz de reinicio recibe eventos del puntero");
-                    var restartButton = gameOverPanel.GetComponentInChildren<UnityEngine.UI.Button>();
-                    Check(restartButton != null && restartButton.interactable, "Boton de reinicio disponible");
-                    restartButton.onClick.Invoke();
+                    Check(restartButton.enabledInHierarchy, "Boton de reinicio disponible");
+                    Submit(restartButton);
                     break;
                 case 13:
                     Check(_model.Sanity == 100 && !_model.IsGameOver && _model.IsPlaying,
                         "Boton reinicia el nivel con cordura completa");
-                    Check(!Object.FindFirstObjectByType<RhythmHudView>().transform.Find("Game Over").gameObject.activeSelf,
+                    Check(FindRuntime("Game Over audio")?.GetComponent<AudioSource>().isPlaying == false,
+                        "Reinicio detiene el soundtrack de game over");
+                    Check(FindScreen("gameOverScreen") == null,
                         "Reinicio oculta pantalla Game Over");
                     BeginCompletionCheck(false);
                     _nextStep = EditorApplication.timeSinceStartup + 0.7;
@@ -435,13 +451,13 @@ public static class RhythmTestPlayModeChecks
                         "Fin natural del audio concede victoria con cordura restante");
                     Check(_conductor.HasCompletedSong && !_conductor.IsPlaying && _factory.ActiveTargetCount == 0,
                         "Victoria detiene audio y limpia objetivos");
-                    var victory = Object.FindFirstObjectByType<RhythmHudView>().transform.Find("Victory");
-                    Check(victory != null && victory.gameObject.activeSelf, "Pantalla WIN GAME visible");
+                    var victory = FindScreen("victoryScreen");
+                    Check(victory != null, "Pantalla WIN GAME visible");
                     Check(Cursor.lockState == CursorLockMode.None && Cursor.visible, "Victoria libera el cursor");
-                    var victoryButton = victory.GetComponentInChildren<UnityEngine.UI.Button>();
-                    var buttonPosition = RectTransformUtility.WorldToScreenPoint(null, victoryButton.transform.position);
+                    var victoryButton = victory.Q<Button>("restartBtn");
+                    var buttonPosition = PanelToScreen(victoryButton.panel, victoryButton.worldBound.center);
                     _victoryPointerPosition = buttonPosition;
-                    _victoryPointerDetails = $"target={buttonPosition}, world={victoryButton.transform.position}, scale={victoryButton.transform.lossyScale}, rect={victoryButton.GetComponent<RectTransform>().rect}";
+                    _victoryPointerDetails = $"target={buttonPosition}, bound={victoryButton.worldBound}, panel={victoryButton.panel}";
                     InputSystem.QueueStateEvent(_mouse, new MouseState { position = buttonPosition }.WithButton(MouseButton.Left));
                     break;
                 case 15:
@@ -455,7 +471,7 @@ public static class RhythmTestPlayModeChecks
                     }
                     Check(_model.IsPlaying && !_model.HasWon && !_model.IsGameOver && _model.Sanity == 100,
                         "Clic real en boton de victoria reinicia con cordura completa" + VictoryPointerDiagnostics());
-                    Check(!Object.FindFirstObjectByType<RhythmHudView>().transform.Find("Victory").gameObject.activeSelf,
+                    Check(FindScreen("victoryScreen") == null,
                         "Reinicio oculta victoria");
                     BeginCompletionCheck(true);
                     _nextStep = EditorApplication.timeSinceStartup + 0.7;
@@ -463,8 +479,7 @@ public static class RhythmTestPlayModeChecks
                 case 16:
                     Check(_model.IsGameOver && !_model.HasWon && _model.Sanity == 0,
                         "Llegada en el final del audio concede derrota antes que victoria");
-                    Object.FindFirstObjectByType<RhythmHudView>().transform.Find("Game Over")
-                        .GetComponentInChildren<UnityEngine.UI.Button>().onClick.Invoke();
+                    Submit(FindScreen("gameOverScreen").Q<Button>("restartBtn"));
                     _nextStep = EditorApplication.timeSinceStartup + _config.TargetLeadTimeSeconds + 0.3;
                     return;
                 case 17:
@@ -679,6 +694,30 @@ public static class RhythmTestPlayModeChecks
         }
         _game.RestartSession();
         Check(!spawner.CreatureSchedule.TryTakeDue(71d, out _), "Reinicio reconstruye progresion desde el primer tramo");
+    }
+
+    private static VisualElement FindScreen(string name)
+    {
+        var documents = Object.FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
+        foreach (var document in documents)
+        {
+            var screen = document.rootVisualElement?.Q<VisualElement>(name);
+            if (screen != null) return screen;
+        }
+        return null;
+    }
+
+    private static void Submit(Button button)
+    {
+        using (var submit = new NavigationSubmitEvent { target = button })
+            button.SendEvent(submit);
+    }
+
+    private static Vector2 PanelToScreen(IPanel panel, Vector2 panelPosition)
+    {
+        if (panel == null) return panelPosition;
+        float scale = panel.scaledPixelsPerPoint > 0f ? panel.scaledPixelsPerPoint : 1f;
+        return new Vector2(panelPosition.x * scale, Screen.height - (panelPosition.y * scale));
     }
 
     private static GameObject FindRuntime(string name) => Array.Find(

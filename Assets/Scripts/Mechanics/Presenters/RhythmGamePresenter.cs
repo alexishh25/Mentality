@@ -16,6 +16,7 @@ namespace Gameplay.Rhythm.Presenters
         private readonly TargetFactory _targetFactory;
         private readonly AudioSource _musicSource;
         private readonly FalseWordEffectService _falseWordEffects;
+        private AudioSource _gameOverSource;
         private bool _disposed;
         private bool _gameOverHandled;
         public MusicalMapData MusicalMap { get; private set; }
@@ -116,7 +117,11 @@ namespace Gameplay.Rhythm.Presenters
             finally
             {
                 try { _targetFactory.ClearTargets(); }
-                finally { _falseWordEffects.Clear(); }
+                finally
+                {
+                    _falseWordEffects.Clear();
+                    if (_gameOverSource != null) _gameOverSource.Stop();
+                }
             }
         }
 
@@ -140,6 +145,23 @@ namespace Gameplay.Rhythm.Presenters
             if (_disposed || !_model.IsGameOver || _gameOverHandled) return;
             _gameOverHandled = true;
             StopSession();
+            PlayGameOverMusic();
+        }
+
+        private void PlayGameOverMusic()
+        {
+            if (_config.GameOverClip == null) return;
+            if (_gameOverSource == null)
+            {
+                var audioObject = new GameObject("Game Over audio");
+                _gameOverSource = audioObject.AddComponent<AudioSource>();
+                _gameOverSource.playOnAwake = false;
+                _gameOverSource.spatialBlend = 0f;
+                _gameOverSource.loop = true;
+            }
+
+            _gameOverSource.clip = _config.GameOverClip;
+            _gameOverSource.Play();
         }
 
         public void PauseSession()

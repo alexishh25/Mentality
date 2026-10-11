@@ -1,0 +1,184 @@
+:root {
+    --hud-text-primary: rgb(237, 230, 216);
+    --hud-text-secondary: rgb(143, 136, 124);
+    --sanity-high: rgb(143, 209, 138);
+    --sanity-low: rgb(255, 89, 89);
+    --rhythm-defeat: rgb(255, 102, 102);
+    --rhythm-victory: rgb(64, 242, 179);
+}
+
+.rhythm-hud {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    -unity-font-definition: url("project://database/Assets/Content/Fonts/m3x6.ttf?fileID=12800000&guid=44f9e4e98ef6b0c4f8e4b05596790f4e&type=3#m3x6");
+    color: var(--hud-text-primary);
+}
+
+.rhythm-sanity {
+    position: absolute;
+    left: 50%;
+    top: 28px;
+    width: 360px;
+    align-items: center;
+}
+
+.rhythm-portrait {
+    flex-grow: 1;
+    width: 100%;
+    height: 100%;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.brain--stable {
+    background-image: url("project://database/Assets/Content/Sprites/HUD/brain_assets.png?fileID=721029578&guid=46e256054d302b3449f9080f90b094cd&type=3#brain_assets_0");
+}
+
+.brain--nervous {
+    background-image: url("project://database/Assets/Content/Sprites/HUD/brain_assets.png?fileID=-1508636321&guid=46e256054d302b3449f9080f90b094cd&type=3#brain_assets_1");
+}
+
+.brain--uneasy {
+    background-image: url("project://database/Assets/Content/Sprites/HUD/brain_assets.png?fileID=-1880782439&guid=46e256054d302b3449f9080f90b094cd&type=3#brain_assets_2");
+}
+
+.brain--collapse {
+    background-image: url("project://database/Assets/Content/Sprites/HUD/brain_assets.png?fileID=-1583365637&guid=46e256054d302b3449f9080f90b094cd&type=3#brain_assets_3");
+}
+
+.rhythm-sanity__label {
+    font-size: 42px;
+    -unity-text-align: middle-center;
+    padding: 0;
+    margin-bottom: 6px;
+    color: var(--hud-text-primary);
+    align-self: flex-end;
+    margin-right: 10px;
+}
+
+.sanity-value {
+    font-size: 44px;
+    padding: 0;
+    margin: 0;
+    -unity-text-align: lower-right;
+    color: var(--sanity-high);
+}
+
+.sanity-max {
+    font-size: 22px;
+    margin-left: 2px;
+    padding: 0;
+    color: rgba(209, 209, 209, 0.85);
+    -unity-text-align: lower-left;
+}
+
+.label-state {
+    align-self: center;
+    color: rgb(255, 255, 255);
+    -unity-text-outline-color: rgba(209, 209, 209, 0.85);
+    font-size: 30px;
+    margin-left: 152px;
+    width: 360px;
+    -unity-text-align: upper-center;
+}
+
+.rhythm-sanity__track {
+    width: 360px;
+    height: 24px;
+    padding: 3px;
+}
+
+.rhythm-sanity__fill {
+    height: 100%;
+    width: 100%;
+    background-color: var(--sanity-high);
+}
+
+.rhythm-combo {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 600px;
+    margin-left: -300px;
+    margin-top: 70px;
+    font-size: 28px;
+    -unity-text-align: upper-center;
+    white-space: normal;
+    padding: 0;
+    display: none;
+}
+
+.rhythm-reticle {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 24px;
+    height: 24px;
+    margin-left: -12px;
+    margin-top: -12px;
+    align-items: center;
+    justify-content: center;
+    display: none;
+}
+
+.rhythm-reticle__line--h,
+.rhythm-reticle__line--v {
+    position: absolute;
+    background-color: rgb(255, 255, 255);
+}
+
+.rhythm-reticle__line--h {
+    width: 22px;
+    height: 3px;
+}
+
+.rhythm-reticle__line--v {
+    width: 3px;
+    height: 22px;
+}
+
+.rhythm-screen {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(4, 5, 9, 0.95);
+    -unity-font-definition: url("project://database/Assets/Content/Fonts/m3x6.ttf?fileID=12800000&guid=44f9e4e98ef6b0c4f8e4b05596790f4e&type=3#m3x6");
+    color: var(--hud-text-primary);
+}
+
+.rhythm-title {
+    font-size: 64px;
+    -unity-text-align: middle-center;
+    padding: 0;
+    margin: 0;
+}
+
+.rhythm-subtitle {
+    font-size: 36px;
+    -unity-text-align: middle-center;
+    padding: 0;
+    margin-top: 8px;
+    margin-bottom: 28px;
+}
+
+.rhythm-title--defeat,
+.rhythm-subtitle--defeat {
+    color: var(--rhythm-defeat);
+}
+
+.rhythm-title--victory,
+.rhythm-subtitle--victory {
+    color: var(--rhythm-victory);
+}
+
+.rhythm-button-slot {
+    position: relative;
+    width: 340px;
+    height: 110px;
+}

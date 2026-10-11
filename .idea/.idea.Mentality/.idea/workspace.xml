@@ -6,18 +6,30 @@
   <component name="ChangeListManager">
     <list default="true" id="3b311b54-b024-48c1-99b3-b35c1747b0cf" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Mentality/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Mentality/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Content/UI/Documents/Views/Menu/MenuUXML.uxml" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Content/UI/Documents/Views/Menu/MenuUXML.uxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Content/UI/Documents/Views/Pause/PauseUXML.uxml" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Content/UI/Documents/Views/Pause/PauseUXML.uxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Content/UI/Styles/ButtonUSS.uss" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Content/UI/Styles/ButtonUSS.uss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Content/UI/Styles/SelectorUSS.uss" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Content/UI/Styles/SelectorUSS.uss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Content/UI/Styles/SettingsUSS.uss" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Content/UI/Styles/SettingsUSS.uss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Repositories/MenuRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Repositories/MenuRepository.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Repositories/UIRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Repositories/UIRepository.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Scopes/UILifetimeScope.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Scopes/UILifetimeScope.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Services/UIService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Services/UIService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Content/Scenes/RhythmTest.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Content/Scenes/RhythmTest.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Content/Sprites/buttons.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Content/Sprites/buttons/boton-default.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Content/Sprites/buttons/boton-default.svg.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Content/Sprites/buttons/boton-disabled.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Content/Sprites/buttons/boton-disabled.svg.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Content/Sprites/buttons/boton-focus.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Content/Sprites/buttons/boton-focus.svg.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Content/Sprites/buttons/boton-hover.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Content/Sprites/buttons/boton-hover.svg.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Content/Sprites/buttons/boton-pressed.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Content/Sprites/buttons/boton-pressed.svg.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Content/UI/Documents/Views/HUD/HudUXML.uxml" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Content/UI/Documents/Views/HUD/HudUXML.uxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Content/UI/Styles/HudUSS.uss" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Content/UI/Styles/HudUSS.uss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Editor/RhythmTestPlayModeChecks.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Editor/RhythmTestPlayModeChecks.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Editor/RhythmTestSceneBuilder.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Editor/RhythmTestSceneBuilder.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Mechanics/Models/RhythmGameConfig.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Mechanics/Models/RhythmGameConfig.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Mechanics/Presenters/RhythmGamePresenter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Mechanics/Presenters/RhythmGamePresenter.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Mechanics/Presenters/RhythmHudPresenter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Mechanics/Presenters/RhythmHudPresenter.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Mechanics/Scopes/RhythmLifetimeScope.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Mechanics/Scopes/RhythmLifetimeScope.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Mechanics/Views/RhythmHudView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Mechanics/Views/RhythmHudView.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Converters/SanityWedgeBar.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Converters/SanityWedgeBar.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Repositories/ButtonRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Repositories/ButtonRepository.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/UIDoc.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/UIDoc.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Views/MenuView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Views/MenuView.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProjectSettings/EditorBuildSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/EditorBuildSettings.asset" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,14 +37,17 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="9" />
+    <option name="cachedIndexableFilesCount" value="7" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/Assets/Content/Scenes/SampleScene.unity" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Content/UI/Documents/Views/Rhythm/RhythmHudUXML.uxml" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Readme.asset" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/Mechanics/Scopes/RhythmLifetimeScope.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/Mechanics/Views/RhythmHudView.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Player/Scopes/Player/PlayerLifetimeScope.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/Repositories/MenuRepository.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/Repositories/MenuSettingsRepository.cs" root0="FORCE_HIGHLIGHTING" />
@@ -47,6 +62,8 @@
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/ViewModels/UnityBaseViewModel.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/Views/BaseView.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/UI/Views/OptionsView.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/TutorialInfo/Scripts/Editor/ReadmeEditor.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.ide.rider@e4950c6d131b/Rider/Editor/RiderScriptEditor.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.shadergraph@3cfe1d1f3f8c/Editor/Data/Util/ScreenSpaceType.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/jp.hadashikick.vcontainer@dcf16cda6a65/Runtime/Internal/ReflectionInjector.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/jp.hadashikick.vcontainer@dcf16cda6a65/Runtime/Unity/LifetimeScope.cs" root0="SKIP_HIGHLIGHTING" />
@@ -137,6 +154,7 @@
       <workItem from="1791562635143" duration="346000" />
       <workItem from="1791601602194" duration="863000" />
       <workItem from="1791688619952" duration="1086000" />
+      <workItem from="1791729505785" duration="12119000" />
     </task>
     <servers />
   </component>

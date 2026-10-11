@@ -18,23 +18,23 @@ namespace Mentality.UI.Repositories
 
         private void Start()
         {
-            // soundService = ServiceLocator.Get<ISoundService>();
+            //soundService = ServiceLocator.Get<ISoundService>();
             //animationService = ServiceLocator.Get<IAnimationUIService>();
         }
 
         public void PlayHoverSFX()
         {
-            //if (soundService != null)
-             //    soundService.PlaySFX(sfx_buttonhover);
-            //else
-            //    Debug.LogWarning("SoundManager not found. Cannot play hover sound.");
+            // if (soundService != null)
+            //      soundService.PlaySFX(sfx_buttonhover);
+            // else
+                Debug.LogWarning("SoundManager not found. Cannot play hover sound.");
         }
 
         public void PlayClickSFX()
         {
             // if (soundService != null)
-            //    soundService.PlaySFX(sfx_clickbutton);
-            //else
+            //     soundService.PlaySFX(sfx_clickbutton);
+            // else
                 Debug.LogWarning("SoundManager not found. Cannot play click sound.");
         }
 

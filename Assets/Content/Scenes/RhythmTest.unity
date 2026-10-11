@@ -1191,6 +1191,7 @@ MonoBehaviour:
   autoInjectGameObjects: []
   config:
     MusicClip: {fileID: 8300000, guid: b521b1dc26d241d18d249ed7812e734d, type: 3}
+    GameOverClip: {fileID: 8300000, guid: b17892c02b862e641860e8ff22f66178, type: 3}
     Beatmap:
       songName: Midnight at the Gallows
       bpm: 117.453835
@@ -1319,6 +1320,7 @@ MonoBehaviour:
   playerTarget: {fileID: 1390725923}
   musicSource: {fileID: 726320778}
   hudView: {fileID: 1248254032}
+  screensDoc: {fileID: 910001104}
 --- !u!82 &726320778
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1787,6 +1789,199 @@ Transform:
   - {fileID: 1453376771}
   m_Father: {fileID: 827934909}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &910001010
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1248254031}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
+  m_PanelSettings: {fileID: 11400000, guid: 1c646a0d30503154ab7a70d52257cc8d, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: 4c8e1a2b7d9f4e6a8b0c1d2e3f4a5b6c, type: 3}
+  m_SortingOrder: 0
+  m_Position: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
+--- !u!1 &910001101
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 910001102}
+  - component: {fileID: 910001103}
+  - component: {fileID: 910001104}
+  m_Layer: 0
+  m_Name: Rhythm Screens
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &910001102
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 910001101}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 910001112}
+  - {fileID: 910001122}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &910001103
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 910001101}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
+  m_PanelSettings: {fileID: 11400000, guid: 1c646a0d30503154ab7a70d52257cc8d, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 0}
+  m_SortingOrder: 10
+  m_Position: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
+--- !u!114 &910001104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 910001101}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a2df80b1be082248b8d4bafcae048ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Mentality.UI.UIDoc
+  initialScreen: 6
+  showInitialScreen: 0
+  uIDocument: {fileID: 910001103}
+  screens:
+  - type: 6
+    visualAsset: {fileID: 9197481963319205126, guid: 5d9f2b3c8e0a4f7b9c1d2e3f4a5b6c7d, type: 3}
+    logicComponent: {fileID: 910001113}
+  - type: 7
+    visualAsset: {fileID: 9197481963319205126, guid: 6e0a3c4d9f1b4a8c0d2e3f4a5b6c7d8e, type: 3}
+    logicComponent: {fileID: 910001123}
+--- !u!1 &910001111
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 910001112}
+  - component: {fileID: 910001113}
+  m_Layer: 0
+  m_Name: GameOverView
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &910001112
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 910001111}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 910001102}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &910001113
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 910001111}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a2c5e6f1b3d4c0e2f4a5b6c7d8e9f0a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Mentality.UI.Views.RhythmResultView
+  cancelBtnName: cancelButton
+--- !u!1 &910001121
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 910001122}
+  - component: {fileID: 910001123}
+  m_Layer: 0
+  m_Name: VictoryView
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &910001122
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 910001121}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 910001102}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &910001123
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 910001121}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a2c5e6f1b3d4c0e2f4a5b6c7d8e9f0a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Mentality.UI.Views.RhythmResultView
+  cancelBtnName: cancelButton
 --- !u!1 &923013157
 GameObject:
   m_ObjectHideFlags: 0
@@ -2249,6 +2444,7 @@ GameObject:
   - component: {fileID: 1248254034}
   - component: {fileID: 1248254033}
   - component: {fileID: 1248254032}
+  - component: {fileID: 910001010}
   m_Layer: 0
   m_Name: Rhythm HUD
   m_TagString: Untagged
@@ -2268,16 +2464,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7951c03f941bd5d4da0092c58485db7d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Gameplay.Rhythm.Views.RhythmHudView
-  hitsText: {fileID: 686794188}
-  missesText: {fileID: 1739444939}
-  statusText: {fileID: 1139054867}
-  rhythmText: {fileID: 719805914}
-  cursorText: {fileID: 179817167}
-  beatIndicator: {fileID: 1883206099}
-  scoreText: {fileID: 90001004}
-  resultText: {fileID: 90001008}
-  sanityFill: {fileID: 0}
-  sanityText: {fileID: 0}
+  document: {fileID: 910001010}
 --- !u!114 &1248254033
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2308,7 +2495,7 @@ Canvas:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1248254031}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_RenderMode: 0
   m_Camera: {fileID: 0}
@@ -2333,7 +2520,7 @@ RectTransform:
   m_GameObject: {fileID: 1248254031}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 90001006}
@@ -3598,3 +3785,4 @@ SceneRoots:
   - {fileID: 726320780}
   - {fileID: 1248254035}
   - {fileID: 647874556}
+  - {fileID: 910001102}

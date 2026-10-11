@@ -1,0 +1,11 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:me="Mentality.UI.Views" editor-extension-mode="False">
+    <Style src="project://database/Assets/Content/UI/Styles/ButtonUSS.uss?fileID=7433441132597879392&amp;guid=49524d7b6231e50428f235b106fc641b&amp;type=3#ButtonUSS" />
+    <Style src="/Assets/Content/UI/Styles/RhythmUSS.uss" />
+    <ui:VisualElement name="victoryScreen" class="rhythm-screen">
+        <ui:Label name="titleLabel" text="WIN GAME" picking-mode="Ignore" class="rhythm-title rhythm-title--victory" />
+        <ui:Label name="subtitleLabel" text="NIVEL COMPLETADO" picking-mode="Ignore" class="rhythm-subtitle rhythm-subtitle--victory" />
+        <ui:VisualElement class="rhythm-button-slot">
+            <me:MenuButton name="restartBtn" text="REINICIAR NIVEL" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -15,7 +15,9 @@ namespace Mentality.UI
         // Agregar valores siempre al final: ScreenEntry se serializa como entero en las escenas.
         GameOver,
         Reward,
-        Pause
+        Pause,
+        RhythmGameOver,
+        RhythmVictory
     }
 
     [Serializable]

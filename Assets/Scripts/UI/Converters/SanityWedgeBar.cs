@@ -33,8 +33,8 @@ namespace Mentality.UI.Views
             new Color32(0x8F, 0xD1, 0x8A, 0xFF)
         };
 
-        private Color _trackColor = new Color(7f / 255f, 7f / 255f, 10f / 255f, 0.9f);
-        private Color _outlineColor = new Color(143f / 255f, 136f / 255f, 124f / 255f, 0.45f);
+        private Color _trackColor = new Color(7f / 255f, 7f / 255f, 10f / 255f, 0f);
+        private Color _outlineColor = new Color(7f / 255f, 7f / 255f, 10f / 255f, 1f);
         private float _outlineWidth = 1.5f;
         private Color _dividerColor = new Color(7f / 255f, 7f / 255f, 10f / 255f, 0.85f);
         private Color _ghostColor = new Color(237f / 255f, 230f / 255f, 216f / 255f, 0.85f);
@@ -49,7 +49,8 @@ namespace Mentality.UI.Views
         private float _leftHeightRatio = 10f / 24f;
 
         [UxmlAttribute]
-        public float value
+        [Range(0, 1)]
+        public float value 
         {
             get => _value;
             set

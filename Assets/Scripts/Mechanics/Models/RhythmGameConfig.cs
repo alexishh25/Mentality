@@ -9,6 +9,8 @@ namespace Gameplay.Rhythm.Models
         [Header("Music")]
         [Tooltip("Opcional. Sin clip, la prueba utilizara un reloj de beats.")]
         public AudioClip MusicClip;
+        [Tooltip("Suena al perder la partida y se detiene al reiniciar.")]
+        public AudioClip GameOverClip;
         public SongBeatmap Beatmap = new SongBeatmap();
         [Tooltip("Opcional. Usa el mapa del audio para generar objetivos. Sin mapa se usa el BPM de Beatmap.")]
         public MusicalSongAsset AnalyzedSong;

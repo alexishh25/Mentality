@@ -2,6 +2,7 @@ using System;
 using Gameplay.Rhythm.Models;
 using Gameplay.Rhythm.Services;
 using Gameplay.Rhythm.Views;
+using Mentality.UI.Services;
 using VContainer.Unity;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -15,6 +16,7 @@ namespace Gameplay.Rhythm.Presenters
         private readonly RhythmGamePresenter _game;
         private readonly AudioConductorService _conductor;
         private readonly RhythmHudView _view;
+        private readonly RhythmUiService _ui;
         private readonly PlayerView _playerView;
         private readonly IPlayerInputService _playerInput;
         private readonly RhythmSessionInputService _sessionInput;
@@ -26,13 +28,14 @@ namespace Gameplay.Rhythm.Presenters
         private int _restartFrame = -1;
 
         public RhythmHudPresenter(RhythmGameModel model, RhythmGameConfig config,
-            RhythmGamePresenter game, AudioConductorService conductor, RhythmHudView view,
+            RhythmGamePresenter game, AudioConductorService conductor, RhythmHudView view, RhythmUiService ui,
             PlayerView playerView, IPlayerInputService playerInput, RhythmSessionInputService sessionInput)
         {
             _model = model;
             _game = game;
             _conductor = conductor;
             _view = view;
+            _ui = ui;
             _playerView = playerView;
             _playerInput = playerInput;
             _sessionInput = sessionInput;
@@ -40,7 +43,7 @@ namespace Gameplay.Rhythm.Presenters
 
         public void Start()
         {
-            _view.RestartRequested += RestartFromButton;
+            _ui.RestartRequested += RestartFromButton;
             InputSystem.onAfterUpdate += ProcessPauseControls;
             Application.focusChanged += OnFocusChanged;
             SetCaptured(true);
@@ -103,8 +106,8 @@ namespace Gameplay.Rhythm.Presenters
             bool showCombo = _model.IsPlaying && !_model.IsPaused && !_conductor.IsWaitingForTimeline
                 && _model.LastJudgment != RhythmJudgment.None;
             _view.RenderSanity(_model.Sanity);
-            _view.ShowGameOver(_model.IsGameOver);
-            _view.ShowVictory(_model.HasWon);
+            _view.SetReticleVisible(_captured);
+            _ui.PresentOutcome(_model.IsGameOver, _model.HasWon);
             _view.RenderCombo(_model.Combo, _model.ScoreMultiplier, _model.LastBrokenCombo, age, showCombo, _model.LastPulseBonus);
         }
 
@@ -123,7 +126,8 @@ namespace Gameplay.Rhythm.Presenters
             _pauseControlsFrame = Time.frameCount;
             SetCaptured(false);
             _game.RestartSession();
-            _view.ResetSessionPresentation(_model.Sanity);
+            _view.ResetFeedback();
+            _view.RenderSanity(_model.Sanity);
             SetCaptured(true);
         }
         private void SetCaptured(bool captured)
@@ -139,7 +143,7 @@ namespace Gameplay.Rhythm.Presenters
 
         public void Dispose()
         {
-            _view.RestartRequested -= RestartFromButton;
+            _ui.RestartRequested -= RestartFromButton;
             InputSystem.onAfterUpdate -= ProcessPauseControls;
             Application.focusChanged -= OnFocusChanged;
             _playerInput.DisableInput();

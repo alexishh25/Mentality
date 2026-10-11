@@ -1,0 +1,23 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/Content/UI/Styles/RhythmUSS.uss?fileID=7433441132597879392&amp;guid=7f1b4d5e0a2c4b9d1e3f4a5b6c7d8e9f&amp;type=3#RhythmUSS"/>
+    <ui:VisualElement name="hudRoot" picking-mode="Ignore" class="rhythm-hud">
+        <ui:VisualElement name="sanity" picking-mode="Ignore" class="rhythm-sanity" style="left: 2%; flex-direction: row;">
+            <ui:VisualElement name="Portrait" picking-mode="Ignore" class="rhythm-portrait brain--stable" style="flex-grow: 1; flex-direction: row; width: 100%; height: 100%;"/>
+            <ui:VisualElement style="flex-grow: 1;">
+                <ui:VisualElement name="VisualElement" style="flex-direction: row; width: 360px;">
+                    <ui:Label name="Cordura" text="CORDURA" picking-mode="Ignore" class="rhythm-sanity__label"/>
+                    <ui:VisualElement name="VisualElement" style="align-items: center; width: 200px;"/>
+                    <ui:Label name="sanityValue" text="100" picking-mode="Ignore" class="sanity-value"/>
+                    <ui:Label name="sanityMax" text="/100" picking-mode="Ignore" class="sanity-max"/>
+                </ui:VisualElement>
+                <Mentality.UI.Views.SanityWedgeBar name="sanityTrack" picking-mode="Ignore" value="1" class="rhythm-sanity__track"/>
+                <ui:Label text="Mente estable" name="labelState" picking-mode="Ignore" class="label-state"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:Label name="comboLabel" text="" picking-mode="Ignore" class="rhythm-combo" style="opacity: 1;"/>
+        <ui:VisualElement name="reticle" picking-mode="Ignore" class="rhythm-reticle">
+            <ui:VisualElement name="reticleH" picking-mode="Ignore" class="rhythm-reticle__line--h" style="opacity: 1;"/>
+            <ui:VisualElement name="reticleV" picking-mode="Ignore" class="rhythm-reticle__line--v"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

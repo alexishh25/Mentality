@@ -4,6 +4,10 @@ using Gameplay.Rhythm.Models;
 using Gameplay.Rhythm.Presenters;
 using Gameplay.Rhythm.Services;
 using Gameplay.Rhythm.Views;
+using Mentality.UI;
+using Mentality.UI.Repositories;
+using Mentality.UI.Services;
+using Mentality.UI.ViewModels;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -24,6 +28,7 @@ namespace Gameplay.Rhythm.Scopes
 
         [Header("Optional Test HUD")]
         [SerializeField] private RhythmHudView hudView;
+        [SerializeField] private UIDoc screensDoc;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -54,6 +59,15 @@ namespace Gameplay.Rhythm.Scopes
             if (hudView != null)
             {
                 builder.RegisterComponent(hudView);
+                builder.Register<UIRepository>(Lifetime.Singleton);
+                builder.Register<UIService>(Lifetime.Singleton);
+                builder.Register<ButtonRepository>(Lifetime.Singleton);
+                builder.Register<ButtonService>(Lifetime.Singleton);
+                builder.Register<RhythmUiRepository>(Lifetime.Singleton);
+                builder.Register<RhythmUiService>(Lifetime.Singleton);
+                builder.Register<RhythmResultViewModel>(Lifetime.Singleton);
+                if (screensDoc != null)
+                    builder.RegisterComponent(screensDoc);
                 builder.Register<RhythmSessionInputService>(Lifetime.Scoped);
                 builder.RegisterEntryPoint<RhythmHudPresenter>(Lifetime.Scoped);
             }

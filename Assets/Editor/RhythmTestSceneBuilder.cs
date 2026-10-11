@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using Gameplay.Rhythm.Scopes;
 using Gameplay.Rhythm.Views;
+using Mentality.UI;
+using Mentality.UI.Views;
 using Unity.Cinemachine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 using VContainer.Unity;
 using Object = UnityEngine.Object;
 
@@ -16,6 +18,10 @@ public static class RhythmTestSceneBuilder
 {
     public const string ScenePath = "Assets/Content/Scenes/RhythmTest.unity";
     private const string ResourcesPath = "Assets/Content/Prefabs/Rhythm";
+    private const string PanelSettingsPath = "Assets/UI Toolkit/PanelSettings.asset";
+    private const string HudUxmlPath = "Assets/Content/UI/Documents/Views/Rhythm/RhythmHudUXML.uxml";
+    private const string GameOverUxmlPath = "Assets/Content/UI/Documents/Views/Rhythm/RhythmGameOverUXML.uxml";
+    private const string VictoryUxmlPath = "Assets/Content/UI/Documents/Views/Rhythm/RhythmVictoryUXML.uxml";
 
     [InitializeOnLoadMethod]
     private static void CheckRequest()
@@ -101,8 +107,8 @@ public static class RhythmTestSceneBuilder
             audioSource.playOnAwake = false;
             audioSource.spatialBlend = 0f;
 
-            RhythmHudView hud = BuildHud(out GameObject crosshair);
-            SetReferenceOrBool(player, "pointerUI", crosshair);
+            RhythmHudView hud = BuildHud(out UIDoc screens);
+            SetReferenceOrBool(player, "pointerUI", null);
             var playerSerialized = new SerializedObject(player);
             playerSerialized.FindProperty("rhythmInteractDistance").floatValue = 100f;
             playerSerialized.ApplyModifiedPropertiesWithoutUndo();
@@ -113,7 +119,10 @@ public static class RhythmTestSceneBuilder
             rhythmSettings.FindProperty("playerTarget").objectReferenceValue = player.CameraTransform;
             rhythmSettings.FindProperty("musicSource").objectReferenceValue = audioSource;
             rhythmSettings.FindProperty("hudView").objectReferenceValue = hud;
+            rhythmSettings.FindProperty("screensDoc").objectReferenceValue = screens;
             var config = rhythmSettings.FindProperty("config");
+            config.FindPropertyRelative("GameOverClip").objectReferenceValue =
+                AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Content/Music/Sonic CD - Game Over Music ~ USA.mp3");
             config.FindPropertyRelative("Beatmap").FindPropertyRelative("bpm").floatValue = 120f;
             config.FindPropertyRelative("Beatmap").FindPropertyRelative("offsetSeconds").floatValue = 0f;
             config.FindPropertyRelative("SpawnDistance").floatValue = 12f;
@@ -168,61 +177,55 @@ public static class RhythmTestSceneBuilder
         serialized.ApplyModifiedPropertiesWithoutUndo();
     }
 
-    private static RhythmHudView BuildHud(out GameObject crosshair)
+    private static RhythmHudView BuildHud(out UIDoc screens)
     {
-        var root = new GameObject("Rhythm HUD", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler));
-        var canvas = root.GetComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 10;
-        var scaler = root.GetComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
-        scaler.matchWidthOrHeight = 0.5f;
-        var hud = root.AddComponent<RhythmHudView>();
-        Text result = TextElement("Judgment feedback", root.transform, "", Vector2.zero,
-            new Vector2(600, 90), 28, Color.white);
-        result.rectTransform.anchorMin = result.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-        result.rectTransform.pivot = new Vector2(0.5f, 1f);
-        result.rectTransform.anchoredPosition = new Vector2(0, -70);
-        result.alignment = TextAnchor.UpperCenter;
-        result.horizontalOverflow = HorizontalWrapMode.Wrap;
+        var panel = AssetDatabase.LoadAssetAtPath<PanelSettings>(PanelSettingsPath);
+        var hudTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(HudUxmlPath);
+        var gameOverTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(GameOverUxmlPath);
+        var victoryTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(VictoryUxmlPath);
+        if (panel == null || hudTree == null || gameOverTree == null || victoryTree == null)
+            throw new InvalidOperationException("Faltan los documentos UI Toolkit del ritmo.");
 
-        RectTransform sight = Rect("Crosshair", root.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(24, 24));
-        crosshair = sight.gameObject;
-        foreach (var size in new[] { new Vector2(22, 3), new Vector2(3, 22) })
-        {
-            RectTransform line = Rect("Line", sight, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, size);
-            line.gameObject.AddComponent<Image>().color = Color.white;
-        }
-        SetReferenceOrBool(hud, "resultText", result);
-        hud.InitializePresentation();
+        var hudObject = new GameObject("Rhythm HUD");
+        var hudDocument = hudObject.AddComponent<UIDocument>();
+        hudDocument.panelSettings = panel;
+        hudDocument.visualTreeAsset = hudTree;
+        hudDocument.sortingOrder = 0;
+        var hud = hudObject.AddComponent<RhythmHudView>();
+        SetReferenceOrBool(hud, "document", hudDocument);
+
+        var screensObject = new GameObject("Rhythm Screens");
+        var screensDocument = screensObject.AddComponent<UIDocument>();
+        screensDocument.panelSettings = panel;
+        screensDocument.sortingOrder = 10;
+        screens = screensObject.AddComponent<UIDoc>();
+        var gameOverView = CreateScreenView("GameOverView", screensObject.transform);
+        var victoryView = CreateScreenView("VictoryView", screensObject.transform);
+
+        var uiDocObject = new SerializedObject(screens);
+        uiDocObject.FindProperty("uIDocument").objectReferenceValue = screensDocument;
+        uiDocObject.FindProperty("showInitialScreen").boolValue = false;
+        uiDocObject.FindProperty("initialScreen").enumValueIndex = (int)ScreenType.RhythmGameOver;
+        SerializedProperty entries = uiDocObject.FindProperty("screens");
+        entries.arraySize = 2;
+        SetScreen(entries.GetArrayElementAtIndex(0), ScreenType.RhythmGameOver, gameOverTree, gameOverView);
+        SetScreen(entries.GetArrayElementAtIndex(1), ScreenType.RhythmVictory, victoryTree, victoryView);
+        uiDocObject.ApplyModifiedPropertiesWithoutUndo();
         return hud;
     }
 
-    private static RectTransform Rect(string name, Transform parent, Vector2 min, Vector2 max, Vector2 position, Vector2 size)
+    private static RhythmResultView CreateScreenView(string name, Transform parent)
     {
-        var rect = new GameObject(name, typeof(RectTransform)).GetComponent<RectTransform>();
-        rect.SetParent(parent, false);
-        rect.anchorMin = min;
-        rect.anchorMax = max;
-        rect.anchoredPosition = position;
-        rect.sizeDelta = size;
-        return rect;
+        var viewObject = new GameObject(name);
+        viewObject.transform.SetParent(parent, false);
+        return viewObject.AddComponent<RhythmResultView>();
     }
 
-    private static Text TextElement(string name, Transform parent, string value, Vector2 position, Vector2 size, int fontSize, Color color, bool right = false)
+    private static void SetScreen(SerializedProperty entry, ScreenType type, VisualTreeAsset asset, BaseView view)
     {
-        Vector2 anchor = new Vector2(right ? 1 : 0, 1);
-        RectTransform rect = Rect(name, parent, anchor, anchor, position, size);
-        rect.pivot = new Vector2(0, 1);
-        var text = rect.gameObject.AddComponent<Text>();
-        text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        text.fontSize = fontSize;
-        text.text = value;
-        text.color = color;
-        text.raycastTarget = false;
-        text.horizontalOverflow = HorizontalWrapMode.Overflow;
-        return text;
+        entry.FindPropertyRelative("type").enumValueIndex = (int)type;
+        entry.FindPropertyRelative("visualAsset").objectReferenceValue = asset;
+        entry.FindPropertyRelative("logicComponent").objectReferenceValue = view;
     }
 
     private static void BuildArena(Vector3 center)

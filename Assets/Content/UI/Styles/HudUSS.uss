@@ -1,4 +1,3 @@
-/* HUD MG01 — tokens del Figma "HUD Sanity Bar" (node 15:160). Referencia 1920x1080. */
 :root {
     --hud-panel-bg: rgba(14, 14, 19, 0.8);
     --hud-panel-border: rgb(42, 42, 51);
@@ -40,8 +39,6 @@
     align-items: flex-end;
 }
 
-/* ---------- Panel de cordura (480 x 100) ---------- */
-
 .sanity-panel {
     flex-direction: row;
     align-items: center;
@@ -80,7 +77,6 @@
     justify-content: center;
 }
 
-/* Placeholder del cerebro (sin la imagen con marca de agua). Asignar retratos en HudView para reemplazarlo. */
 .sanity-portrait__art {
     width: 54px;
     height: 44px;
@@ -150,7 +146,7 @@
 }
 
 .sanity-bar {
-    width: 360px;
+    width: 350px;
     height: 24px;
     --wedge-track-color: rgba(7, 7, 10, 0.9);
     --wedge-outline-color: rgba(143, 136, 124, 0.45);
@@ -171,17 +167,37 @@
     color: var(--hud-text-secondary);
 }
 
-/* ---------- Estados (clases que alterna HudView) ---------- */
+.sanity--high .sanity-value {
+    color: var(--sanity-high);
+}
 
-.sanity--high .sanity-value { color: var(--sanity-high); }
-.sanity--mid .sanity-value { color: var(--sanity-mid); }
-.sanity--low .sanity-value { color: var(--sanity-low); }
-.sanity--critical .sanity-value { color: var(--sanity-critical); }
+.sanity--mid .sanity-value {
+    color: var(--sanity-mid);
+}
 
-.sanity--high .sanity-portrait__art { background-color: rgb(201, 139, 139); }
-.sanity--mid .sanity-portrait__art { background-color: rgb(176, 134, 122); }
-.sanity--low .sanity-portrait__art { background-color: rgb(150, 112, 96); }
-.sanity--critical .sanity-portrait__art { background-color: rgb(84, 70, 60); }
+.sanity--low .sanity-value {
+    color: var(--sanity-low);
+}
+
+.sanity--critical .sanity-value {
+    color: var(--sanity-critical);
+}
+
+.sanity--high .sanity-portrait__art {
+    background-color: rgb(201, 139, 139);
+}
+
+.sanity--mid .sanity-portrait__art {
+    background-color: rgb(176, 134, 122);
+}
+
+.sanity--low .sanity-portrait__art {
+    background-color: rgb(150, 112, 96);
+}
+
+.sanity--critical .sanity-portrait__art {
+    background-color: rgb(84, 70, 60);
+}
 
 .sanity--critical,
 .sanity--hit {
@@ -209,11 +225,17 @@
     --wedge-outline-color: rgba(224, 38, 63, 0.9);
 }
 
-.sanity--hit .sanity-value { color: var(--sanity-damage); }
-.sanity--hit .sanity-damage { display: flex; }
-.sanity--hit .sanity-portrait__flash { opacity: 1; }
+.sanity--hit .sanity-value {
+    color: var(--sanity-damage);
+}
 
-/* ---------- Chip de habilidad ---------- */
+.sanity--hit .sanity-damage {
+    display: flex;
+}
+
+.sanity--hit .sanity-portrait__flash {
+    opacity: 1;
+}
 
 .hud-ability {
     align-items: flex-end;
@@ -247,8 +269,6 @@
 .hud-ability--unlocked .hud-ability__state {
     color: var(--sanity-critical);
 }
-
-/* ---------- Pie: nivel, progreso de cancion y pista ---------- */
 
 .hud-caption {
     font-size: 20px;
@@ -285,8 +305,6 @@
     height: 100%;
     background-color: rgba(237, 230, 216, 0.8);
 }
-
-/* ---------- Reticula (40x40: anillo r=14, 1.5px, #EDE6D8 @70% + punto r=2) ---------- */
 
 .hud-reticle {
     position: absolute;
