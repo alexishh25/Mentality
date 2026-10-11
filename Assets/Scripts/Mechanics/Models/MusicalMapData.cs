@@ -26,6 +26,7 @@ namespace Gameplay.Rhythm.Models
         [JsonProperty("ataques", Required = Required.Always)] public double[] Attacks;
     }
 
+    [System.Serializable]
     public sealed class MusicalActiveInterval
     {
         [JsonProperty("inicio", Required = Required.Always)] public double Start;

@@ -17,13 +17,17 @@ namespace Gameplay.Rhythm.Presenters
         private readonly Vector3 _spawnPosition;
         private readonly Vector3 _arrivalDirection;
         private readonly AimEvasionMotion _evasion;
+        private readonly FalseWordEffectService _falseWordEffects;
 
         public bool IsResolved { get; private set; }
         public TargetTiming Timing { get; }
+        public WordTargetKind Kind { get; }
+        public bool IsFalseWord => Kind != WordTargetKind.Normal;
 
         public TargetPresenter(ITargetView view, RhythmGameModel model,
             Transform playerTarget, float travelSpeed, float arrivalDistance, TargetTiming timing = null,
-            AudioConductorService conductor = null, AimEvasionMotion evasion = null)
+            AudioConductorService conductor = null, AimEvasionMotion evasion = null,
+            WordTargetKind kind = WordTargetKind.Normal, FalseWordEffectService falseWordEffects = null)
         {
             _view = view ?? throw new ArgumentNullException(nameof(view));
             _model = model ?? throw new ArgumentNullException(nameof(model));
@@ -40,6 +44,9 @@ namespace Gameplay.Rhythm.Presenters
             Timing = timing;
             _conductor = conductor;
             _evasion = evasion;
+            _falseWordEffects = falseWordEffects;
+            if (!Enum.IsDefined(typeof(WordTargetKind), kind)) throw new ArgumentOutOfRangeException(nameof(kind));
+            Kind = kind;
             _spawnPosition = _view.Position;
             _arrivalDirection = (_spawnPosition - _playerTarget.position).normalized;
             if (Timing != null)
@@ -107,6 +114,18 @@ namespace Gameplay.Rhythm.Presenters
                 <= _arrivalDistance * _arrivalDistance;
         }
 
+        public void ResolveAtSongEnd(double songTime)
+        {
+            if (IsResolved || !_model.IsPlaying || _model.IsPaused) return;
+            if (Timing != null)
+            {
+                if (Timing.HitTime > songTime) return;
+                UpdateMusicalPosition(songTime);
+                ResolveJudgment(RhythmJudgment.Miss, songTime, null);
+            }
+            else if (HasReachedPlayer()) Resolve(false);
+        }
+
         private void UpdateMusicalPosition(double songTime)
         {
             double progress = Timing.ProgressAt(songTime);
@@ -121,6 +140,12 @@ namespace Gameplay.Rhythm.Presenters
                 Vector3 direction = _arrivalDirection * Mathf.Cos(radians) + tangent * Mathf.Sin(radians);
                 float radius = (position - _playerTarget.position).magnitude;
                 position = _playerTarget.position + direction * radius;
+            }
+            if (Timing.LateralArcDegrees != 0f)
+            {
+                float arc = Timing.LateralArcDegrees * Mathf.Sin(Mathf.PI * clampedProgress);
+                position = _playerTarget.position + Quaternion.AngleAxis(arc, Vector3.up)
+                    * (position - _playerTarget.position);
             }
             _view.SetPosition(position);
             _view.FacePlayer(_playerTarget.position);
@@ -169,6 +194,7 @@ namespace Gameplay.Rhythm.Presenters
 
         private void Resolve(bool hit)
         {
+            if (IsFalseWord) { ResolveFalseWord(!hit); return; }
             if (_conductor != null)
             {
                 ResolveJudgment(hit ? RhythmJudgment.Hit : RhythmJudgment.Miss, _conductor.CurrentSongTime, null);
@@ -178,19 +204,43 @@ namespace Gameplay.Rhythm.Presenters
             if (hit)
                 _model.RegisterHit();
             else
+            {
                 _model.RegisterMiss();
+                _model.RegisterWordCollision();
+            }
 
             _view.DestroySelf();
         }
 
         private void ResolveJudgment(RhythmJudgment judgment, double songTime, double? error)
         {
+            if (IsFalseWord) { ResolveFalseWord(judgment == RhythmJudgment.Miss); return; }
             Dispose();
             _model.RegisterJudgment(judgment, songTime, error);
+            if (judgment == RhythmJudgment.Miss) _model.RegisterWordCollision();
             _view.DestroySelf();
         }
 
         // Retirar objetivos al detener/reiniciar no penaliza al jugador.
+        private void ResolveFalseWord(bool reachedPlayer)
+        {
+            if (IsResolved) return;
+            // Resolver antes de notificar evita reentradas y disparos duplicados.
+            Dispose();
+            try
+            {
+                if (reachedPlayer)
+                {
+                    _model.RegisterWordCollision();
+                    _falseWordEffects?.Request(Kind);
+                }
+            }
+            finally
+            {
+                _view.DestroySelf();
+            }
+        }
+
         public void Cancel()
         {
             if (IsResolved)

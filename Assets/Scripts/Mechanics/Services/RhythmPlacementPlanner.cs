@@ -13,6 +13,8 @@ namespace Gameplay.Rhythm.Services
                 || !Finite(settings.LaneSpacingDegrees) || settings.LaneSpacingDegrees < 5f || settings.LaneSpacingDegrees > 45f
                 || !Finite(settings.MaximumTurnDegrees) || settings.MaximumTurnDegrees < settings.LaneSpacingDegrees || settings.MaximumTurnDegrees > 180f
                 || !Finite(settings.MaximumTurnSpeedDegreesPerSecond) || settings.MaximumTurnSpeedDegreesPerSecond < 15f
+                || !Finite(settings.FrenzyTurnAngleMultiplier) || settings.FrenzyTurnAngleMultiplier < 1f || settings.FrenzyTurnAngleMultiplier > 2f
+                || !Finite(settings.FrenzyTurnSpeedMultiplier) || settings.FrenzyTurnSpeedMultiplier < 1f || settings.FrenzyTurnSpeedMultiplier > 5f
                 || !Finite(settings.TargetAngularWidthDegrees) || settings.TargetAngularWidthDegrees < 2f
                 || settings.TargetAngularWidthDegrees >= settings.LaneSpacingDegrees)
                 throw new ArgumentException("La colocacion necesita un arco y giro validos, y palabras mas estrechas que la separacion de rutas.", nameof(settings));
@@ -47,9 +49,9 @@ namespace Gameplay.Rhythm.Services
                     {
                         var previous = result[result.Count - 1];
                         double frenzy = activity == null ? 0d : activity.FrenzyAt(item.HitTime);
-                        double allowedTurn = Math.Min(Math.Min(180d, settings.MaximumTurnDegrees * (1d + 0.7d * frenzy)),
+                        double allowedTurn = Math.Min(Math.Min(180d, settings.MaximumTurnDegrees * (1d + (settings.FrenzyTurnAngleMultiplier - 1d) * frenzy)),
                             (spawnTime - (previous.SpawnTime ?? (previous.HitTime - leadTime)))
-                                * settings.MaximumTurnSpeedDegreesPerSecond * (1d + 4d * frenzy));
+                                * settings.MaximumTurnSpeedDegreesPerSecond * (1d + (settings.FrenzyTurnSpeedMultiplier - 1d) * frenzy));
                         if (Math.Abs(angle - previous.AngleDegrees.Value) > allowedTurn + 1e-6d) continue;
                     }
                     bool blocked = false;

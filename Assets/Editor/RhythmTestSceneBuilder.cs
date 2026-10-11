@@ -179,21 +179,6 @@ public static class RhythmTestSceneBuilder
         scaler.referenceResolution = new Vector2(1920, 1080);
         scaler.matchWidthOrHeight = 0.5f;
         var hud = root.AddComponent<RhythmHudView>();
-        RectTransform top = Rect("Top panel", root.transform, new Vector2(0, 1), new Vector2(1, 1), Vector2.zero, new Vector2(0, 160));
-        top.pivot = new Vector2(0.5f, 1f);
-        top.gameObject.AddComponent<Image>().color = new Color(0.02f, 0.035f, 0.055f, 0.92f);
-        TextElement("Title", top, "MENTALITY / PRUEBA RITMICA", new Vector2(48, -22), new Vector2(750, 40), 30, new Color(0.35f, 0.95f, 0.8f));
-        Text status = TextElement("Status", top, "SESION ACTIVA", new Vector2(48, -69), new Vector2(750, 28), 20, Color.white);
-        Text rhythm = TextElement("Rhythm", top, "120 BPM / RELOJ SIN MUSICA", new Vector2(48, -105), new Vector2(1100, 30), 20, new Color(0.65f, 0.73f, 0.8f));
-        TextElement("Hits label", top, "ACIERTOS", new Vector2(-440, -24), new Vector2(180, 30), 19, new Color(0.65f, 0.73f, 0.8f), true);
-        Text hits = TextElement("Hits", top, "00", new Vector2(-440, -59), new Vector2(180, 65), 48, new Color(0.35f, 0.95f, 0.8f), true);
-        TextElement("Misses label", top, "FALLOS", new Vector2(-210, -24), new Vector2(180, 30), 19, new Color(0.65f, 0.73f, 0.8f), true);
-        Text misses = TextElement("Misses", top, "00", new Vector2(-210, -59), new Vector2(180, 65), 48, new Color(1f, 0.48f, 0.48f), true);
-        RectTransform beatRect = Rect("Beat pulse", top, new Vector2(0, 1), new Vector2(0, 1), new Vector2(810, -40), new Vector2(16, 16));
-        Image beat = beatRect.gameObject.AddComponent<Image>();
-        beat.color = new Color(0.35f, 0.95f, 0.8f);
-        Text score = TextElement("Score and combo", top, "PUNTOS 0\nCOMBO 0 / x1\nMEJOR RACHA 0",
-            new Vector2(940, -22), new Vector2(480, 105), 24, Color.white);
         Text result = TextElement("Judgment feedback", root.transform, "", Vector2.zero,
             new Vector2(600, 90), 28, Color.white);
         result.rectTransform.anchorMin = result.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
@@ -202,11 +187,6 @@ public static class RhythmTestSceneBuilder
         result.alignment = TextAnchor.UpperCenter;
         result.horizontalOverflow = HorizontalWrapMode.Wrap;
 
-        RectTransform footer = Rect("Footer", root.transform, Vector2.zero, new Vector2(1, 0), Vector2.zero, new Vector2(0, 95));
-        footer.pivot = new Vector2(0.5f, 0);
-        footer.gameObject.AddComponent<Image>().color = new Color(0.02f, 0.035f, 0.055f, 0.9f);
-        Text hint = TextElement("Controls", footer, "APUNTA Y HAZ CLIC | ESC / P pausa | R reinicia", new Vector2(48, -30), new Vector2(1800, 40), 22, new Color(0.8f, 0.85f, 0.9f));
-
         RectTransform sight = Rect("Crosshair", root.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(24, 24));
         crosshair = sight.gameObject;
         foreach (var size in new[] { new Vector2(22, 3), new Vector2(3, 22) })
@@ -214,14 +194,8 @@ public static class RhythmTestSceneBuilder
             RectTransform line = Rect("Line", sight, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, size);
             line.gameObject.AddComponent<Image>().color = Color.white;
         }
-        SetReferenceOrBool(hud, "hitsText", hits);
-        SetReferenceOrBool(hud, "missesText", misses);
-        SetReferenceOrBool(hud, "statusText", status);
-        SetReferenceOrBool(hud, "rhythmText", rhythm);
-        SetReferenceOrBool(hud, "cursorText", hint);
-        SetReferenceOrBool(hud, "beatIndicator", beat);
-        SetReferenceOrBool(hud, "scoreText", score);
         SetReferenceOrBool(hud, "resultText", result);
+        hud.InitializePresentation();
         return hud;
     }
 
@@ -306,3 +280,4 @@ public static class RhythmTestSceneBuilder
         return material;
     }
 }
+

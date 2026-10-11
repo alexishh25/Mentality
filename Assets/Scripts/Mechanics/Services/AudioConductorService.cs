@@ -40,6 +40,9 @@ public class AudioConductorService : IDisposable
 
     public bool IsPlaying { get; private set; }
     public bool IsPaused { get; private set; }
+    public bool HasCompletedSong { get; private set; }
+    public bool IsAtSongEnd => _usesAudio && IsPlaying && !IsPaused && !IsWaitingForTimeline
+        && CurrentSongTime >= _clipDuration;
     public bool IsWaitingForTimeline => IsPlaying && !IsPaused && AudioSettings.dspTime < _dspTimelineTime;
     public bool HasStarted { get; private set; }
     public bool HasTimelineStarted { get; private set; }
@@ -101,6 +104,7 @@ public class AudioConductorService : IDisposable
         HasTimelineStarted = false;
         _countInSeconds = 0d;
         _initialized = true;
+        HasCompletedSong = false;
     }
 
     // Inicia una nueva reproduccion desde cero; no reanuda una sesion detenida.
@@ -113,6 +117,7 @@ public class AudioConductorService : IDisposable
 
         StopMusic();
         _countInSeconds = countInSeconds;
+        HasCompletedSong = false;
         _songPosition = -countInSeconds;
         _minimumSongTime = _songPosition;
         HasStarted = false;
@@ -197,6 +202,7 @@ public class AudioConductorService : IDisposable
         if (_usesAudio && _songPosition >= _clipDuration)
         {
             _songPosition = _clipDuration;
+            HasCompletedSong = true;
             IsPlaying = false;
             if (_musicSource != null)
                 _musicSource.Stop();

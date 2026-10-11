@@ -36,6 +36,12 @@ namespace Gameplay.Rhythm.Scopes
             builder.RegisterInstance(playerTarget);
             builder.Register<RhythmGameModel>(Lifetime.Scoped);
             builder.Register<AudioConductorService>(Lifetime.Scoped);
+            builder.Register<FalseWordEffectService>(Lifetime.Scoped);
+            builder.RegisterEntryPoint<ScreamerPresenter>(Lifetime.Scoped);
+            builder.RegisterEntryPoint<GlitchPresenter>(Lifetime.Scoped);
+            builder.RegisterInstance(config.Bullicio ?? new BullicioSettings { Enabled = false });
+            builder.Register<BullicioSessionService>(Lifetime.Scoped);
+            builder.RegisterEntryPoint<BullicioPresenter>(Lifetime.Scoped);
             builder.Register<TargetFactory>(Lifetime.Scoped);
             builder.Register<RhythmSpawnerPresenter>(Lifetime.Scoped);
 
