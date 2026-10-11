@@ -11,6 +11,8 @@ namespace Gameplay.Rhythm.Models
         [Range(5f, 45f)] public float LaneSpacingDegrees = 15f;
         [Range(15f, 180f)] public float MaximumTurnDegrees = 90f;
         [Min(15f)] public float MaximumTurnSpeedDegreesPerSecond = 120f;
+        [Range(1f, 2f)] public float FrenzyTurnAngleMultiplier = 1.35f;
+        [Range(1f, 5f)] public float FrenzyTurnSpeedMultiplier = 3f;
         [Range(2f, 30f), Tooltip("Ancho angular maximo de la palabra al lanzarse. Conserva su tamano fisico durante el vuelo.")]
         public float TargetAngularWidthDegrees = 10f;
     }

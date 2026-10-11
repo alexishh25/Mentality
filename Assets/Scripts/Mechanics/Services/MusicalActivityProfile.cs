@@ -17,16 +17,20 @@ namespace Gameplay.Rhythm.Services
         private readonly double _fullIntensity;
         private readonly double _transitionRelief;
         private readonly bool _frenzy;
-        private readonly double _frenzyStart, _frenzyFull, _maximumSpeed, _frenzyInterval;
+        private readonly double _frenzyStart, _frenzyFull, _maximumFrenzy, _maximumSpeed, _frenzyInterval;
         private readonly MusicalCurve _speed;
         private readonly double[] _motion;
         public int ExtraTargets { get; }
         public int ActiveIntervalCount => _activeStarts.Length;
+        public ManualIntensityProfile ManualIntensity { get; }
 
-        public MusicalActivityProfile(MusicalMapData map, double minimumInterval, MusicalActivitySettings settings)
+        public MusicalActivityProfile(MusicalMapData map, double minimumInterval, MusicalActivitySettings settings,
+            ManualIntensitySettings manualSettings = null)
         {
             MusicalMapLoader.Validate(map);
             ValidateSettings(settings, minimumInterval);
+            if (manualSettings != null && manualSettings.Enabled)
+                ManualIntensity = new ManualIntensityProfile(map.Metadata.DurationSeconds, manualSettings);
             _minimumInterval = minimumInterval;
             _quietInterval = settings.QuietSpawnInterval;
             _quietIntensity = settings.QuietIntensity;
@@ -35,6 +39,7 @@ namespace Gameplay.Rhythm.Services
             _frenzy = settings.EnableFrenzy;
             _frenzyStart = settings.FrenzyStartIntensity;
             _frenzyFull = settings.FullFrenzyIntensity;
+            _maximumFrenzy = settings.MaximumFrenzy;
             _maximumSpeed = settings.MaximumSpeedMultiplier;
             _frenzyInterval = settings.FrenzyIntervalMultiplier;
             ExtraTargets = _frenzy ? settings.FrenzyExtraTargets : 0;
@@ -42,11 +47,29 @@ namespace Gameplay.Rhythm.Services
             _transitions = Smooth(map.Curves.Transitions, settings.SmoothingSeconds);
             var speedTimes = new List<double> { 0d };
             foreach (double time in _intensity.Times) if (time > 0d) speedTimes.Add(time);
+            if (ManualIntensity != null)
+            {
+                var speedIntervals = new List<MusicalActiveInterval>(manualSettings.Intervals);
+                foreach(var section in manualSettings.Sections) speedIntervals.Add(new MusicalActiveInterval {Start=section.Start,End=section.End});
+                foreach (var interval in speedIntervals)
+                {
+                    speedTimes.Add(interval.Start); speedTimes.Add(interval.End);
+                    double ramp = Math.Min(manualSettings.TransitionSeconds, (interval.End - interval.Start) / 2d);
+                    for (int step = 1; step <= 20; step++)
+                    {
+                        speedTimes.Add(interval.Start + ramp * step / 20d);
+                        speedTimes.Add(interval.End - ramp * step / 20d);
+                    }
+                }
+                speedTimes.Sort();
+                for (int i = speedTimes.Count - 1; i > 0; i--) if (speedTimes[i] == speedTimes[i - 1]) speedTimes.RemoveAt(i);
+            }
             var speedValues = new double[speedTimes.Count];
             _motion = new double[speedTimes.Count];
             for (int i = 0; i < speedValues.Length; i++)
             {
-                speedValues[i] = 1d + (_maximumSpeed - 1d) * FrenzyAt(speedTimes[i]);
+                speedValues[i] = _frenzy && ManualIntensity != null && ManualIntensity.HasSections
+                    ? ManualIntensity.SpeedAt(speedTimes[i]) : 1d + (_maximumSpeed - 1d) * FrenzyAt(speedTimes[i]);
                 if (i > 0) _motion[i] = _motion[i - 1]
                     + (speedTimes[i] - speedTimes[i - 1]) * (speedValues[i] + speedValues[i - 1]) * 0.5d;
             }
@@ -77,6 +100,7 @@ namespace Gameplay.Rhythm.Services
                 || !IsFinite(settings.TransitionRelief) || settings.TransitionRelief < 0 || settings.TransitionRelief > 1
                 || !IsFinite(settings.FrenzyStartIntensity) || !IsFinite(settings.FullFrenzyIntensity)
                 || settings.FrenzyStartIntensity < 0 || settings.FullFrenzyIntensity > 1 || settings.FullFrenzyIntensity <= settings.FrenzyStartIntensity
+                || !IsFinite(settings.MaximumFrenzy) || settings.MaximumFrenzy < 0 || settings.MaximumFrenzy > 1
                 || !IsFinite(settings.MaximumSpeedMultiplier) || settings.MaximumSpeedMultiplier < 1 || settings.MaximumSpeedMultiplier > 4
                 || !IsFinite(settings.FrenzyIntervalMultiplier) || settings.FrenzyIntervalMultiplier < 0.25 || settings.FrenzyIntervalMultiplier > 1
                 || settings.FrenzyExtraTargets < 0 || settings.FrenzyExtraTargets > 4)
@@ -97,8 +121,9 @@ namespace Gameplay.Rhythm.Services
         public double FrenzyAt(double time)
         {
             if (!_frenzy || time < 0) return 0d;
+            if (ManualIntensity != null) return ManualIntensity.HasSections ? ManualIntensity.FrenzyAt(time) : _maximumFrenzy * ManualIntensity.AmountAt(time);
             double amount = Clamp01((IntensityAt(time) - _frenzyStart) / (_frenzyFull - _frenzyStart));
-            return amount * amount * (3d - 2d * amount);
+            return Math.Min(_maximumFrenzy, amount * amount * (3d - 2d * amount));
         }
 
         public double DensityMultiplierAt(double time) => 1d + (_frenzyInterval - 1d) * FrenzyAt(time);

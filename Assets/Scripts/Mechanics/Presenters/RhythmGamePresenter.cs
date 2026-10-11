@@ -15,12 +15,14 @@ namespace Gameplay.Rhythm.Presenters
         private readonly RhythmSpawnerPresenter _spawner;
         private readonly TargetFactory _targetFactory;
         private readonly AudioSource _musicSource;
+        private readonly FalseWordEffectService _falseWordEffects;
         private bool _disposed;
+        private bool _gameOverHandled;
         public MusicalMapData MusicalMap { get; private set; }
 
         public RhythmGamePresenter(RhythmGameConfig config, RhythmGameModel model,
             AudioConductorService conductor, RhythmSpawnerPresenter spawner,
-            TargetFactory targetFactory, AudioSource musicSource)
+            TargetFactory targetFactory, AudioSource musicSource, FalseWordEffectService falseWordEffects)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _model = model ?? throw new ArgumentNullException(nameof(model));
@@ -28,6 +30,7 @@ namespace Gameplay.Rhythm.Presenters
             _spawner = spawner ?? throw new ArgumentNullException(nameof(spawner));
             _targetFactory = targetFactory ?? throw new ArgumentNullException(nameof(targetFactory));
             _musicSource = musicSource;
+            _falseWordEffects = falseWordEffects ?? throw new ArgumentNullException(nameof(falseWordEffects));
         }
 
         public void Start() => StartSession();
@@ -58,10 +61,12 @@ namespace Gameplay.Rhythm.Presenters
                 else
                     _conductor.Initialize(_musicSource, _config.Beatmap);
                 _model.StartSession();
+                _model.ConfigurePulseBonus(MusicalMap, _config.PulseBonus);
+                _gameOverHandled = false;
                 double leadTime = MusicalMap != null ? _config.TargetLeadTimeSeconds : 0d;
                 // Preparar el plan completo antes de acordar el inicio DSP del audio.
                 _spawner.ResetBeatTracking(MusicalMap, _config.MinimumSpawnInterval, leadTime, _config.MusicalActivity,
-                    _config.Patterns, 0d, _config.Placement);
+                    _config.Patterns, 0d, _config.Placement, _config.Cadence, _config.AnalyzedSong?.ManualIntensity);
                 _conductor.PlayMusic(leadTime);
             }
             catch
@@ -74,19 +79,27 @@ namespace Gameplay.Rhythm.Presenters
 
         public void Tick()
         {
+            HandleGameOver();
             if (_disposed || !_model.IsPlaying || _model.IsPaused)
                 return;
 
             try
             {
+                if (_conductor.IsAtSongEnd)
+                {
+                    FinishSong();
+                    return;
+                }
                 _conductor.UpdateTime();
                 if (!_conductor.IsPlaying)
                 {
-                    StopSession();
+                    if (_conductor.HasCompletedSong) FinishSong();
+                    else StopSession();
                     return;
                 }
 
                 _spawner.CheckAndSpawnTargets();
+                HandleGameOver();
             }
             catch
             {
@@ -99,18 +112,48 @@ namespace Gameplay.Rhythm.Presenters
         public void StopSession()
         {
             _model.StopSession();
-            _conductor.StopMusic();
-            _targetFactory.ClearTargets();
+            try { _conductor.StopMusic(); }
+            finally
+            {
+                try { _targetFactory.ClearTargets(); }
+                finally { _falseWordEffects.Clear(); }
+            }
         }
 
         public void RestartSession() => StartSession();
+
+        private void FinishSong()
+        {
+            // Resolver llegadas pendientes antes de conceder la victoria, incluso en el ultimo frame.
+            _targetFactory.ResolveAtSongEnd(_conductor.CurrentSongTime);
+            if (_model.IsGameOver) HandleGameOver();
+            else
+            {
+                _model.CompleteSong();
+                StopSession();
+            }
+        }
+
+        // Limpiar fuera de la iteracion de objetivos evita modificar su lista durante una colision.
+        public void HandleGameOver()
+        {
+            if (_disposed || !_model.IsGameOver || _gameOverHandled) return;
+            _gameOverHandled = true;
+            StopSession();
+        }
 
         public void PauseSession()
         {
             if (_disposed || !_model.IsPlaying || _model.IsPaused) return;
             _conductor.PauseMusic();
-            if (!_conductor.IsPlaying) { StopSession(); return; }
+            if (!_conductor.IsPlaying)
+            {
+                if (_conductor.HasCompletedSong) FinishSong();
+                else StopSession();
+                return;
+            }
             _model.PauseSession();
+            _falseWordEffects.RefreshPresentation();
         }
 
         public void ResumeSession()
@@ -118,6 +161,7 @@ namespace Gameplay.Rhythm.Presenters
             if (_disposed || !_model.IsPlaying || !_model.IsPaused) return;
             _conductor.ResumeMusic();
             _model.ResumeSession();
+            _falseWordEffects.RefreshPresentation();
         }
 
         private void ValidateConfiguration()
@@ -142,6 +186,12 @@ namespace Gameplay.Rhythm.Presenters
             if (_config.ShowSpawnRing && !IsPositiveFinite(_config.SpawnRingDurationSeconds))
                 throw new InvalidOperationException("La duracion del aro de aparicion debe ser positiva y finita.");
             if (_config.Evasion != null) AimEvasionMotion.Validate(_config.Evasion);
+            if (_config.FalseWords != null) FalseWordSelector.Validate(_config.FalseWords);
+            if (_config.Bullicio != null) BullicioSessionService.Validate(_config.Bullicio);
+            if (_config.Glitch != null) GlitchSignal.Validate(_config.Glitch);
+            if (_config.Screamer != null && _config.Screamer.Enabled
+                && (!IsPositiveFinite(_config.Screamer.DurationSeconds) || _config.Screamer.DurationSeconds < 0.05f))
+                throw new InvalidOperationException("La duracion del screamer debe ser finita y de al menos 0.05 segundos.");
             if (!IsPositiveFinite(_config.SpawnDistance) || _config.SpawnDistance <= _config.ArrivalDistance)
                 throw new InvalidOperationException("SpawnDistance debe ser mayor que ArrivalDistance y finita.");
             if (_config.WordPrefabs == null || _config.WordPrefabs.Length == 0)

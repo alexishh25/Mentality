@@ -22,8 +22,10 @@ namespace Gameplay.Rhythm.Models
         public bool EnableFrenzy = true;
         [Range(0f, 1f)] public float FrenzyStartIntensity = 0.45f;
         [Range(0f, 1f)] public float FullFrenzyIntensity = 0.65f;
-        [Range(1f, 4f)] public float MaximumSpeedMultiplier = 4f;
-        [Range(0.25f, 1f)] public float FrenzyIntervalMultiplier = 0.25f;
-        [Range(0, 4)] public int FrenzyExtraTargets = 4;
+        [Range(0f, 1f), Tooltip("Tope de frenesi compartido por velocidad, evasion y palabras falsas. 1 conserva el comportamiento completo.")]
+        public float MaximumFrenzy = 1f;
+        [Range(1f, 4f)] public float MaximumSpeedMultiplier = 3f;
+        [Range(0.25f, 1f)] public float FrenzyIntervalMultiplier = 0.4f;
+        [Range(0, 4)] public int FrenzyExtraTargets = 2;
     }
 }

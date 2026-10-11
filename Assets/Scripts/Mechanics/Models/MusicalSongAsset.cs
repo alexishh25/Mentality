@@ -11,6 +11,7 @@ namespace Gameplay.Rhythm.Models
         public TextAsset AnalysisJson;
         [Tooltip("Nombre original del archivo analizado, incluida su extension.")]
         public string AnalyzedAudioFile;
+        public ManualIntensitySettings ManualIntensity = new ManualIntensitySettings();
 
         public MusicalMapData LoadValidatedMap()
         {

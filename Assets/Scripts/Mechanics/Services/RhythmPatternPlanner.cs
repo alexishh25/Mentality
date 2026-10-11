@@ -21,7 +21,7 @@ namespace Gameplay.Rhythm.Services
         }
 
         public static MusicalSpawnEvent[] Build(IReadOnlyList<double> times, MusicalActivityProfile activity,
-            RhythmPatternSettings settings)
+            RhythmPatternSettings settings, MusicalPhraseProfile musicalPhrases = null)
         {
             ValidateSettings(settings);
             var difficulty = RhythmDifficultyProfile.For(settings.Difficulty);
@@ -29,9 +29,14 @@ namespace Gameplay.Rhythm.Services
             int step = 0;
             int phrase = 0;
             RhythmPattern pattern = RhythmPattern.CenterPulse;
+            int previousMusicalPhrase = -2;
+            MusicalPhrasePressure previousPressure = MusicalPhrasePressure.Normal;
             for (int i = 0; i < times.Count; i++)
             {
-                if (i == 0 || step >= settings.PhraseLength || times[i] - times[i - 1] > settings.PhraseResetGapSeconds)
+                int musicalPhrase = musicalPhrases == null ? -1 : musicalPhrases.PhraseAt(times[i]);
+                if (i == 0 || (musicalPhrases == null ? step >= settings.PhraseLength : musicalPhrase != previousMusicalPhrase)
+                    || (musicalPhrases != null && musicalPhrases.At(times[i]) != previousPressure)
+                    || times[i] - times[i - 1] > settings.PhraseResetGapSeconds)
                 {
                     step = 0;
                     double intensity = activity == null ? 0.4d : activity.IntensityAt(times[i]);
@@ -40,11 +45,24 @@ namespace Gameplay.Rhythm.Services
                         : settings.Difficulty == RhythmDifficulty.Easy ? RhythmPattern.Alternating
                         : intensity >= 0.55d ? (settings.Difficulty == RhythmDifficulty.Hard ? RhythmPattern.Mirror : RhythmPattern.Sweep)
                         : phrase % 2 == 0 ? RhythmPattern.Alternating : RhythmPattern.Sweep;
+                    if (musicalPhrases != null)
+                    {
+                        var pressure = musicalPhrases.At(times[i]);
+                        if (pressure == MusicalPhrasePressure.Recovery) pattern = RhythmPattern.CenterPulse;
+                        else if (pressure == MusicalPhrasePressure.Pressure)
+                            pattern = musicalPhrase % 2 == 0 ? RhythmPattern.Alternating
+                                : musicalPhrases.ChallengingPatterns ? RhythmPattern.Mirror : RhythmPattern.Sweep;
+                    }
                     phrase++;
                 }
                 int[] sequence = pattern == RhythmPattern.CenterPulse ? Center
                     : pattern == RhythmPattern.Alternating ? Alternating : pattern == RhythmPattern.Sweep ? Sweep : Mirror;
-                events[i] = new MusicalSpawnEvent(times[i], sequence[step % sequence.Length] * difficulty.SideAngleDegrees, pattern);
+                float reach = musicalPhrases != null && musicalPhrases.At(times[i]) == MusicalPhrasePressure.Recovery ? 0.5f : 1f;
+                if (musicalPhrases != null && musicalPhrases.ChallengingPatterns
+                    && musicalPhrases.At(times[i]) == MusicalPhrasePressure.Pressure) reach = 1.25f;
+                events[i] = new MusicalSpawnEvent(times[i], sequence[step % sequence.Length] * difficulty.SideAngleDegrees * reach, pattern);
+                previousMusicalPhrase = musicalPhrase;
+                if (musicalPhrases != null) previousPressure = musicalPhrases.At(times[i]);
                 step++;
             }
             return events;

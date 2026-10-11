@@ -27,6 +27,8 @@ public static class RhythmTestPlayModeChecks
     private const string ScreenshotPath = "Logs/RhythmTest-preview.png";
     private static readonly List<string> Checks = new List<string>();
     private static readonly List<string> Errors = new List<string>();
+    private static readonly List<string> InputDiagnostics = new List<string>();
+    private static IPlayerInputService _playerInput;
     private static int _phase;
     private static double _nextStep;
     private static double _deadline;
@@ -41,12 +43,23 @@ public static class RhythmTestPlayModeChecks
     private static AudioConductorService _conductor;
     private static TargetFactory _factory;
     private static RhythmGameConfig _config;
+    private static AudioSource _completionAudio;
+    private static AudioClip _completionClip;
+    private static TargetView[] _restartTargets;
+    private static SpawnRingView[] _restartRings;
     private static Vector3 _position;
     private static Vector3 _look;
     private static Mouse _mouse;
     private static Keyboard _keyboard;
     private static Mouse _previousMouse;
     private static Keyboard _previousKeyboard;
+    private static bool _restoreMouseEnabled, _restoreKeyboardEnabled;
+    private static bool _victoryClickReleased;
+    private static int _sanity;
+    private static int _screamerPausedSample;
+    private static bool _completionScreamerPending;
+    private static Vector2 _victoryPointerPosition;
+    private static string _victoryPointerDetails;
 
     [Serializable]
     private class Report
@@ -78,6 +91,10 @@ public static class RhythmTestPlayModeChecks
         if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("La prueba debe iniciarse fuera de Play Mode.");
         var scene = AssetDatabase.LoadAssetAtPath<SceneAsset>(RhythmTestSceneBuilder.ScenePath);
         if (scene == null) throw new InvalidOperationException("Primero crea RhythmTest.");
+        // Refresh disk edits before testing; never discard an unsaved editor scene.
+        bool hasDirtyScene = false;
+        for (int i = 0; i < SceneManager.sceneCount; i++) hasDirtyScene |= SceneManager.GetSceneAt(i).isDirty;
+        if (!hasDirtyScene) EditorSceneManager.OpenScene(RhythmTestSceneBuilder.ScenePath, OpenSceneMode.Single);
         SessionState.SetString(PreviousSceneKey, AssetDatabase.GetAssetPath(EditorSceneManager.playModeStartScene));
         SessionState.SetBool(RunningKey, true);
         EditorSceneManager.playModeStartScene = scene;
@@ -91,10 +108,13 @@ public static class RhythmTestPlayModeChecks
         {
             Checks.Clear();
             Errors.Clear();
+            InputDiagnostics.Clear();
             _phase = 0;
+            _victoryClickReleased = false;
             _nextStep = EditorApplication.timeSinceStartup + 1.5;
             _deadline = EditorApplication.timeSinceStartup + 40;
             Application.logMessageReceived += OnLog;
+            InputSystem.onAfterUpdate += CaptureInput;
             EditorApplication.update += Step;
             var gameView = typeof(Editor).Assembly.GetType("UnityEditor.GameView");
             if (gameView != null) EditorWindow.GetWindow(gameView).Focus();
@@ -103,6 +123,7 @@ public static class RhythmTestPlayModeChecks
         {
             EditorApplication.update -= Step;
             Application.logMessageReceived -= OnLog;
+            InputSystem.onAfterUpdate -= CaptureInput;
         }
         else if (state == PlayModeStateChange.EnteredEditMode)
         {
@@ -127,9 +148,63 @@ public static class RhythmTestPlayModeChecks
         Checks.Add(label);
     }
 
+    private static void CheckScreamerImages(FalseWordEffectService effects)
+    {
+        var settings = _config.Screamer;
+        Check(settings.Images != null && settings.Images.Length == 15 && Array.TrueForAll(settings.Images, t => t != null),
+            "Quince imagenes de screamer asignadas en la escena");
+        Texture previous = null;
+        for (int i = 0; i < 60; i++)
+        {
+            effects.Request(WordTargetKind.Screamer);
+            var current = FindRuntime("Screamer overlay").GetComponentInChildren<UnityEngine.UI.RawImage>(true).texture;
+            if (Array.IndexOf(settings.Images, current as Texture2D) < 0 || current == previous)
+                throw new InvalidOperationException("Screamer fuera de la lista o repetido consecutivamente");
+            previous = current;
+        }
+        Check(true, "Sesenta activaciones usan la lista sin repetir consecutivamente");
+        var audio = FindRuntime("Screamer audio")?.GetComponent<AudioSource>();
+        Check(audio != null && audio.isPlaying && audio.clip == settings.Clip && !audio.loop && audio.spatialBlend == 0f,
+            "Screamer reproduce susto junto a la imagen con audio independiente");
+        Check(Array.FindAll(Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None),
+            item => item.name == "Screamer audio").Length == 1 && audio.time < 0.15f,
+            "Activaciones consecutivas reutilizan una fuente y reinician el susto");
+        Check(Math.Abs(audio.volume - settings.Volume) < 0.001f,
+            "Screamer aplica el volumen configurado");
+        var original = settings.Images;
+        try
+        {
+            settings.Images = new[] { original[0], null, original[0] };
+            effects.Request(WordTargetKind.Screamer);
+            Check(FindRuntime("Screamer overlay").GetComponentInChildren<UnityEngine.UI.RawImage>(true).texture == original[0],
+                "Lista con una imagen duplicada y referencias vacias funciona");
+            settings.Images = Array.Empty<Texture2D>();
+            effects.Request(WordTargetKind.Screamer);
+            Check(FindRuntime("Screamer overlay").GetComponentInChildren<UnityEngine.UI.RawImage>(true).texture == settings.Image,
+                "Lista vacia conserva la imagen de respaldo");
+        }
+        finally { settings.Images = original; }
+    }
+
+    private static void CaptureInput()
+    {
+        if (_phase != 4 || _playerInput == null || InputDiagnostics.Count >= 12) return;
+        if (!_playerInput.ActionPressed && (_mouse == null || !_mouse.leftButton.isPressed)) return;
+        string target = _player.PerformFirstPersonRaycast(out var hit, false) ? hit.collider.name : "none";
+        InputDiagnostics.Add($"update={InputState.currentUpdateType} attack={_playerInput.ActionPressed} focus={Application.isFocused} paused={_model.IsPaused} waiting={_conductor.IsWaitingForTimeline} ray={target} hits={_model.Hits}");
+    }
+
     private static void Step()
     {
         if (!EditorApplication.isPlaying) return;
+        if (_completionScreamerPending && !_conductor.IsWaitingForTimeline)
+        {
+            _completionScreamerPending = false;
+            Object.FindFirstObjectByType<RhythmLifetimeScope>().Container.Resolve<FalseWordEffectService>().Request(WordTargetKind.Screamer);
+            if (FindRuntime("Screamer audio")?.GetComponent<AudioSource>().isPlaying != true)
+            { Errors.Add("Susto no se activo antes del final de cancion"); Finish(); return; }
+            Checks.Add("Susto activo antes del final de cancion");
+        }
         if (EditorApplication.timeSinceStartup > _deadline) { Errors.Add("Tiempo limite de la prueba."); Finish(); return; }
         if (EditorApplication.timeSinceStartup < _nextStep) return;
         try
@@ -144,24 +219,59 @@ public static class RhythmTestPlayModeChecks
                     _conductor = scope.Container.Resolve<AudioConductorService>();
                     _factory = scope.Container.Resolve<TargetFactory>();
                     _config = scope.Container.Resolve<RhythmGameConfig>();
+                    var creaturePlan = scope.Container.Resolve<RhythmSpawnerPresenter>().CreatureSchedule;
+                    Check(_config.Creatures.Enabled && _config.Creatures.Prefab != null && creaturePlan != null
+                        && creaturePlan.Events.Count > 0, "Progresion de criaturas activa al iniciar la sesion");
+                    Check(!creaturePlan.TryTakeDue(71d, out _), "Criaturas esperan el primer tramo intenso");
                     _player = scope.Container.Resolve<PlayerView>();
                     _playerModel = scope.Container.Resolve<PlayerModel>();
+                    _playerInput = scope.Container.Resolve<IPlayerInputService>();
                     var hud = scope.Container.Resolve<RhythmHudView>();
                     var serializedHud = new SerializedObject(hud);
-                    var scoreText = serializedHud.FindProperty("scoreText").objectReferenceValue as UnityEngine.UI.Text;
+                    var sanityFill = serializedHud.FindProperty("sanityFill").objectReferenceValue as UnityEngine.UI.Image;
                     var resultText = serializedHud.FindProperty("resultText").objectReferenceValue as UnityEngine.UI.Text;
-                    Check(scoreText != null && scoreText.text.Contains("PUNTOS") && scoreText.text.Contains("COMBO"),
-                        "HUD presenta puntuacion y combo");
+                    Check(sanityFill != null && !sanityFill.raycastTarget && Mathf.Approximately(sanityFill.rectTransform.anchorMax.x, _model.Sanity / 100f), "HUD presenta cordura sin bloquear clics");
                     Check(resultText != null && !resultText.raycastTarget,
                         "Feedback de precision asignado sin bloquear clics");
+                    Check(!hud.transform.Find("Top panel").gameObject.activeSelf
+                        && !hud.transform.Find("Footer").gameObject.activeSelf, "HUD anterior oculto durante el juego");
                     Check(_model.IsPlaying, "Sesion ritmica iniciada");
                     if (_config.AnalyzedSong != null)
                     {
                         Check(_game.MusicalMap != null, "Mapa musical cargado y validado");
+                        if (_config.AnalyzedSong.ManualIntensity != null && _config.AnalyzedSong.ManualIntensity.Enabled)
+                        {
+                            var manual = _config.AnalyzedSong.ManualIntensity;
+                            Check(manual.Intervals != null && manual.Intervals.Length > 0, "Intervalos manuales persisten al entrar en Play Mode");
+                            var plan = new MusicalSpawnSchedule(_game.MusicalMap, _config.MinimumSpawnInterval, _config.TargetLeadTimeSeconds,
+                                _config.MusicalActivity, _config.Patterns, 0d, _config.Placement, _config.Cadence, manual);
+                            var checkedIntervals = manual.Sections.Length > 0
+                                ? Array.ConvertAll(manual.Sections, s => new MusicalActiveInterval { Start = s.Start, End = s.End })
+                                : manual.Intervals;
+                            foreach (var interval in checkedIntervals)
+                            {
+                                double midpoint = (interval.Start + interval.End) / 2d;
+                                Check(plan.PhraseProfile.At(midpoint) == MusicalPhrasePressure.Pressure,
+                                    "Tramo manual activa patron intenso en " + midpoint + " segundos");
+                                var section = plan.ActivityProfile.ManualIntensity.SectionAt(midpoint);
+                                Check(Math.Abs(plan.ActivityProfile.FrenzyAt(midpoint) - (section?.Frenzy ?? _config.MusicalActivity.MaximumFrenzy)) < 1e-6d,
+                                    "Tramo manual alcanza el frenesi configurado");
+                                double expectedSpeed = section?.SpeedMultiplier ?? (1d + (_config.MusicalActivity.MaximumSpeedMultiplier - 1d) * _config.MusicalActivity.MaximumFrenzy);
+                                Check(Math.Abs(plan.ActivityProfile.SpeedMultiplierAt(midpoint) - expectedSpeed) < 1e-6d,
+                                    "Velocidad intensa coincide con la configuracion actual");
+                                Check(section != null
+                                    ? plan.ActivityProfile.ManualIntensity.SectionAt(interval.Start) == section
+                                        && plan.ActivityProfile.ManualIntensity.SectionAt(interval.Start - 0.001d) != section
+                                        && plan.ActivityProfile.ManualIntensity.SectionAt(interval.End) != section
+                                    : !plan.ActivityProfile.ManualIntensity.Contains(interval.Start - 0.001d)
+                                        && plan.ActivityProfile.ManualIntensity.Contains(interval.Start)
+                                        && !plan.ActivityProfile.ManualIntensity.Contains(interval.End), "Limites manuales respetados en Play Mode");
+                            }
+                        }
                         Check(_config.SessionMusicClip == _config.AnalyzedSong.MusicClip,
                             "Audio de la sesion asociado al mapa musical");
                         var musicalTargets = Object.FindObjectsByType<TargetView>(FindObjectsSortMode.None);
-                        Check(musicalTargets.Length > 0, "Objetivos musicales aparecen con anticipacion");
+                        Check(HasTargetsOrPendingCadenceIntro(), "Objetivos aparecen con anticipacion o esperan el primer beat de la introduccion");
                         foreach (var target in musicalTargets)
                         {
                             Check(target.Timing != null && target.Timing.HitTime >= 0
@@ -184,10 +294,14 @@ public static class RhythmTestPlayModeChecks
                     }
                     Check(!scope.Container.TryResolve<IApiClient>(out _), "Contenedor sin cliente backend: Python/Ollama no se inicia");
                     Check(_playerModel.GameplayMode == PlayerGameplayMode.Rhythm && _playerModel.CurrentPerspective == CameraPerspective.FirstPerson, "Player en modo ritmico y primera persona");
-                    Check(Object.FindObjectsByType<TargetView>(FindObjectsSortMode.None).Length > 0,
-                        "Spawn real de palabras durante la sesion");
+                    Check(HasTargetsOrPendingCadenceIntro(), "Spawn respeta el inicio musical de la sesion");
                     _previousMouse = Mouse.current;
                     _previousKeyboard = Keyboard.current;
+                    _restoreMouseEnabled = _previousMouse != null && _previousMouse.enabled;
+                    _restoreKeyboardEnabled = _previousKeyboard != null && _previousKeyboard.enabled;
+                    // Aislar los dispositivos de prueba del movimiento/clic fisico del editor.
+                    if (_restoreMouseEnabled) InputSystem.DisableDevice(_previousMouse);
+                    if (_restoreKeyboardEnabled) InputSystem.DisableDevice(_previousKeyboard);
                     _mouse = InputSystem.AddDevice<Mouse>("RhythmCheckMouse");
                     _keyboard = InputSystem.AddDevice<Keyboard>("RhythmCheckKeyboard");
                     _position = _player.transform.position;
@@ -216,6 +330,7 @@ public static class RhythmTestPlayModeChecks
                     _hits = _model.Hits;
                     _score = _model.Score;
                     _combo = _model.Combo;
+                    _sanity = _model.Sanity;
                     break;
                 case 3:
                     Check(_player.PerformFirstPersonRaycast(out var hit) && hit.collider.GetComponent<TargetView>() != null, "Raycast del Player alcanza una palabra");
@@ -223,16 +338,19 @@ public static class RhythmTestPlayModeChecks
                     break;
                 case 4:
                     InputSystem.QueueStateEvent(_mouse, new MouseState());
-                    Check(_model.Hits == _hits + 1, "Clic real del Input System registra un acierto");
+                    Check(_model.Hits == _hits + 1, "Clic real del Input System registra un acierto"
+                        + (_model.Hits == _hits + 1 ? "" : ". " + string.Join(" | ", InputDiagnostics)));
                     Check(_model.Combo == _combo + 1 && _model.Score == _score
-                        + RhythmScoreRules.PointsFor(RhythmJudgment.Perfect, _combo + 1),
+                        + RhythmScoreRules.PointsFor(RhythmJudgment.Hit, _combo + 1) + _model.LastPulseBonus,
                         "El acierto por raycast suma puntos y mantiene el combo");
+                    Check(_model.Sanity == _sanity, "Interceptar palabra normal conserva cordura");
                     _factory.ClearTargets();
                     _misses = _model.Misses;
                     _factory.Create(_config.WordPrefabs[1], _player.CameraTransform.position + _player.CameraTransform.forward * (_config.ArrivalDistance + 0.1f));
                     break;
                 case 5:
                     Check(_model.Misses == _misses + 1, "Llegada de palabra registra un fallo");
+                    Check(_model.Sanity == _sanity - 20, "Llegada normal resta exactamente veinte puntos de cordura");
                     Check(_model.Combo == 0 && _model.ScoreMultiplier == 1,
                         "El fallo reinicia combo y multiplicador");
                     InputSystem.QueueStateEvent(_keyboard, new KeyboardState(Key.Escape));
@@ -272,6 +390,165 @@ public static class RhythmTestPlayModeChecks
                     break;
                 case 10:
                     Check(File.Exists(ScreenshotPath), "Captura real de Game View guardada");
+                    _game.RestartSession();
+                    _factory.ClearTargets();
+                    _conductor.PlayMusic(0d);
+                    break;
+                case 11:
+                    Object.FindFirstObjectByType<RhythmLifetimeScope>().Container.Resolve<FalseWordEffectService>().Request(WordTargetKind.Screamer);
+                    Check(FindRuntime("Screamer audio").GetComponent<AudioSource>().isPlaying, "Susto activo antes de derrota");
+                    for (int i = 0; i < 5; i++)
+                    {
+                        var collision = _factory.Create(_config.WordPrefabs[0], _player.CameraTransform.position);
+
+                    }
+                    break;
+                case 12:
+                    Check(!FindRuntime("Screamer audio").GetComponent<AudioSource>().isPlaying, "Derrota detiene el sonido del screamer");
+                    Check(_model.Sanity == 0 && _model.IsGameOver && !_model.IsPlaying, "Cinco colisiones reales agotan cordura y terminan la partida");
+                    Check(!_conductor.IsPlaying && _factory.ActiveTargetCount == 0,
+                        "Game Over detiene musica y limpia palabras");
+                    var gameOverHud = Object.FindFirstObjectByType<RhythmHudView>();
+                    var gameOverPanel = gameOverHud.transform.Find("Game Over");
+                    Check(gameOverPanel != null && gameOverPanel.gameObject.activeSelf,
+                        "Pantalla Game Over visible");
+                    Check(Cursor.lockState == CursorLockMode.None && Cursor.visible,
+                        "Cursor disponible en Game Over");
+                    Check(Object.FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>() != null
+                        && gameOverHud.GetComponentInParent<Canvas>().GetComponent<UnityEngine.UI.GraphicRaycaster>() != null,
+                        "Interfaz de reinicio recibe eventos del puntero");
+                    var restartButton = gameOverPanel.GetComponentInChildren<UnityEngine.UI.Button>();
+                    Check(restartButton != null && restartButton.interactable, "Boton de reinicio disponible");
+                    restartButton.onClick.Invoke();
+                    break;
+                case 13:
+                    Check(_model.Sanity == 100 && !_model.IsGameOver && _model.IsPlaying,
+                        "Boton reinicia el nivel con cordura completa");
+                    Check(!Object.FindFirstObjectByType<RhythmHudView>().transform.Find("Game Over").gameObject.activeSelf,
+                        "Reinicio oculta pantalla Game Over");
+                    BeginCompletionCheck(false);
+                    _nextStep = EditorApplication.timeSinceStartup + 0.7;
+                    return;
+                case 14:
+                    Check(!FindRuntime("Screamer audio").GetComponent<AudioSource>().isPlaying, "Victoria detiene el sonido del screamer");
+                    Check(_model.HasWon && !_model.IsGameOver && !_model.IsPlaying && _model.Sanity > 0,
+                        "Fin natural del audio concede victoria con cordura restante");
+                    Check(_conductor.HasCompletedSong && !_conductor.IsPlaying && _factory.ActiveTargetCount == 0,
+                        "Victoria detiene audio y limpia objetivos");
+                    var victory = Object.FindFirstObjectByType<RhythmHudView>().transform.Find("Victory");
+                    Check(victory != null && victory.gameObject.activeSelf, "Pantalla WIN GAME visible");
+                    Check(Cursor.lockState == CursorLockMode.None && Cursor.visible, "Victoria libera el cursor");
+                    var victoryButton = victory.GetComponentInChildren<UnityEngine.UI.Button>();
+                    var buttonPosition = RectTransformUtility.WorldToScreenPoint(null, victoryButton.transform.position);
+                    _victoryPointerPosition = buttonPosition;
+                    _victoryPointerDetails = $"target={buttonPosition}, world={victoryButton.transform.position}, scale={victoryButton.transform.lossyScale}, rect={victoryButton.GetComponent<RectTransform>().rect}";
+                    InputSystem.QueueStateEvent(_mouse, new MouseState { position = buttonPosition }.WithButton(MouseButton.Left));
+                    break;
+                case 15:
+                    if (!_victoryClickReleased)
+                    {
+                        _victoryClickReleased = true;
+                        InputSystem.QueueStateEvent(_mouse, new MouseState { position = _victoryPointerPosition });
+                        _phase = 15;
+                        _nextStep = EditorApplication.timeSinceStartup + 0.2;
+                        return;
+                    }
+                    Check(_model.IsPlaying && !_model.HasWon && !_model.IsGameOver && _model.Sanity == 100,
+                        "Clic real en boton de victoria reinicia con cordura completa" + VictoryPointerDiagnostics());
+                    Check(!Object.FindFirstObjectByType<RhythmHudView>().transform.Find("Victory").gameObject.activeSelf,
+                        "Reinicio oculta victoria");
+                    BeginCompletionCheck(true);
+                    _nextStep = EditorApplication.timeSinceStartup + 0.7;
+                    return;
+                case 16:
+                    Check(_model.IsGameOver && !_model.HasWon && _model.Sanity == 0,
+                        "Llegada en el final del audio concede derrota antes que victoria");
+                    Object.FindFirstObjectByType<RhythmHudView>().transform.Find("Game Over")
+                        .GetComponentInChildren<UnityEngine.UI.Button>().onClick.Invoke();
+                    _nextStep = EditorApplication.timeSinceStartup + _config.TargetLeadTimeSeconds + 0.3;
+                    return;
+                case 17:
+                    var restartScope = Object.FindFirstObjectByType<RhythmLifetimeScope>();
+                    var restartEffects = restartScope.Container.Resolve<FalseWordEffectService>();
+                    CheckScreamerImages(restartEffects);
+                    restartEffects.Request(WordTargetKind.Screamer);
+                    restartEffects.Request(WordTargetKind.Glitch);
+                    restartEffects.Request(WordTargetKind.Bullicio);
+                    Check(FindRuntime("Screamer overlay")?.activeSelf == true && FindRuntime("Glitch overlay")?.activeSelf == true,
+                        "Screamer y glitch activos antes del reinicio");
+                    Check(FindRuntime("Bullicio audio")?.GetComponent<AudioSource>().isPlaying == true
+                        && restartScope.Container.Resolve<BullicioSessionService>().ProbabilityBonus > 0,
+                        "Bullicio y aumento de palabras falsas activos antes del reinicio");
+                    _model.RegisterHit();
+                    _model.RegisterWordCollision();
+                    _factory.Create(_config.WordPrefabs[0], _player.CameraTransform.position + Vector3.forward * 10f);
+                    _restartTargets = Object.FindObjectsByType<TargetView>(FindObjectsSortMode.None);
+                    _restartRings = Object.FindObjectsByType<SpawnRingView>(FindObjectsSortMode.None);
+                    _game.PauseSession();
+                    Check(_model.IsPaused, "Reinicio probado desde pausa con efectos pendientes");
+                    InputSystem.QueueStateEvent(_keyboard, new KeyboardState(Key.R));
+                    break;
+                case 18:
+                    InputSystem.QueueStateEvent(_keyboard, new KeyboardState());
+                    Check(_model.Sanity == 100 && _model.Hits == 0 && _model.Misses == 0 && _model.Score == 0
+                        && _model.Combo == 0 && _model.BestCombo == 0 && _model.LastJudgment == RhythmJudgment.None,
+                        "Reinicio limpia cordura, puntuacion, combo y feedback");
+                    Check(_model.IsPlaying && !_model.IsPaused && !_model.IsGameOver && !_model.HasWon
+                        && !_conductor.IsPaused && !_conductor.HasCompletedSong && _conductor.CurrentSongTime < 0,
+                        "Reinicio restaura sesion y cuenta de entrada desde el comienzo");
+                    foreach (var oldTarget in _restartTargets)
+                        Check(oldTarget == null || !oldTarget.gameObject.activeSelf, "Palabra anterior retirada al reiniciar");
+                    foreach (var oldRing in _restartRings)
+                        Check(oldRing == null || !oldRing.gameObject.activeSelf, "Aro anterior retirado al reiniciar");
+                    CheckEffectsCleared();
+                    Check(Cursor.lockState == CursorLockMode.Locked && !Cursor.visible, "Reinicio recupera cursor de juego");
+                    _nextStep = EditorApplication.timeSinceStartup + _config.TargetLeadTimeSeconds + 0.3;
+                    return;
+                case 19:
+                    CheckEffectsCleared();
+                    Check(_conductor.HasStarted && _conductor.IsPlaying, "Cancion vuelve a comenzar tras reiniciar");
+                    var repeatedEffects = Object.FindFirstObjectByType<RhythmLifetimeScope>().Container.Resolve<FalseWordEffectService>();
+                    repeatedEffects.Request(WordTargetKind.Screamer);
+                    repeatedEffects.Request(WordTargetKind.Glitch);
+                    repeatedEffects.Request(WordTargetKind.Bullicio);
+                    foreach (var effectName in new[] { "Screamer overlay", "Glitch overlay", "Bullicio audio" })
+                        Check(Array.FindAll(Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None),
+                            item => item.name == effectName).Length == 1, "Reinicio reutiliza un unico efecto: " + effectName);
+                    Check(FindRuntime("Bullicio audio").GetComponent<AudioDistortionFilter>().enabled,
+                        "Nuevo bullicio vuelve a habilitar su distorsion");
+                    _game.RestartSession();
+                    CheckEffectsCleared();
+                    break;
+                case 20:
+                    if (!_conductor.HasStarted) { _phase--; _nextStep = EditorApplication.timeSinceStartup + 0.1d; return; }
+                    Check(_model.Sanity == 100 && !_model.IsPaused && _model.IsPlaying,
+                        "Reinicios consecutivos mantienen una partida nueva limpia");
+                    CheckCreatureAttack();
+                    CheckCreatureProgression();
+                    _nextStep = EditorApplication.timeSinceStartup + _config.TargetLeadTimeSeconds + 0.3;
+                    return;
+                case 21:
+                    Object.FindFirstObjectByType<RhythmLifetimeScope>().Container.Resolve<FalseWordEffectService>().Request(WordTargetKind.Screamer);
+                    FindRuntime("Screamer audio").GetComponent<AudioSource>().time = 0.5f;
+                    _game.PauseSession();
+                    _screamerPausedSample = FindRuntime("Screamer audio").GetComponent<AudioSource>().timeSamples;
+                    Check(!FindRuntime("Screamer audio").GetComponent<AudioSource>().isPlaying,
+                        "Pausa detiene temporalmente el susto");
+                    break;
+                case 22:
+                    var pausedScreamer = FindRuntime("Screamer audio").GetComponent<AudioSource>();
+                    Check(Math.Abs(pausedScreamer.timeSamples - _screamerPausedSample) < 2048,
+                        "Susto conserva su posicion durante pausa");
+                    _game.ResumeSession();
+                    break;
+                case 23:
+                    var resumedScreamer = FindRuntime("Screamer audio").GetComponent<AudioSource>();
+                    Check(resumedScreamer.isPlaying && resumedScreamer.time > 0.4f,
+                        "Reanudar continua el susto sin reiniciarlo");
+                    _game.PauseSession();
+                    _game.RestartSession();
+                    Check(!resumedScreamer.isPlaying && resumedScreamer.timeSamples == 0,
+                        "Reinicio desde pausa cancela el susto y borra su posicion");
                     Finish();
                     return;
             }
@@ -284,12 +561,198 @@ public static class RhythmTestPlayModeChecks
         }
     }
 
+    private static void CheckCreatureAttack()
+    {
+        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Content/Creatures/Creature.prefab");
+        Check(prefab != null, "Prefab de criatura con boca abierta disponible");
+        var scope = Object.FindFirstObjectByType<RhythmLifetimeScope>();
+        var player = new SerializedObject(scope).FindProperty("playerTarget").objectReferenceValue as Transform;
+        var creature = Object.Instantiate(prefab).GetComponent<CreatureEmergenceView>();
+        var origin = player.position + Vector3.forward * 10f;
+        origin.y = 0;
+        creature.Initialize(origin, player, _conductor);
+        _factory.RegisterCreature(creature);
+        var profile = new MusicalActivityProfile(_game.MusicalMap, _config.MinimumSpawnInterval,
+            _config.MusicalActivity, _config.AnalyzedSong.ManualIntensity);
+        var spawned = new List<TargetView>();
+        creature.ConfigureAttack(4, 0.22d, (mouth, index, time) =>
+            spawned.Add(_factory.CreateCreatureWord(mouth, index, _conductor.CurrentSongTime, profile)), _model);
+        creature.AdvanceAt(0.9d);
+        Check(spawned.Count == 0 && !creature.IsAttacking, "Criatura aparece de pie antes de atacar");
+        creature.AdvanceAt(1.05d);
+        Check(creature.IsAttacking && spawned.Count == 0, "Boca abierta anticipa la rafaga");
+        int sanity = _model.Sanity;
+        int hits = _model.Hits;
+        for (int i = 0; i < 4; i++)
+        {
+            creature.AdvanceAt(1.151d + i * 0.22d);
+            creature.AdvanceAt(1.151d + i * 0.22d);
+        }
+        Check(spawned.Count == 4 && spawned.TrueForAll(t => t != null && t.Kind != WordTargetKind.Normal),
+            "Rafaga crea cuatro palabras falsas sin duplicados");
+        Check(spawned[0].Timing.LateralArcDegrees > 0f && spawned[1].Timing.LateralArcDegrees < 0f,
+            "Rafaga alterna lados del abanico sin cambiar el destino");
+        Check(spawned.TrueForAll(t => Vector3.Distance(t.Position, creature.MouthPosition) < 0.05f
+            && Math.Abs(t.Timing.ProgressAt(t.Timing.HitTime) - 1d) < 1e-6),
+            "Palabras salen de la boca y su recorrido termina en el jugador");
+        Check(!_factory.HasClearCreatureRoute(creature.MouthPosition),
+            "Ruta ocupada impide superponer otro lanzamiento de criatura");
+        foreach (var target in spawned) target.Touch(player.position);
+        Check(_factory.HasClearCreatureRoute(creature.MouthPosition),
+            "Interceptar palabras libera la ruta de la criatura");
+        Check(_model.Sanity == sanity && _model.Hits == hits && spawned.TrueForAll(t => t.IsResolved),
+            "Interceptar la rafaga falsa conserva cordura y no suma aciertos normales");
+        float screamer = _config.FalseWords.ScreamerWeight, noise = _config.FalseWords.BullicioWeight, glitch = _config.FalseWords.GlitchWeight;
+        var effects = scope.Container.Resolve<FalseWordEffectService>();
+        WordTargetKind received = WordTargetKind.Normal;
+        Action<WordTargetKind, double> listener = (kind, time) => received = kind;
+        effects.Requested += listener;
+        try
+        {
+            foreach (var kind in new[] { WordTargetKind.Screamer, WordTargetKind.Bullicio, WordTargetKind.Glitch })
+            {
+                _config.FalseWords.ScreamerWeight = kind == WordTargetKind.Screamer ? 1 : 0;
+                _config.FalseWords.BullicioWeight = kind == WordTargetKind.Bullicio ? 1 : 0;
+                _config.FalseWords.GlitchWeight = kind == WordTargetKind.Glitch ? 1 : 0;
+                received = WordTargetKind.Normal;
+                var word = _factory.CreateCreatureWord(creature.MouthPosition, 0, _conductor.CurrentSongTime, profile);
+                int before = _model.Sanity;
+                word.ResolveAtSongEnd(word.Timing.HitTime);
+                Check(word.IsResolved && _model.Sanity == before - 20 && received == kind,
+                    "Palabra de criatura resta veinte de cordura y activa " + kind);
+                effects.Clear();
+            }
+            creature.ConfigureAttack(2, 0.22d, (mouth, index, time) => spawned.Add(null), _model);
+            _conductor.PauseMusic();
+            _model.PauseSession();
+            int beforePause = spawned.Count;
+            creature.AdvanceAt(1.151d);
+            Check(spawned.Count == beforePause, "Criatura no dispara durante pausa");
+            _game.RestartSession();
+            Check(!creature.gameObject.activeSelf && creature.HasFinished && _model.Sanity == 100,
+                "Reinicio retira criatura y cancela rafaga pendiente");
+        }
+        finally
+        {
+            effects.Requested -= listener;
+            _config.FalseWords.ScreamerWeight = screamer;
+            _config.FalseWords.BullicioWeight = noise;
+            _config.FalseWords.GlitchWeight = glitch;
+            effects.Clear();
+            _factory.ClearTargets();
+        }
+    }
+
+    private static void CheckCreatureProgression()
+    {
+        var scope = Object.FindFirstObjectByType<RhythmLifetimeScope>();
+        var spawner = scope.Container.Resolve<RhythmSpawnerPresenter>();
+        var clockType = typeof(AudioConductorService);
+        var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+        for (int section = 0; section < 3; section++)
+        {
+            _game.RestartSession();
+            var item = new List<CreatureSpawnEvent>(spawner.CreatureSchedule.Events).Find(e => e.Section == section);
+            Check(item != null && item.Shots.Length == section + 2, "Rafaga musical de " + (section + 2) + " palabras en seccion " + (section + 1));
+            // Advance only the test clock, then use the real spawner, floor mesh and prefab.
+            clockType.GetField("_dspSongTime", flags).SetValue(_conductor, AudioSettings.dspTime - item.Time - 0.005d);
+            clockType.GetField("_dspTimelineTime", flags).SetValue(_conductor, AudioSettings.dspTime - 1d);
+            _conductor.UpdateTime();
+            spawner.CheckAndSpawnTargets();
+            var creatures = Object.FindObjectsByType<CreatureEmergenceView>(FindObjectsSortMode.None);
+            var floor = GameObject.Find("Floor").GetComponent<Renderer>();
+            Check(creatures.Length == 1 && Math.Abs(creatures[0].GroundPosition.y - floor.bounds.max.y) < 0.02f,
+                "Spawner real situa criatura en el suelo de la seccion " + (section + 1)
+                    + (creatures.Length == 1 ? "" : "; cantidad=" + creatures.Length
+                        + "; time=" + _conductor.SongTime + "; due=" + item.Time
+                        + "; playing=" + _conductor.IsPlaying + "; model=" + _model.IsPlaying
+                        + "; timeline=" + _conductor.HasTimelineStarted + "; floor=" + floor.bounds
+                        + "; player=" + new SerializedObject(scope).FindProperty("playerTarget").objectReferenceValue));
+            var whistle = creatures[0].GetComponent<AudioSource>();
+            Check(whistle != null && whistle.isPlaying && whistle.clip == _config.Creatures.AppearanceClip
+                && Math.Abs(whistle.volume - _config.Creatures.AppearanceVolume) < 0.001f && !whistle.loop,
+                "Aparicion reproduce silbido en seccion " + (section + 1));
+            _factory.ClearTargets();
+            Check(!whistle.isPlaying, "Limpieza detiene silbido en seccion " + (section + 1));
+            Check(creatures[0].HasFinished && !creatures[0].gameObject.activeSelf,
+                "Limpieza cancela aparicion musical de la seccion " + (section + 1));
+        }
+        _game.RestartSession();
+        Check(!spawner.CreatureSchedule.TryTakeDue(71d, out _), "Reinicio reconstruye progresion desde el primer tramo");
+    }
+
+    private static GameObject FindRuntime(string name) => Array.Find(
+        Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None), item => item.name == name);
+
+    private static bool HasTargetsOrPendingCadenceIntro()
+    {
+        if (Object.FindObjectsByType<TargetView>(FindObjectsSortMode.None).Length > 0) return true;
+        if (_config.Cadence == null || !_config.Cadence.Enabled || _game.MusicalMap == null) return false;
+        var plan = new MusicalSpawnSchedule(_game.MusicalMap, _config.MinimumSpawnInterval, _config.TargetLeadTimeSeconds,
+            _config.MusicalActivity, _config.Patterns, 0d, _config.Placement, _config.Cadence, _config.AnalyzedSong?.ManualIntensity);
+        return plan.Events.Count > 0 && _conductor.CurrentSongTime < plan.Events[0].SpawnTime;
+    }
+
+    private static string VictoryPointerDiagnostics()
+    {
+        if (_model.IsPlaying) return "";
+        var events = UnityEngine.EventSystems.EventSystem.current;
+        var module = events?.GetComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
+        var pointer = new UnityEngine.EventSystems.PointerEventData(events) { position = _mouse.position.ReadValue() };
+        var hits = new List<UnityEngine.EventSystems.RaycastResult>();
+        events?.RaycastAll(pointer, hits);
+        return $" [mouse={pointer.position}, uiPoint={module?.point?.action.ReadValue<Vector2>()}, "
+            + _victoryPointerDetails + ", "
+            + $"module={module?.isActiveAndEnabled}, focused={Application.isFocused}, size={Screen.width}x{Screen.height}, "
+            + $"hits={string.Join(",", hits.ConvertAll(item => item.gameObject.name))}]";
+    }
+
+    private static void CheckEffectsCleared()
+    {
+        Check(!FindRuntime("Screamer audio").GetComponent<AudioSource>().isPlaying,
+            "Reinicio detiene el sonido del screamer");
+        Check(FindRuntime("Screamer overlay")?.activeSelf == false && FindRuntime("Glitch overlay")?.activeSelf == false,
+            "Reinicio deja screamer y glitch ocultos sin reactivacion anterior");
+        var noise = FindRuntime("Bullicio audio");
+        Check(noise != null && !noise.GetComponent<AudioSource>().isPlaying && !noise.GetComponent<AudioDistortionFilter>().enabled,
+            "Reinicio detiene bullicio y desactiva distorsion");
+        Check(Object.FindFirstObjectByType<RhythmLifetimeScope>().Container.Resolve<BullicioSessionService>().ProbabilityBonus == 0,
+            "Reinicio elimina aumento de palabras falsas");
+    }
+
+    private static void BeginCompletionCheck(bool finalCollision)
+    {
+        _factory.ClearTargets();
+        _model.StartSession();
+        if (_completionAudio == null)
+        {
+            _completionAudio = new GameObject("Song completion test audio").AddComponent<AudioSource>();
+            _completionClip = AudioClip.Create("Completion check", 4410, 1, 11025, false);
+            _completionAudio.clip = _completionClip;
+        }
+        _conductor.Initialize(_completionAudio, 120f);
+        _conductor.PlayMusic();
+        _completionScreamerPending = true;
+        // Aislar el limite del audio del mapa de la cancion de varios minutos.
+        Object.FindFirstObjectByType<RhythmLifetimeScope>().Container.Resolve<RhythmSpawnerPresenter>().ResetBeatTracking();
+        if (!finalCollision) return;
+        for (int i = 0; i < 4; i++) _model.RegisterWordCollision();
+        double duration = (double)_completionClip.samples / _completionClip.frequency;
+        _factory.Create(_config.WordPrefabs[0], _player.CameraTransform.position + Vector3.forward * 12f,
+            new TargetTiming(0d, duration));
+    }
+
     private static void Finish()
     {
+        if (_completionAudio != null) Object.Destroy(_completionAudio.gameObject);
+        if (_completionClip != null) Object.Destroy(_completionClip);
         EditorApplication.update -= Step;
         Application.logMessageReceived -= OnLog;
+        InputSystem.onAfterUpdate -= CaptureInput;
         if (_mouse != null && _mouse.added) InputSystem.RemoveDevice(_mouse);
         if (_keyboard != null && _keyboard.added) InputSystem.RemoveDevice(_keyboard);
+        if (_restoreMouseEnabled && _previousMouse != null && _previousMouse.added) InputSystem.EnableDevice(_previousMouse);
+        if (_restoreKeyboardEnabled && _previousKeyboard != null && _previousKeyboard.added) InputSystem.EnableDevice(_previousKeyboard);
         if (_previousMouse != null && _previousMouse.added) _previousMouse.MakeCurrent();
         if (_previousKeyboard != null && _previousKeyboard.added) _previousKeyboard.MakeCurrent();
         Directory.CreateDirectory("Logs");
@@ -303,3 +766,15 @@ public static class RhythmTestPlayModeChecks
         EditorApplication.isPlaying = false;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+

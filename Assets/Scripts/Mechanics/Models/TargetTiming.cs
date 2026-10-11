@@ -11,8 +11,10 @@ namespace Gameplay.Rhythm.Models
         public double HitTime { get; }
         public double LeadTime => HitTime - SpawnTime;
         public MusicalActivityProfile MotionProfile { get; }
+        public float LateralArcDegrees { get; }
 
-        public TargetTiming(double spawnTime, double hitTime, MusicalActivityProfile motionProfile = null)
+        public TargetTiming(double spawnTime, double hitTime, MusicalActivityProfile motionProfile = null,
+            float lateralArcDegrees = 0f)
         {
             if (double.IsNaN(spawnTime) || double.IsInfinity(spawnTime))
                 throw new ArgumentOutOfRangeException(nameof(spawnTime));
@@ -21,6 +23,9 @@ namespace Gameplay.Rhythm.Models
             SpawnTime = spawnTime;
             HitTime = hitTime;
             MotionProfile = motionProfile;
+            if (float.IsNaN(lateralArcDegrees) || float.IsInfinity(lateralArcDegrees) || Math.Abs(lateralArcDegrees) > 30f)
+                throw new ArgumentOutOfRangeException(nameof(lateralArcDegrees));
+            LateralArcDegrees = lateralArcDegrees;
         }
 
         public double ProgressAt(double songTime) => MotionProfile == null

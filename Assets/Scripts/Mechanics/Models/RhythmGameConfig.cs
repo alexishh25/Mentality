@@ -20,9 +20,18 @@ namespace Gameplay.Rhythm.Models
         [Tooltip("Separacion minima en segundos entre apariciones del mapa. Los beats tienen prioridad sobre ataques cercanos.")]
         public float MinimumSpawnInterval = 0.3f;
         public MusicalActivitySettings MusicalActivity = new MusicalActivitySettings();
+        [Header("Beat Cadence")]
+        public BeatCadenceSettings Cadence = new BeatCadenceSettings();
+        public PulseBonusSettings PulseBonus = new PulseBonusSettings();
         public RhythmPatternSettings Patterns = new RhythmPatternSettings();
         public RhythmPlacementSettings Placement = new RhythmPlacementSettings();
         public TargetEvasionSettings Evasion = new TargetEvasionSettings();
+        public FalseWordSettings FalseWords = new FalseWordSettings();
+        public ScreamerSettings Screamer = new ScreamerSettings();
+        public BullicioSettings Bullicio = new BullicioSettings();
+        public GlitchSettings Glitch = new GlitchSettings();
+        [Header("Creatures")]
+        public CreatureSettings Creatures = new CreatureSettings();
 
         [Header("Word Targets")]
         public GameObject[] WordPrefabs = Array.Empty<GameObject>();
