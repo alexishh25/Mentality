@@ -6,30 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="3b311b54-b024-48c1-99b3-b35c1747b0cf" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Mentality/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Mentality/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Content/Scenes/RhythmTest.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Content/Scenes/RhythmTest.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Content/Sprites/buttons.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Content/Sprites/buttons/boton-default.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Content/Sprites/buttons/boton-default.svg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Content/Sprites/buttons/boton-disabled.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Content/Sprites/buttons/boton-disabled.svg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Content/Sprites/buttons/boton-focus.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Content/Sprites/buttons/boton-focus.svg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Content/Sprites/buttons/boton-hover.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Content/Sprites/buttons/boton-hover.svg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Content/Sprites/buttons/boton-pressed.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Content/Sprites/buttons/boton-pressed.svg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Content/UI/Documents/Views/HUD/HudUXML.uxml" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Content/UI/Documents/Views/HUD/HudUXML.uxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Content/UI/Styles/HudUSS.uss" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Content/UI/Styles/HudUSS.uss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Editor/RhythmTestPlayModeChecks.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Editor/RhythmTestPlayModeChecks.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Editor/RhythmTestSceneBuilder.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Editor/RhythmTestSceneBuilder.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Mechanics/Models/RhythmGameConfig.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Mechanics/Models/RhythmGameConfig.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Mechanics/Presenters/RhythmGamePresenter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Mechanics/Presenters/RhythmGamePresenter.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Mechanics/Presenters/RhythmHudPresenter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Mechanics/Presenters/RhythmHudPresenter.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Mechanics/Scopes/RhythmLifetimeScope.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Mechanics/Scopes/RhythmLifetimeScope.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Mechanics/Views/RhythmHudView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Mechanics/Views/RhythmHudView.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Converters/SanityWedgeBar.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Converters/SanityWedgeBar.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Repositories/ButtonRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Repositories/ButtonRepository.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/UIDoc.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/UIDoc.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -154,7 +130,7 @@
       <workItem from="1791562635143" duration="346000" />
       <workItem from="1791601602194" duration="863000" />
       <workItem from="1791688619952" duration="1086000" />
-      <workItem from="1791729505785" duration="12119000" />
+      <workItem from="1791729505785" duration="15376000" />
     </task>
     <servers />
   </component>
