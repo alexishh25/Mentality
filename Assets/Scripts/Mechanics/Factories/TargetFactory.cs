@@ -19,6 +19,7 @@ namespace Gameplay.Rhythm.Factories
         private readonly AudioConductorService _conductor;
         private readonly FalseWordEffectService _falseWordEffects;
         private readonly BullicioSessionService _bullicio;
+        private readonly WordLaunchLayout _launchLayout;
         private readonly List<TargetView> _targets = new List<TargetView>();
         private readonly List<SpawnRingView> _spawnRings = new List<SpawnRingView>();
         private readonly List<CreatureEmergenceView> _creatures = new List<CreatureEmergenceView>();
@@ -80,7 +81,7 @@ namespace Gameplay.Rhythm.Factories
 
         public TargetFactory(IObjectResolver resolver, RhythmGameConfig config,
             RhythmGameModel model, Transform playerTarget, AudioConductorService conductor,
-            FalseWordEffectService falseWordEffects, BullicioSessionService bullicio)
+            FalseWordEffectService falseWordEffects, BullicioSessionService bullicio, WordLaunchLayout launchLayout = null)
         {
             _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
             _config = config ?? throw new ArgumentNullException(nameof(config));
@@ -91,6 +92,7 @@ namespace Gameplay.Rhythm.Factories
             _conductor = conductor ?? throw new ArgumentNullException(nameof(conductor));
             _falseWordEffects = falseWordEffects ?? throw new ArgumentNullException(nameof(falseWordEffects));
             _bullicio = bullicio ?? throw new ArgumentNullException(nameof(bullicio));
+            _launchLayout = launchLayout;
         }
 
         public TargetView CreateRandomPosition(TargetTiming timing = null)
@@ -130,7 +132,9 @@ namespace Gameplay.Rhythm.Factories
             // Excluye los 90 grados del sur (-Z), independientemente del giro de la camara.
             float angle = angleDegrees * Mathf.Deg2Rad;
             Vector3 direction = new Vector3(Mathf.Sin(angle), 0f, Mathf.Cos(angle));
-            return Create(_config.WordPrefabs[index], _playerTarget.position + direction * _config.SpawnDistance, timing);
+            Vector3 position = _launchLayout == null ? _playerTarget.position + direction * _config.SpawnDistance
+                : _launchLayout.PositionFor(angleDegrees, _playerTarget.position, _config.SpawnDistance);
+            return Create(_config.WordPrefabs[index], position, timing);
         }
 
         public TargetView Create(GameObject prefab, Vector3 position, TargetTiming timing = null,

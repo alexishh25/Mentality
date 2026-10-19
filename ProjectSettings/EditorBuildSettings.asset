@@ -9,11 +9,8 @@ EditorBuildSettings:
     path: Assets/Content/Scenes/UIScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 1
-    path: Assets/Content/Scenes/SampleScene.unity
-    guid: 99c9720ab356a0642a771bea13969a05
-  - enabled: 1
-    path: Assets/Content/Scenes/RhythmTest.unity
-    guid: 90c8bfd518c4e724cbc65c0d0127903c
+    path: Assets/All-ObjE/Scenes/Nivel-1_Rhythm.unity
+    guid: 4f99104af9c14bc3aa8e3ade5ffbedf2
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

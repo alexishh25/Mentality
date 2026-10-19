@@ -24,7 +24,7 @@ namespace Mentality.Gameplay.MG01
         [SerializeField, Min(0.1f)] private float debugSongDuration = 60f;
 
         [Header("Escenas (deben estar en Build Settings)")]
-        [SerializeField] private string mg01SceneName = "RhythmTest";
+        [SerializeField] private string mg01SceneName = "Nivel-1_Rhythm";
         [SerializeField] private string menuSceneName = "UIScene";
 
         [Header("Guardado")]

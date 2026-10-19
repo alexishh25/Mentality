@@ -22,6 +22,9 @@ namespace Gameplay.Rhythm.Scopes
         [Header("Scene References")]
         [Tooltip("Punto de llegada y centro del circulo de aparicion; usar la posicion de la camara del jugador fijo.")]
         [SerializeField] private Transform playerTarget;
+        [Tooltip("Opcional: carriles de lanzamiento adaptados al escenario. Vacio conserva el comportamiento original.")]
+        [SerializeField] private WordLaunchLayout wordLaunchLayout;
+        [SerializeField] private CreaturePlacementLayout creaturePlacementLayout;
 
         [Tooltip("AudioSource dedicado. Puede quedar vacio cuando no se usa musica.")]
         [SerializeField] private AudioSource musicSource;
@@ -47,8 +50,8 @@ namespace Gameplay.Rhythm.Scopes
             builder.RegisterInstance(config.Bullicio ?? new BullicioSettings { Enabled = false });
             builder.Register<BullicioSessionService>(Lifetime.Scoped);
             builder.RegisterEntryPoint<BullicioPresenter>(Lifetime.Scoped);
-            builder.Register<TargetFactory>(Lifetime.Scoped);
-            builder.Register<RhythmSpawnerPresenter>(Lifetime.Scoped);
+            builder.Register<TargetFactory>(Lifetime.Scoped).WithParameter<WordLaunchLayout>(wordLaunchLayout);
+            builder.Register<RhythmSpawnerPresenter>(Lifetime.Scoped).WithParameter<CreaturePlacementLayout>(creaturePlacementLayout);
 
             // Solo este presentador actualiza reloj y spawn, en ese orden.
             // El parametro explicito permite inyectar null en las pruebas sin musica.

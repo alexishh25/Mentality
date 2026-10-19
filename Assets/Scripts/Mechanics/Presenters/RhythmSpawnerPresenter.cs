@@ -18,16 +18,18 @@ public class RhythmSpawnerPresenter
     private CreatureShotBudget _creatureBudget;
     private readonly RhythmGameConfig _config;
     private readonly Transform _player;
+    private readonly CreaturePlacementLayout _creatureLayout;
     public CreatureSpawnSchedule CreatureSchedule => _creatureSchedule;
 
     public RhythmSpawnerPresenter(AudioConductorService conductor, RhythmGameModel model, TargetFactory targetFactory,
-        RhythmGameConfig config, Transform player)
+        RhythmGameConfig config, Transform player, CreaturePlacementLayout creatureLayout = null)
     {
         _conductor = conductor ?? throw new ArgumentNullException(nameof(conductor));
         _model = model ?? throw new ArgumentNullException(nameof(model));
         _targetFactory = targetFactory ?? throw new ArgumentNullException(nameof(targetFactory));
         _config = config;
         _player = player;
+        _creatureLayout = creatureLayout;
     }
 
     // Llamar al iniciar/reiniciar, despues de que el reloj vuelva a tiempo cero.
@@ -92,6 +94,9 @@ public class RhythmSpawnerPresenter
         Vector3 origin = _player.position + new Vector3(Mathf.Sin(angle), 0, Mathf.Cos(angle)) * _config.Creatures.Distance;
         // The cylinder's default CapsuleCollider does not match its flat rendered surface.
         // Anchor to the visible arena mesh rather than the capsule's rounded volume.
+        if (_creatureLayout != null) origin = _creatureLayout.GroundFor(item.Angle);
+        else
+        {
         var floor = GameObject.Find("Floor");
         var renderer = floor == null ? null : floor.GetComponent<Renderer>();
         if (renderer == null) return;
@@ -99,8 +104,10 @@ public class RhythmSpawnerPresenter
         double x = (origin.x - bounds.center.x) / bounds.extents.x;
         double z = (origin.z - bounds.center.z) / bounds.extents.z;
         if (x * x + z * z > 1d) return;
+        origin.y = bounds.max.y + 0.01f;
+        }
         var view = UnityEngine.Object.Instantiate(_config.Creatures.Prefab).GetComponent<CreatureEmergenceView>();
-        view.Initialize(new Vector3(origin.x, bounds.max.y + 0.01f, origin.z), _player, _conductor);
+        view.Initialize(origin, _player, _conductor);
         view.ConfigureMusicalAttack(item.Time, item.Shots, (mouth, index, time) => {
             if (_creatureBudget.Allows(item.Shots[index])
                 && _targetFactory.ActiveTargetCount < _schedule.MaximumTargetsAt(time)

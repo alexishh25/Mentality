@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+#if UNITY_EDITOR
 using UnityEditor.UIElements;
+#endif
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Mentality.Presentation.Views
 {
+#if UNITY_EDITOR
     public class FieldListConverter : UxmlAttributeConverter<List<Fields>>
     {
         const char k_ItemSeparator = ',';
@@ -57,6 +60,8 @@ namespace Mentality.Presentation.Views
             return list;
         }
     }
+
+#endif
 
     [Serializable]
     public class Fields

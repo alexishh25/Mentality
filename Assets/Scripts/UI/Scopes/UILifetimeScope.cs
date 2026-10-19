@@ -11,7 +11,7 @@ namespace Mentality.UI
     public class UILifetimeScope : LifetimeScope
     {
         [SerializeField] private UIDoc uiDoc;
-        [Tooltip("Opcional. Sin asset se usan los valores por defecto (escena MG01 = SampleScene).")]
+        [Tooltip("Opcional. Sin asset se usan los valores por defecto (escena MG01 = Nivel-1_Rhythm).")]
         [SerializeField] private MG01ConfigSO mg01Config;
 
         protected override void Configure(IContainerBuilder builder)
