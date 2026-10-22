@@ -7,7 +7,7 @@ using Gameplay.Rhythm.Services;
 using UnityEngine;
 
 [RequireComponent(typeof(BoxCollider))]
-public class TargetView : MonoBehaviour, ITouchable, ITargetView
+public class TargetView : MonoBehaviour, ITouchable, ITargetView, IAudienceWordFlightView
 {
     [SerializeField] private TextMesh wordText;
     [SerializeField] private WordTargetKind targetKind;
@@ -18,6 +18,29 @@ public class TargetView : MonoBehaviour, ITouchable, ITargetView
     private AudioConductorService _distortionClock;
     private double _distortionStart;
     private double _distortionInterval;
+    private Vector3 _audienceFullScale;
+    private float _audienceClearance;
+    private bool _usesGrowthFlight;
+    private bool _immediateGrowth;
+    public Gameplay.Rhythm.Views.AudienceWordEmitter SourceEmitter { get; private set; }
+    public Vector3 LaunchPosition { get; private set; }
+    public float LaunchClearance => _audienceClearance;
+
+    public void ConfigureAudienceLaunch(Gameplay.Rhythm.Views.AudienceWordEmitter emitter, float clearance = 0f, bool immediateGrowth = false)
+    {
+        SourceEmitter = emitter;
+        _usesGrowthFlight = true;
+        _immediateGrowth = immediateGrowth;
+        LaunchPosition = transform.position;
+        _audienceFullScale = transform.localScale;
+        _audienceClearance = clearance;
+        SetAudienceFlightTravel(0f);
+    }
+
+    public void SetAudienceFlightTravel(float travelled)
+    {
+        if (_usesGrowthFlight) transform.localScale = _audienceFullScale * AudienceWordFlight.ScaleAt(travelled, _audienceClearance, _immediateGrowth);
+    }
 
     public Vector3 Position => transform.position;
     public TargetTiming Timing => _presenter?.Timing;

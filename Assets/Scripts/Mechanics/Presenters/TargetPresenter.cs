@@ -18,6 +18,10 @@ namespace Gameplay.Rhythm.Presenters
         private readonly Vector3 _arrivalDirection;
         private readonly AimEvasionMotion _evasion;
         private readonly FalseWordEffectService _falseWordEffects;
+        private readonly bool _audienceLaunch;
+        private readonly float _audienceClearance;
+        private readonly float _readableApproachFraction;
+        private readonly bool _immediateLaunch;
 
         public bool IsResolved { get; private set; }
         public TargetTiming Timing { get; }
@@ -27,7 +31,8 @@ namespace Gameplay.Rhythm.Presenters
         public TargetPresenter(ITargetView view, RhythmGameModel model,
             Transform playerTarget, float travelSpeed, float arrivalDistance, TargetTiming timing = null,
             AudioConductorService conductor = null, AimEvasionMotion evasion = null,
-            WordTargetKind kind = WordTargetKind.Normal, FalseWordEffectService falseWordEffects = null)
+            WordTargetKind kind = WordTargetKind.Normal, FalseWordEffectService falseWordEffects = null, bool audienceLaunch = false,
+            float audienceClearance = 0f, float readableApproachFraction = 0f, bool immediateLaunch = false)
         {
             _view = view ?? throw new ArgumentNullException(nameof(view));
             _model = model ?? throw new ArgumentNullException(nameof(model));
@@ -45,6 +50,10 @@ namespace Gameplay.Rhythm.Presenters
             _conductor = conductor;
             _evasion = evasion;
             _falseWordEffects = falseWordEffects;
+            _audienceLaunch = audienceLaunch;
+            _audienceClearance = audienceClearance;
+            _readableApproachFraction = readableApproachFraction;
+            _immediateLaunch = immediateLaunch;
             if (!Enum.IsDefined(typeof(WordTargetKind), kind)) throw new ArgumentOutOfRangeException(nameof(kind));
             Kind = kind;
             _spawnPosition = _view.Position;
@@ -102,6 +111,7 @@ namespace Gameplay.Rhythm.Presenters
 
             Vector3 destination = _playerTarget.position;
             _view.SetPosition(Vector3.MoveTowards(_view.Position, destination, _travelSpeed * deltaTime));
+            UpdateAudienceScale(Vector3.Distance(_spawnPosition, destination) - Vector3.Distance(_view.Position, destination));
             _view.FacePlayer(destination);
 
             if (HasReachedPlayer())
@@ -130,12 +140,17 @@ namespace Gameplay.Rhythm.Presenters
         {
             double progress = Timing.ProgressAt(songTime);
             float clampedProgress = (float)Math.Max(0d, Math.Min(1d, progress));
+            if (_audienceLaunch) clampedProgress = AudienceWordFlight.TravelProgressAt(clampedProgress,
+                Vector3.Distance(_spawnPosition, _playerTarget.position) - _arrivalDistance, _audienceClearance, _readableApproachFraction);
             Vector3 arrivalPosition = _playerTarget.position + _arrivalDirection * _arrivalDistance;
             Vector3 position = Vector3.Lerp(_spawnPosition, arrivalPosition, clampedProgress);
+            float travelled = clampedProgress * (Vector3.Distance(_spawnPosition, _playerTarget.position) - _arrivalDistance);
+            UpdateAudienceScale(travelled);
             if (_evasion != null && Timing.MotionProfile != null)
             {
                 double frenzy = Timing.MotionProfile.FrenzyAt(songTime);
                 float radians = (float)(_evasion.AngleAt(songTime, frenzy) * Math.PI / 180d);
+                if (_audienceLaunch) radians *= AudienceWordFlight.EvasionAt(travelled, _audienceClearance);
                 Vector3 tangent = new Vector3(-_arrivalDirection.z, 0f, _arrivalDirection.x);
                 Vector3 direction = _arrivalDirection * Mathf.Cos(radians) + tangent * Mathf.Sin(radians);
                 float radius = (position - _playerTarget.position).magnitude;
@@ -144,11 +159,18 @@ namespace Gameplay.Rhythm.Presenters
             if (Timing.LateralArcDegrees != 0f)
             {
                 float arc = Timing.LateralArcDegrees * Mathf.Sin(Mathf.PI * clampedProgress);
+                if (_audienceLaunch && !_immediateLaunch) arc *= AudienceWordFlight.EvasionAt(travelled, _audienceClearance);
                 position = _playerTarget.position + Quaternion.AngleAxis(arc, Vector3.up)
                     * (position - _playerTarget.position);
             }
             _view.SetPosition(position);
             _view.FacePlayer(_playerTarget.position);
+        }
+
+        private void UpdateAudienceScale(float travelled)
+        {
+            if (_audienceLaunch && _view is IAudienceWordFlightView audienceView)
+                audienceView.SetAudienceFlightTravel(travelled);
         }
 
         public void SetAimed(bool aimed)

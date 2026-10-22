@@ -29,6 +29,7 @@ namespace Gameplay.Rhythm.Models
         public int LastPulseBonus { get; private set; }
         public int PulseHits { get; private set; }
         private PulseBonusProfile _pulseBonus;
+        public event Action WordCollided;
 
         public void ConfigurePulseBonus(MusicalMapData map, PulseBonusSettings settings)
         {
@@ -85,6 +86,7 @@ namespace Gameplay.Rhythm.Models
                 IsGameOver = true;
                 StopSession();
             }
+            WordCollided?.Invoke();
         }
 
         public void RegisterHit()

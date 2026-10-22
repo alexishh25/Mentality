@@ -15,14 +15,14 @@ public static class NivelCreatureLayoutSetup
 {
     static NivelCreatureLayoutSetup()
     {
-        if (File.Exists("Temp/NivelCreatureLayout.request")) EditorApplication.update += Process;
+        EditorApplication.update += Process;
     }
     private static void Process()
     {
-        if (EditorApplication.isCompiling || EditorApplication.isUpdating || EditorApplication.isPlayingOrWillChangePlaymode) return;
-        EditorApplication.update -= Process;
-        Prepare();
+        if (EditorApplication.isCompiling || EditorApplication.isUpdating || EditorApplication.isPlayingOrWillChangePlaymode || !File.Exists("Temp/NivelCreatureLayout.request")) return;
         File.Delete("Temp/NivelCreatureLayout.request");
+        try { Prepare(); }
+        catch (Exception e) { File.AppendAllText("Logs/Nivel-1-creature-grounds.txt", e.ToString()); Debug.LogException(e); }
     }
     [MenuItem("Tools/Mentality/Integration/Prepare Nivel Creature Grounds")]
     public static void Prepare()
@@ -41,11 +41,14 @@ public static class NivelCreatureLayoutSetup
             var origin = transforms.Single(t => t.name == "Gameplay Origin");
             var renderers = transforms.SelectMany(t => t.GetComponents<Renderer>())
                 .Where(r => r.enabled && r.gameObject.activeInHierarchy && !(r is ParticleSystemRenderer)
-                    && r.transform.root.name != "Rhythm Player").ToArray();
-            var floors = renderers.Where(r => r.name == "BaseT" || (r.name == "New Game Object" && r.transform.parent == null)).ToArray();
+                    && r.transform.root.name != "Rhythm Player"
+                    && r.sharedMaterials.Any(m => m != null && m.renderQueue < 3000)).ToArray();
+            var audience = transforms.Select(t => t.GetComponent<AudienceWordEmitter>()).Where(e => e != null).ToArray();
+            var floors = renderers.Where(r => r.name == "BaseT" || (r.name.StartsWith("New Game Object", StringComparison.Ordinal) && r.bounds.size.x > 5f && r.bounds.size.z > 1f)).ToArray();
             if (floors.Length < 2) throw new InvalidOperationException("Expected arena floor and audience steps");
             NivelWordLayoutSetup.OpenGeometry(renderers);
-            var positions = new List<Vector3>(); var arcs = new List<float>(); var log = new List<string>();
+            var positions = new List<Vector3>(); var clearances = new List<float>(); var log = new List<string>();
+            float rayHeight = floors.Max(f => f.bounds.max.y) + 1f;
             foreach (float nominal in new[] { -60f, -30f, 0f, 30f, 60f })
             {
                 bool found = false;
@@ -53,29 +56,30 @@ public static class NivelCreatureLayoutSetup
                 {
                     float yaw = nominal + offset;
                     if (Mathf.Abs(yaw) > 75f) continue;
-                    for (float distance = config.Creatures.Distance; distance >= 3f; distance -= 0.5f)
+                    for (float distance = 10f; distance <= 22f; distance += 0.5f)
                     {
                         var direction = Quaternion.Euler(0f, origin.eulerAngles.y + yaw, 0f) * Vector3.forward;
                         var point = origin.position + direction * distance;
-                        var ray = new Ray(new Vector3(point.x, origin.position.y + 0.1f, point.z), Vector3.down);
+                        var ray = new Ray(new Vector3(point.x, rayHeight, point.z), Vector3.down);
                         bool supported = false; float highest = float.NegativeInfinity;
                         foreach (var floor in floors)
                             if (NivelWordLayoutSetup.Ground(floor, ray, out var hit) && hit.normal.y > 0.65f && hit.point.y > highest)
                             { point.y = hit.point.y + 0.02f; highest = hit.point.y; supported = true; }
                         if (!supported || positions.Any(p => Vector3.Distance(p, point) < 2.4f)) continue;
-                        var body = new Bounds(point + Vector3.up * 1.23f, new Vector3(2.4f, 2.34f, 2.4f));
-                        if (!NivelWordLayoutSetup.VolumeClear(body, renderers)) continue;
+                        if (!audience.Any(e => Vector2.Distance(new Vector2(e.transform.position.x, e.transform.position.z), new Vector2(point.x, point.z)) < 3f)) continue;
+                        var facing = Quaternion.LookRotation(new Vector3(origin.position.x - point.x, 0f, origin.position.z - point.z));
+                        if (!NivelWordLayoutSetup.BoxClear(point + Vector3.up * 1.23f, new Vector3(1.2f, 1.17f, 0.08f), facing, renderers, out _)) continue;
                         var head = point + Vector3.up * 1.9f;
-                        bool visible = true;
-                        for (int i = 1; i < 20; i++)
-                            if (!NivelWordLayoutSetup.VolumeClear(new Bounds(Vector3.Lerp(origin.position, head, i / 20f), Vector3.one * 0.12f), renderers))
-                            { visible = false; break; }
+                        bool visible = NivelWordLayoutSetup.RayClear(origin.position, head, renderers, out _);
                         if (!visible) continue;
-                        foreach (float arc in new[] { 0f })
-                            if (ShotClear(point + Vector3.up * 1.392f, origin.position, arc, config, renderers))
+                        var mouth = point + Vector3.up * 1.392f;
+                        float maximum = Vector3.Distance(mouth, origin.position) - config.ArrivalDistance - Gameplay.Rhythm.Services.AudienceWordFlight.GrowthDistance - 0.5f;
+                        for (float clearance = Mathf.Max(0f, distance - 6f); clearance <= maximum; clearance += 0.5f)
+                            if (NivelAudienceRouteSetup.CheckVolume(mouth, origin.position, config, renderers, true, out _, clearance,
+                                Mathf.Clamp(config.Placement.MaximumSideAngle - Mathf.Abs(yaw), 0f, 18f)))
                             {
-                                positions.Add(point); arcs.Add(arc);
-                                log.Add("slot=" + nominal + "; actual yaw=" + yaw + "; distance=" + distance + "; ground=" + point + "; shot arc=" + arc);
+                                positions.Add(point); clearances.Add(clearance);
+                                log.Add("slot=" + nominal + "; actual yaw=" + yaw + "; distance=" + distance + "; ground=" + point + "; launch clearance=" + clearance);
                                 found = true; break;
                             }
                         if (found) break;
@@ -95,7 +99,7 @@ public static class NivelCreatureLayoutSetup
                 var point = holder.transform.Find("Ground " + (i + 1)) ?? new GameObject("Ground " + (i + 1)).transform;
                 point.SetParent(holder.transform, true); point.position = positions[i]; points[i] = point;
             }
-            layout.Configure(points);
+            layout.Configure(points, clearances.ToArray());
             settings.FindProperty("creaturePlacementLayout").objectReferenceValue = layout;
             settings.ApplyModifiedPropertiesWithoutUndo();
             EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene);
@@ -107,23 +111,5 @@ public static class NivelCreatureLayoutSetup
             if (previous.isLoaded) SceneManager.SetActiveScene(previous);
             if (opened) EditorSceneManager.CloseScene(scene, true);
         }
-    }
-    private static bool ShotClear(Vector3 mouth, Vector3 player, float arc, RhythmGameConfig config, Renderer[] renderers)
-    {
-        var direction = (mouth - player).normalized;
-        float distance = Vector3.Distance(mouth, player);
-        float halfWidth = distance * Mathf.Tan(config.Placement.TargetAngularWidthDegrees * Mathf.Deg2Rad * 0.5f);
-        foreach (float side in new[] { -1f, 0f, 1f })
-            foreach (float evade in new[] { -config.Evasion.MaximumAngleDegrees, 0f, config.Evasion.MaximumAngleDegrees })
-                for (int i = 0; i <= 30; i++)
-                {
-                    float p = i / 30f;
-                    var point = Vector3.Lerp(mouth, player + direction * config.ArrivalDistance, p);
-                    float fan = side * 18f * Mathf.Sin(Mathf.PI * p) + evade;
-                    point = player + Quaternion.AngleAxis(fan, Vector3.up) * (point - player);
-                    point += Vector3.up * (arc * Mathf.Sin(Mathf.PI * p));
-                    if (!NivelWordLayoutSetup.VolumeClear(new Bounds(point, new Vector3(halfWidth * 2f + 0.1f, halfWidth * 0.6f + 0.1f, halfWidth * 2f + 0.1f)), renderers)) return false;
-                }
-        return true;
     }
 }

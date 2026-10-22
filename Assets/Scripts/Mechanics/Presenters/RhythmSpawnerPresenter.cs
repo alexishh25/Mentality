@@ -41,7 +41,8 @@ public class RhythmSpawnerPresenter
     {
         _leadTime = leadTime;
         _schedule = map == null ? null : new MusicalSpawnSchedule(map, minimumInterval, leadTime, activitySettings,
-            patternSettings, lateHitWindow, placementSettings, cadenceSettings, manualSettings);
+            patternSettings, lateHitWindow, placementSettings, cadenceSettings, manualSettings,
+            _config.Creatures != null && _config.Creatures.Enabled ? _config.CreatureReservedSlots : 0);
         _creatureSchedule = null;
         _creatureBudget = null;
         if (map != null && _config.Creatures != null && _config.Creatures.Enabled)
@@ -50,7 +51,11 @@ public class RhythmSpawnerPresenter
             if (creature == null) throw new InvalidOperationException("Asignar el prefab de criatura.");
             _creatureSchedule = new CreatureSpawnSchedule(map, manualSettings, _config.Creatures, creature.EmergenceSeconds);
             double conservativeLead = (_config.Creatures.Distance + 2d) / _config.TravelSpeed;
+            if (_creatureLayout != null) conservativeLead = Math.Max(conservativeLead,
+                (_creatureLayout.MaximumMouthDistance(_player.position) + 0.1d) / _config.TravelSpeed);
             _creatureBudget = new CreatureShotBudget(_creatureSchedule, _schedule, conservativeLead);
+            if (_config.Creatures.ContinuousAttack)
+                _creatureSchedule = _creatureSchedule.WithAdmittedShots(_creatureBudget, creature.EmergenceSeconds);
         }
         // Un desfase negativo puede situar beats antes del inicio del clip.
         // Esos beats se omiten; un beat exactamente en t=0 si puede aparecer.
@@ -111,9 +116,9 @@ public class RhythmSpawnerPresenter
         view.ConfigureMusicalAttack(item.Time, item.Shots, (mouth, index, time) => {
             if (_creatureBudget.Allows(item.Shots[index])
                 && _targetFactory.ActiveTargetCount < _schedule.MaximumTargetsAt(time)
-                && _targetFactory.HasClearCreatureRoute(mouth))
-                _targetFactory.CreateCreatureWord(mouth, index, time, _schedule.ActivityProfile);
-        }, _model);
+                && (_config.Creatures.ContinuousAttack || _targetFactory.HasClearCreatureRoute(mouth)))
+                _targetFactory.CreateCreatureWord(mouth, index, time, _schedule.ActivityProfile, _creatureLayout?.LaunchClearanceFor(item.Angle));
+        }, _model, _config.Creatures.ContinuousAttack);
         _targetFactory.RegisterCreature(view);
         view.PlayAppearanceSound(_config.Creatures.AppearanceClip, _config.Creatures.AppearanceVolume);
     }

@@ -7,6 +7,8 @@ namespace Gameplay.Rhythm.Models
     public sealed class CreatureSettings
     {
         public bool Enabled;
+        [Tooltip("Disparar al completar la emergencia, sin espera de preparacion; retirarse al terminar la rafaga.")]
+        public bool ContinuousAttack;
         public GameObject Prefab;
         public AudioClip AppearanceClip;
         [Range(0f, 1f)] public float AppearanceVolume = 0.7f;

@@ -43,14 +43,16 @@ public static class NivelPlayerPlayChecks
         // A script reload during Play Mode must not leave an unfinished check running.
         if (SessionState.GetBool(Running, false) && EditorApplication.isPlaying)
             EditorApplication.delayCall += () => Changed(PlayModeStateChange.EnteredPlayMode);
-        if (File.Exists("Temp/NivelPlayerChecks.request")) EditorApplication.update += StartWhenReady;
+        EditorApplication.update += StartWhenReady;
     }
     private static void StartWhenReady()
     {
+        if (!File.Exists("Temp/NivelPlayerChecks.request") && !File.Exists("Temp/NivelCreatureAudiencePlay.request")) return;
         if (EditorApplication.isCompiling || EditorApplication.isUpdating || EditorApplication.isPlayingOrWillChangePlaymode
             || File.Exists("Temp/NivelPlayerSetup.request") || File.Exists("Temp/NivelRhythmSystems.request")
             || File.Exists("Temp/NivelWordLayout.request") || File.Exists("Temp/NivelCreatureLayout.request")) return;
-        EditorApplication.update -= StartWhenReady;
+        SessionState.SetBool(Running + ".CreatureOnly", File.Exists("Temp/NivelCreatureAudiencePlay.request"));
+        if (File.Exists("Temp/NivelCreatureAudiencePlay.request")) File.Delete("Temp/NivelCreatureAudiencePlay.request");
         File.Delete("Temp/NivelPlayerChecks.request");
         SessionState.SetString("Nivel.PreviousStartScene", AssetDatabase.GetAssetPath(EditorSceneManager.playModeStartScene));
         EditorSceneManager.playModeStartScene = AssetDatabase.LoadAssetAtPath<SceneAsset>(NivelPlayerSetup.ScenePath);
@@ -155,7 +157,7 @@ public static class NivelPlayerPlayChecks
                         Check(clock.CurrentSongTime >= 0d && rhythmScope.GetComponent<AudioSource>().isPlaying
                             && rhythmScope.GetComponent<AudioSource>().clip == config.SessionMusicClip, "Dedicated source plays the analyzed song after count-in");
                         var chart = new MusicalSpawnSchedule(game.MusicalMap, config.MinimumSpawnInterval, config.TargetLeadTimeSeconds,
-                            config.MusicalActivity, config.Patterns, 0d, config.Placement, config.Cadence, config.AnalyzedSong.ManualIntensity);
+                            config.MusicalActivity, config.Patterns, 0d, config.Placement, config.Cadence, config.AnalyzedSong.ManualIntensity, config.CreatureReservedSlots);
                         var item = chart.Events.First(e => e.SpawnTime.Value >= 10d);
                         var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
                         typeof(AudioConductorService).GetField("_dspSongTime", flags).SetValue(clock, AudioSettings.dspTime - item.SpawnTime.Value - 0.005d);
@@ -165,6 +167,7 @@ public static class NivelPlayerPlayChecks
                         factory.ClearTargets();
                         if (UnityEngine.Object.FindFirstObjectByType<CreaturePlacementLayout>() != null)
                             CheckCreatureGrounds(rhythmScope, chart);
+                        if (SessionState.GetBool(Running + ".CreatureOnly", false)) { game.StopSession(); Finish(); return; }
                         var layout = UnityEngine.Object.FindFirstObjectByType<WordLaunchLayout>();
                         if (layout != null)
                         {
@@ -245,8 +248,17 @@ public static class NivelPlayerPlayChecks
         var spawner = scope.Container.Resolve<RhythmSpawnerPresenter>();
         var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
         Check(layout.Points.Length == 5 && layout.Points.Distinct().Count() == 5, "Five distinct creature ground markers configured");
-        Check(layout.Points.All(p => Mathf.Abs(p.position.y - 0.27f) < 0.03f), "Creature feet rest on the actual floor surface");
-        var budget = new CreatureShotBudget(spawner.CreatureSchedule, chart, (config.Creatures.Distance + 2d) / config.TravelSpeed);
+        var audience = UnityEngine.Object.FindObjectsByType<AudienceWordEmitter>(FindObjectsSortMode.None);
+        Check(layout.Points.All(p => Vector3.Distance(p.position, player.transform.position) >= 10f
+            && audience.Any(e => Vector2.Distance(new Vector2(p.position.x, p.position.z),
+                new Vector2(e.transform.position.x, e.transform.position.z)) < 3f)), "Creature grounds are distant and among the audience");
+        Check(layout.Points.All(p => p.position.y > 0.9f), "Creature feet use the raised audience tiers");
+        var budget = new CreatureShotBudget(spawner.CreatureSchedule, chart,
+            Math.Max(config.Creatures.Distance + 2d, layout.MaximumMouthDistance(scope.Container.Resolve<Transform>().position) + 0.1d) / config.TravelSpeed);
+        if (config.Creatures.ContinuousAttack)
+            Check(spawner.CreatureSchedule.Events.All(e => e.Shots.All(budget.Allows)
+                && Math.Abs(e.Shots[0] - e.Time - config.Creatures.Prefab.GetComponent<CreatureEmergenceView>().EmergenceSeconds) < 0.000001d),
+                "Live creature schedule removes empty volleys and aligns emergence to the first admitted shot");
         for (int section = 0; section < 3; section++)
         {
             game.RestartSession();
@@ -265,9 +277,19 @@ public static class NivelPlayerPlayChecks
             Check(whistle != null && whistle.isPlaying && whistle.clip == config.Creatures.AppearanceClip,
                 "Section " + section + " appearance plays the whistle");
             foreach (var word in UnityEngine.Object.FindObjectsByType<TargetView>(FindObjectsSortMode.None)) word.Touch(player.transform.position);
-            creature.AdvanceAt(0.9d);
-            Check(creature.HasEmerged && !creature.IsAttacking, "Standing emergence precedes the attack");
-            creature.AdvanceAt(1.05d);
+            if (config.Creatures.ContinuousAttack)
+            {
+                creature.SampleAt(creature.EmergenceSeconds);
+                Check(creature.HasEmerged && creature.IsAttacking && Math.Abs(item.Shots[0] - item.Time - creature.EmergenceSeconds) < 0.000001d,
+                    "Creature finishes emerging on its first shot beat with no standing preparation pause");
+            }
+            else
+            {
+                creature.AdvanceAt(0.9d);
+                Check(creature.HasEmerged && !creature.IsAttacking, "Standing emergence precedes the attack");
+            }
+            CaptureCreature(creature, section);
+            creature.SampleAt(config.Creatures.ContinuousAttack ? creature.EmergenceSeconds : 1.05d);
             Check(creature.IsAttacking, "Open-mouth animation anticipates the volley");
             bool fired = false;
             foreach (double shot in item.Shots)
@@ -275,10 +297,14 @@ public static class NivelPlayerPlayChecks
                 seek(shot);
                 creature.AdvanceAt(shot - item.Time + 0.005d);
                 var words = UnityEngine.Object.FindObjectsByType<TargetView>(FindObjectsSortMode.None).Where(w => !w.IsResolved).ToArray();
+                if (config.Creatures.ContinuousAttack && shot == item.Shots[0])
+                    Check(words.Length > 0, "First admitted creature shot fires at emergence without waiting for another word to clear");
                 if (words.Length > 0)
                 {
                     Check(words.All(w => w.Kind != WordTargetKind.Normal && Vector3.Distance(w.Position, creature.MouthPosition) < 0.05f),
                         "Creature volley launches false words from its mouth");
+                    Check(words.All(w => Mathf.Abs(w.LaunchClearance - layout.LaunchClearanceFor(item.Angle).Value) < 0.001f),
+                        "Creature words keep the baked clearance through the audience");
                     fired = true;
                     foreach (var word in words) word.Touch(player.transform.position);
                 }
@@ -290,6 +316,57 @@ public static class NivelPlayerPlayChecks
             Check(creature.HasFinished && !creature.gameObject.activeSelf && !whistle.isPlaying,
                 "Restart removes the creature and cancels pending shots and whistle");
         }
+        if (config.Creatures.ContinuousAttack)
+        {
+            game.RestartSession();
+            Action<double> seekBurst = time => {
+                typeof(AudioConductorService).GetField("_dspSongTime", flags).SetValue(clock, AudioSettings.dspTime - time - 0.005d);
+                typeof(AudioConductorService).GetField("_dspTimelineTime", flags).SetValue(clock, AudioSettings.dspTime - 1d);
+                clock.UpdateTime();
+            };
+            const double start = 10d;
+            seekBurst(start);
+            var quick = UnityEngine.Object.Instantiate(config.Creatures.Prefab).GetComponent<CreatureEmergenceView>();
+            quick.Initialize(layout.GroundFor(0f), player.transform, clock); factory.RegisterCreature(quick);
+            var shots = new[] { start + quick.EmergenceSeconds, start + quick.EmergenceSeconds + 0.255d };
+            var launched = new List<TargetView>();
+            quick.ConfigureMusicalAttack(start, shots, (mouth, index, time) => {
+                Check(factory.HasClearCreatureRoute(mouth), "Continuous burst admits consecutive small words without waiting for the first to arrive");
+                launched.Add(factory.CreateCreatureWord(mouth, index, time, null, layout.LaunchClearanceFor(0f)));
+            }, scope.Container.Resolve<RhythmGameModel>(), true);
+            seekBurst(shots[0]); quick.AdvanceAt(quick.EmergenceSeconds + 0.005d);
+            Check(launched.Count == 1 && launched[0] != null, "First creature word launches immediately after emergence");
+            var launchPosition = launched[0].Position; var launchScale = launched[0].transform.localScale;
+            seekBurst(shots[0] + 0.06d); launched[0].RefreshMusicalState();
+            Check(Vector3.Distance(launched[0].Position, launchPosition) > 0.01f && launched[0].transform.localScale.magnitude > launchScale.magnitude,
+                "Creature word moves and grows within the first 60 ms, without a launch hold");
+            seekBurst(shots[1]); launched[0].RefreshMusicalState(); quick.AdvanceAt(shots[1] - start + 0.005d);
+            Check(launched.Count == 2 && launched.All(w => w != null && !w.IsResolved), "Second volley word launches while the first is still flying");
+            quick.SampleAt(shots[1] - start + 0.3d);
+            Check(!quick.IsAttacking && quick.GetComponentInChildren<SpriteRenderer>().transform.localPosition.y < -0.05f,
+                "Creature retreats promptly after the volley instead of remaining idle");
+        }
         game.RestartSession();
+    }
+    private static void CaptureCreature(CreatureEmergenceView creature, int section)
+    {
+        var capture = new GameObject("Creature audience verification camera");
+        var camera = capture.AddComponent<Camera>(); camera.CopyFrom(Camera.main);
+        camera.transform.position = Camera.main.transform.position;
+        camera.transform.LookAt(creature.GroundPosition + Vector3.up * 1.2f);
+        camera.fieldOfView = 65f;
+        var texture = new RenderTexture(1200, 675, 24); var previous = RenderTexture.active;
+        var pixels = new Texture2D(1200, 675, TextureFormat.RGB24, false);
+        try
+        {
+            camera.targetTexture = texture; camera.Render(); RenderTexture.active = texture;
+            pixels.ReadPixels(new Rect(0, 0, 1200, 675), 0, 0); pixels.Apply();
+            File.WriteAllBytes("Logs/NivelCreatureAudience-" + section + ".png", pixels.EncodeToPNG());
+        }
+        finally
+        {
+            RenderTexture.active = previous; camera.targetTexture = null;
+            UnityEngine.Object.DestroyImmediate(pixels); UnityEngine.Object.DestroyImmediate(texture); UnityEngine.Object.DestroyImmediate(capture);
+        }
     }
 }

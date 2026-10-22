@@ -29,6 +29,9 @@ namespace Gameplay.Rhythm.Views
         private double[] _shotOffsets;
         private AudioSource _appearanceAudio;
         private bool _audioPaused;
+        private bool _continuousAttack;
+        private double PreparationSeconds => _continuousAttack ? 0d : 0.35d;
+        private double RecoverySeconds => _continuousAttack ? 0.12d : 0.35d;
         public float EmergenceSeconds => emergenceSeconds;
         public bool IsAttacking { get; private set; }
         public Vector3 MouthPosition => body.transform.TransformPoint(mouthOffset);
@@ -84,6 +87,7 @@ namespace Gameplay.Rhythm.Views
             if (openMouthFrames.Length != 5 || Array.Exists(openMouthFrames, frame => frame == null))
                 throw new InvalidOperationException("Asignar los cinco cuadros de boca abierta.");
             _shoot = shoot ?? throw new ArgumentNullException(nameof(shoot));
+            _continuousAttack = false;
             _shotCount = shotCount;
             _shotInterval = intervalSeconds;
             _shotOffsets = null;
@@ -92,16 +96,17 @@ namespace Gameplay.Rhythm.Views
         }
 
         public void ConfigureMusicalAttack(double appearanceTime, double[] shotTimes,
-            Action<Vector3, int, double> shoot, RhythmGameModel model)
+            Action<Vector3, int, double> shoot, RhythmGameModel model, bool continuousAttack = false)
         {
             if (shotTimes == null || shotTimes.Length == 0) throw new ArgumentException("Rafaga vacia.");
             ConfigureAttack(shotTimes.Length, 0.25d, shoot, model);
+            _continuousAttack = continuousAttack;
             _start = appearanceTime;
             _shotOffsets = new double[shotTimes.Length];
             for (int i = 0; i < shotTimes.Length; i++)
             {
                 double offset = shotTimes[i] - appearanceTime;
-                if (double.IsNaN(offset) || double.IsInfinity(offset) || offset < emergenceSeconds + 0.35d
+                if (double.IsNaN(offset) || double.IsInfinity(offset) || offset < emergenceSeconds + PreparationSeconds - 0.000001d
                     || (i > 0 && offset - _shotOffsets[i - 1] < 0.15d))
                     throw new ArgumentException("Tiempos de rafaga invalidos.");
                 _shotOffsets[i] = offset;
@@ -132,7 +137,7 @@ namespace Gameplay.Rhythm.Views
             SampleAt(elapsed);
             if (_shoot == null || HasFinished || (_model != null && (!_model.IsPlaying || _model.IsPaused))) return;
             if (_nextShot >= _shotCount) return;
-            double due = _shotOffsets == null ? emergenceSeconds + 0.35d + _nextShot * _shotInterval : _shotOffsets[_nextShot];
+            double due = _shotOffsets == null ? emergenceSeconds + PreparationSeconds + _nextShot * _shotInterval : _shotOffsets[_nextShot];
             if (elapsed < due) return;
             int index = _nextShot++;
             // Skip stale shots after a long frame rather than unloading a whole burst at once.
@@ -145,16 +150,20 @@ namespace Gameplay.Rhythm.Views
             if (!_initialized || double.IsNaN(elapsed) || double.IsInfinity(elapsed) || elapsed < 0d)
                 throw new ArgumentOutOfRangeException(nameof(elapsed));
             double retreatStart = emergenceSeconds + standingSeconds;
-            if (_shoot != null) retreatStart = Math.Max(retreatStart,
-                (_shotOffsets == null ? emergenceSeconds + 0.35d + (_shotCount - 1) * _shotInterval
-                    : _shotOffsets[_shotOffsets.Length - 1]) + 0.35d);
+            if (_shoot != null)
+            {
+                double attackEnd = (_shotOffsets == null ? emergenceSeconds + PreparationSeconds + (_shotCount - 1) * _shotInterval
+                    : _shotOffsets[_shotOffsets.Length - 1]) + RecoverySeconds;
+                retreatStart = _continuousAttack ? attackEnd : Math.Max(retreatStart, attackEnd);
+            }
             HasEmerged = elapsed >= emergenceSeconds;
             HasFinished = elapsed >= retreatStart + retreatSeconds;
             float visibility = elapsed < emergenceSeconds
                 ? Mathf.SmoothStep(0f, 1f, (float)(elapsed / emergenceSeconds))
                 : 1f - Mathf.SmoothStep(0f, 1f, (float)((elapsed - retreatStart) / retreatSeconds));
             body.transform.localPosition = Vector3.down * height * (1f - visibility);
-            IsAttacking = _shoot != null && elapsed >= emergenceSeconds + 0.2d && elapsed < retreatStart;
+            double attackPoseStart = _continuousAttack ? Math.Max(0d, emergenceSeconds - 0.12d) : emergenceSeconds + 0.2d;
+            IsAttacking = _shoot != null && elapsed >= attackPoseStart && elapsed < retreatStart;
             var frames = IsAttacking ? openMouthFrames : standingFrames;
             body.sprite = frames[(int)(elapsed * framesPerSecond % frames.Length)];
             body.enabled = !HasFinished;

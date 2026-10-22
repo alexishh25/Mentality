@@ -25,6 +25,9 @@ namespace Gameplay.Rhythm.Scopes
         [Tooltip("Opcional: carriles de lanzamiento adaptados al escenario. Vacio conserva el comportamiento original.")]
         [SerializeField] private WordLaunchLayout wordLaunchLayout;
         [SerializeField] private CreaturePlacementLayout creaturePlacementLayout;
+        [Tooltip("Registro opcional del publico. Preparado para la futura seleccion de emisores.")]
+        [SerializeField] private AudienceWordEmitterRegistry audienceWordEmitters;
+        [SerializeField] private AudienceWordRouteLayout audienceWordRoutes;
 
         [Tooltip("AudioSource dedicado. Puede quedar vacio cuando no se usa musica.")]
         [SerializeField] private AudioSource musicSource;
@@ -42,15 +45,25 @@ namespace Gameplay.Rhythm.Scopes
 
             builder.RegisterInstance(config);
             builder.RegisterInstance(playerTarget);
+            AudienceWordSelector audienceSelector = null;
+            if (audienceWordEmitters != null)
+            {
+                builder.RegisterComponent(audienceWordEmitters);
+                if (audienceWordRoutes == null && !config.WordsPassThroughScenery) throw new InvalidOperationException("Validar los recorridos del publico antes de jugar.");
+                audienceSelector = new AudienceWordSelector(audienceWordEmitters, config, audienceWordRoutes);
+                builder.RegisterInstance(audienceSelector);
+            }
             builder.Register<RhythmGameModel>(Lifetime.Scoped);
             builder.Register<AudioConductorService>(Lifetime.Scoped);
             builder.Register<FalseWordEffectService>(Lifetime.Scoped);
             builder.RegisterEntryPoint<ScreamerPresenter>(Lifetime.Scoped);
             builder.RegisterEntryPoint<GlitchPresenter>(Lifetime.Scoped);
+            builder.RegisterEntryPoint<WordImpactBlurPresenter>(Lifetime.Scoped).AsSelf();
             builder.RegisterInstance(config.Bullicio ?? new BullicioSettings { Enabled = false });
             builder.Register<BullicioSessionService>(Lifetime.Scoped);
             builder.RegisterEntryPoint<BullicioPresenter>(Lifetime.Scoped);
-            builder.Register<TargetFactory>(Lifetime.Scoped).WithParameter<WordLaunchLayout>(wordLaunchLayout);
+            builder.Register<TargetFactory>(Lifetime.Scoped).WithParameter<WordLaunchLayout>(wordLaunchLayout)
+                .WithParameter<AudienceWordSelector>(audienceSelector);
             builder.Register<RhythmSpawnerPresenter>(Lifetime.Scoped).WithParameter<CreaturePlacementLayout>(creaturePlacementLayout);
 
             // Solo este presentador actualiza reloj y spawn, en ese orden.

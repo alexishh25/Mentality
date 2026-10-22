@@ -14,6 +14,8 @@ using UnityEngine.SceneManagement;
 public static class NivelWordLayoutSetup
 {
     private static readonly Dictionary<Renderer, MeshCollider> Shapes = new Dictionary<Renderer, MeshCollider>();
+    private static readonly Dictionary<Collider, Renderer> ShapeOwners = new Dictionary<Collider, Renderer>();
+    private static readonly Collider[] QueryHits = new Collider[16384];
     private static BoxCollider probe;
     private static Scene geometryScene;
     private static string lastBlock;
@@ -113,7 +115,9 @@ public static class NivelWordLayoutSetup
 
     public static void OpenGeometry(Renderer[] renderers)
     {
-            geometryScene = EditorSceneManager.NewPreviewScene();
+            var activeScene = SceneManager.GetActiveScene();
+            geometryScene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Additive);
+            SceneManager.SetActiveScene(activeScene);
             var probeObject = new GameObject("Word volume probe");
             SceneManager.MoveGameObjectToScene(probeObject, geometryScene);
             probe = probeObject.AddComponent<BoxCollider>();
@@ -130,12 +134,14 @@ public static class NivelWordLayoutSetup
                     collider.cookingOptions &= ~MeshColliderCookingOptions.UseFastMidphase;
                 collider.sharedMesh = mesh;
                 Shapes.Add(renderer, collider);
+                ShapeOwners.Add(collider, renderer);
             }
+            Physics.SyncTransforms();
     }
     public static void CloseGeometry()
     {
-            Shapes.Clear(); probe = null;
-            if (geometryScene.IsValid() && geometryScene.isLoaded) EditorSceneManager.ClosePreviewScene(geometryScene);
+            Shapes.Clear(); ShapeOwners.Clear(); probe = null;
+            if (geometryScene.IsValid() && geometryScene.isLoaded) EditorSceneManager.CloseScene(geometryScene, true);
     }
 
     public static bool Ground(Renderer floor, Ray ray, out RaycastHit hit)
@@ -150,6 +156,38 @@ public static class NivelWordLayoutSetup
                 if (Physics.ComputePenetration(probe, box.center, Quaternion.identity, shape,
                     shape.transform.position, shape.transform.rotation, out _, out _)) return false;
             }
+        return true;
+    }
+
+    public static bool RayClear(Vector3 start, Vector3 end, Renderer[] obstacles, out Renderer blocker)
+    {
+        blocker = null;
+        Vector3 delta = end - start;
+        var ray = new Ray(start, delta.normalized);
+        float nearest = delta.magnitude;
+        foreach (var obstacle in obstacles)
+            if (Shapes.TryGetValue(obstacle, out var shape))
+            {
+                if (shape.Raycast(ray, out var hit, nearest))
+                { nearest = hit.distance; blocker = obstacle; }
+                // Reverse casting also detects a start point enclosed by a one-sided mesh.
+                if (shape.Raycast(new Ray(end, -delta.normalized), out var reverse, delta.magnitude) &&
+                    delta.magnitude - reverse.distance < nearest)
+                { nearest = delta.magnitude - reverse.distance; blocker = obstacle; }
+            }
+        return blocker == null;
+    }
+
+    public static bool BoxClear(Vector3 center, Vector3 halfSize, Quaternion rotation, Renderer[] obstacles, out Renderer blocker)
+    {
+        blocker = null;
+        // Overlap queries handle non-convex mesh surfaces; penetration queries can
+        // miss them, so they are unsuitable for validating these imported meshes.
+        int count = Physics.OverlapBoxNonAlloc(center, halfSize, QueryHits, rotation, ~0, QueryTriggerInteraction.Ignore);
+        if (count == QueryHits.Length) throw new InvalidOperationException("Word route query exceeded its collider buffer.");
+        for (int i = 0; i < count; i++)
+            if (ShapeOwners.TryGetValue(QueryHits[i], out var owner) && Array.IndexOf(obstacles, owner) >= 0)
+            { blocker = owner; return false; }
         return true;
     }
 

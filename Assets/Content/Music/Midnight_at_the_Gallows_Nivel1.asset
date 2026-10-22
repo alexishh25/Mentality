@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60fd8234581d462fae65cb6d3686216d, type: 3}
+  m_Name: Midnight_at_the_Gallows_Nivel1
+  m_EditorClassIdentifier: Assembly-CSharp::Gameplay.Rhythm.Models.MusicalSongAsset
+  MusicClip: {fileID: 8300000, guid: b521b1dc26d241d18d249ed7812e734d, type: 3}
+  AnalysisJson: {fileID: 4900000, guid: d0947caaf29d4414b2c66084231a4d98, type: 3}
+  AnalyzedAudioFile: Midnight_at_the_Gallows.mp3
+  ManualIntensity:
+    Enabled: 1
+    TransitionSeconds: 1.8
+    Intervals:
+    - Start: 71.9
+      End: 102
+    - Start: 132
+      End: 162.1
+    Sections:
+    - Start: 71.9
+      End: 102
+      SpeedMultiplier: 1.67
+      Frenzy: 0.6
+      MaximumTargets: 6
+      FalseProbability: 0.25
+      MinimumInterval: 0.3
+      AttackEveryBeats: 8
+    - Start: 102
+      End: 132
+      SpeedMultiplier: 1.4
+      Frenzy: 0.38
+      MaximumTargets: 6
+      FalseProbability: 0.3
+      MinimumInterval: 0.3
+      AttackEveryBeats: 8
+    - Start: 132
+      End: 162.1
+      SpeedMultiplier: 2.05
+      Frenzy: 0.78
+      MaximumTargets: 7
+      FalseProbability: 0.4
+      MinimumInterval: 0.3
+      AttackEveryBeats: 8

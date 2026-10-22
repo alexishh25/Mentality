@@ -178,7 +178,8 @@ public class PlayerView : MonoBehaviour
         // Dibujar el rayo en la vista de escena de Unity (durante 2 segundos en verde)
         if (drawDebug) Debug.DrawRay(ray.origin, ray.direction * distance, Color.green, 2f);
 
-        bool result = Physics.Raycast(ray, out hitInfo, distance, interactableLayer);
+        bool result = Physics.Raycast(ray, out hitInfo, distance, interactableLayer,
+            _isRhythmMode ? QueryTriggerInteraction.Collide : QueryTriggerInteraction.UseGlobal);
         return result;
     }
 

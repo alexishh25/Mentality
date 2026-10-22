@@ -32,22 +32,35 @@ namespace Gameplay.Rhythm.Models
         public ScreamerSettings Screamer = new ScreamerSettings();
         public BullicioSettings Bullicio = new BullicioSettings();
         public GlitchSettings Glitch = new GlitchSettings();
+        [Header("Word Impact Feedback")]
+        public WordImpactBlurSettings ImpactBlur = new WordImpactBlurSettings();
         [Header("Creatures")]
         public CreatureSettings Creatures = new CreatureSettings();
 
         [Header("Word Targets")]
         public GameObject[] WordPrefabs = Array.Empty<GameObject>();
-        [Tooltip("Aro breve y fijo en el lugar de lanzamiento; no sigue al objeto.")]
+        [Tooltip("Pulso breve en la boca del publico; para otros origenes, aro fijo de lanzamiento.")]
         public bool ShowSpawnRing = true;
         [Min(0.01f)] public float SpawnRingDurationSeconds = 0.35f;
 
         [Min(0.1f)]
-        [Tooltip("Distancia desde el jugador donde aparecen las palabras, en unidades de Unity.")]
+        [Tooltip("Distancia de referencia del mapa. Con publico, el origen real es la boca de cada personaje.")]
         public float SpawnDistance = 12f;
 
         [Min(0.1f)]
-        [Tooltip("Velocidad de acercamiento en unidades por segundo. El recorrido y esta velocidad determinan la anticipacion del mapa musical.")]
+        [Tooltip("Velocidad base de referencia. Junto con SpawnDistance determina la anticipacion musical; el acercamiento desde el publico se adapta al recorrido real.")]
         public float TravelSpeed = 3f;
+
+        [Tooltip("Adapta el acercamiento desde el publico: reserva mas tiempo para el tramo legible sin mover los beats de llegada.")]
+        public bool UseDistanceAwareApproach;
+        [Tooltip("Permite lanzar palabras a traves de la escenografia y usar todos los emisores del publico.")]
+        public bool WordsPassThroughScenery;
+        [Tooltip("El tamano de las palabras empieza a crecer desde la salida, sin un tramo inicial de tamano fijo.")]
+        public bool ImmediateWordGrowth;
+        [Range(0, 2), Tooltip("Espacios reservados para disparos de criatura durante los tramos intensos, dentro del limite total de palabras.")]
+        public int CreatureReservedSlots;
+        [Range(0.5f, 0.85f), Tooltip("Fraccion del tiempo musical de vuelo reservada para el acercamiento legible desde filas lejanas.")]
+        public float ReadableApproachFraction = 0.65f;
 
         [Min(0.01f)]
         [Tooltip("Distancia al jugador a partir de la cual una palabra cuenta como fallo. Debe ser menor que SpawnDistance.")]

@@ -10,6 +10,7 @@ namespace Gameplay.Rhythm.Services
         private readonly double[] _times;
         private int _next;
         private readonly double _leadTime;
+        private readonly int _reservedCreatureSlots;
         public IReadOnlyList<double> Times { get; }
         public MusicalActivityProfile ActivityProfile { get; }
         public MusicalPhraseProfile PhraseProfile { get; }
@@ -23,11 +24,13 @@ namespace Gameplay.Rhythm.Services
         public int MaximumTargetsAt(double time) => _difficulty == null ? int.MaxValue
             : ActivityProfile?.ManualIntensity?.SectionAt(time)?.MaximumTargets ?? (_difficulty.MaximumActiveTargets + (ActivityProfile == null ? 0
                 : (int)Math.Floor(ActivityProfile.ExtraTargets * ActivityProfile.FrenzyAt(time) + 1e-9d)));
+        public int MaximumChartTargetsAt(double time) => Math.Max(1, MaximumTargetsAt(time)
+            - (ActivityProfile?.ManualIntensity?.SectionAt(time) != null ? _reservedCreatureSlots : 0));
 
         public MusicalSpawnSchedule(MusicalMapData map, double minimumInterval, double leadTime = 0d,
             MusicalActivitySettings activitySettings = null, RhythmPatternSettings patternSettings = null,
             double lateHitWindow = 0d, RhythmPlacementSettings placementSettings = null,
-            BeatCadenceSettings cadenceSettings = null, ManualIntensitySettings manualSettings = null)
+            BeatCadenceSettings cadenceSettings = null, ManualIntensitySettings manualSettings = null, int reservedCreatureSlots = 0)
         {
             if (map == null) throw new ArgumentNullException(nameof(map));
             if (double.IsNaN(minimumInterval) || double.IsInfinity(minimumInterval) || minimumInterval <= 0)
@@ -35,6 +38,8 @@ namespace Gameplay.Rhythm.Services
             if (double.IsNaN(leadTime) || double.IsInfinity(leadTime) || leadTime < 0)
                 throw new ArgumentOutOfRangeException(nameof(leadTime));
             _leadTime = leadTime;
+            if (reservedCreatureSlots < 0 || reservedCreatureSlots > 2) throw new ArgumentOutOfRangeException(nameof(reservedCreatureSlots));
+            _reservedCreatureSlots = reservedCreatureSlots;
             bool beatCadence = cadenceSettings != null && cadenceSettings.Enabled;
             if (beatCadence && (cadenceSettings.BeatsPerTarget < 1 || cadenceSettings.BeatsPerTarget > 4))
                 throw new ArgumentOutOfRangeException(nameof(cadenceSettings), "La cadencia necesita entre 1 y 4 beats por objetivo.");
@@ -97,7 +102,7 @@ namespace Gameplay.Rhythm.Services
                 {
                     double spawnTime = ActivityProfile == null ? hitTime - leadTime : ActivityProfile.SpawnTimeFor(hitTime, leadTime);
                     while (deadlines.Count > 0 && deadlines.Peek() < spawnTime - 0.000000001d) deadlines.Dequeue();
-                    if (deadlines.Count >= MaximumTargetsAt(hitTime)) continue;
+                    if (deadlines.Count >= MaximumChartTargetsAt(hitTime)) continue;
                     limited.Add(hitTime);
                     deadlines.Enqueue(hitTime + lateHitWindow);
                 }
@@ -178,7 +183,7 @@ namespace Gameplay.Rhythm.Services
             {
                 double spawn = item.SpawnTime ?? (item.HitTime - leadTime);
                 while (deadlines.Count > 0 && deadlines.Peek() < spawn - 1e-9d) deadlines.Dequeue();
-                if (deadlines.Count >= MaximumTargetsAt(item.HitTime)) return false;
+                if (deadlines.Count >= MaximumChartTargetsAt(item.HitTime)) return false;
                 deadlines.Enqueue(item.HitTime + lateWindow);
             }
             MusicalSpawnEvent[] placed = placement != null && placement.Enabled

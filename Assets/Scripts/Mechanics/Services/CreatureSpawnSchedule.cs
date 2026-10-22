@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Gameplay.Rhythm.Models;
 
 namespace Gameplay.Rhythm.Services
@@ -19,6 +20,22 @@ namespace Gameplay.Rhythm.Services
         private readonly List<CreatureSpawnEvent> _events = new List<CreatureSpawnEvent>();
         private int _next;
         public IReadOnlyList<CreatureSpawnEvent> Events => _events;
+        private CreatureSpawnSchedule(List<CreatureSpawnEvent> events) { _events.AddRange(events); }
+        public CreatureSpawnSchedule WithAdmittedShots(CreatureShotBudget budget, double emergenceSeconds)
+        {
+            if (budget == null || emergenceSeconds <= 0d || double.IsNaN(emergenceSeconds) || double.IsInfinity(emergenceSeconds))
+                throw new ArgumentException("A valid shot budget and emergence duration are required.");
+            var events = new List<CreatureSpawnEvent>();
+            foreach (var item in _events)
+            {
+                var shots = item.Shots.Where(budget.Allows).ToArray();
+                // Do not show a creature whose whole volley is unavailable, or let it
+                // stand waiting because the budget rejected the opening shot.
+                if (shots.Length > 0) events.Add(new CreatureSpawnEvent(shots[0] - emergenceSeconds, shots, item.Section, item.Angle));
+            }
+            events.Sort((a, b) => a.Time.CompareTo(b.Time));
+            return new CreatureSpawnSchedule(events);
+        }
         public CreatureSpawnSchedule(MusicalMapData map, ManualIntensitySettings manual, CreatureSettings settings, double emergenceSeconds)
         {
             if (settings == null || !settings.Enabled) return;
@@ -38,7 +55,7 @@ namespace Gameplay.Rhythm.Services
                 if (first < 0) first = ~first;
                 for (int i = first; i < beats.Length && beats[i] < range.End; i += cadence[section])
                 {
-                    int attack = Array.BinarySearch(beats, beats[i] + emergenceSeconds + 0.35d);
+                    int attack = Array.BinarySearch(beats, beats[i] + emergenceSeconds + (settings.ContinuousAttack ? 0d : 0.35d));
                     if (attack < 0) attack = ~attack;
                     if (attack + (burst[section] + 1) / 2 >= beats.Length) continue;
                     var shots = new double[burst[section]];
@@ -51,7 +68,9 @@ namespace Gameplay.Rhythm.Services
                     if (shots[shots.Length - 1] >= range.End) continue;
                     int slot = (_events.Count * 3) % 5;
                     float angle = (slot / 2f - 1f) * settings.MaximumAngle;
-                    _events.Add(new CreatureSpawnEvent(beats[i], shots, section, angle));
+                    // Keep the first shot on its beat and finish emerging at that exact time.
+                    double appearance = settings.ContinuousAttack ? shots[0] - emergenceSeconds : beats[i];
+                    _events.Add(new CreatureSpawnEvent(appearance, shots, section, angle));
                 }
             }
         }

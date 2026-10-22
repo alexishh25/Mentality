@@ -20,6 +20,12 @@ namespace Gameplay.Rhythm.Factories
         private readonly FalseWordEffectService _falseWordEffects;
         private readonly BullicioSessionService _bullicio;
         private readonly WordLaunchLayout _launchLayout;
+        private readonly AudienceWordSelector _audienceSelector;
+        private readonly List<Vector3> _occupiedAudienceDirections = new List<Vector3>();
+        private bool _reportedMissingAudience;
+        public int AudienceSpawnedCount { get; private set; }
+        public int AudienceSkippedCount { get; private set; }
+        public int AudienceRedirectedCount { get; private set; }
         private readonly List<TargetView> _targets = new List<TargetView>();
         private readonly List<SpawnRingView> _spawnRings = new List<SpawnRingView>();
         private readonly List<CreatureEmergenceView> _creatures = new List<CreatureEmergenceView>();
@@ -33,6 +39,13 @@ namespace Gameplay.Rhythm.Factories
             {
                 float separation = Vector3.Angle(direction, target.Position - _playerTarget.position);
                 float width = _config.Placement.TargetAngularWidthDegrees;
+                if (_config.Creatures?.ContinuousAttack == true && _creatureWords.Contains(target))
+                {
+                    var bounds = target.GetComponent<Collider>().bounds;
+                    float visibleAngle = 2f * Mathf.Atan2(bounds.extents.magnitude,
+                        Mathf.Max(0.1f, Vector3.Distance(target.Position, _playerTarget.position))) * Mathf.Rad2Deg;
+                    width = Mathf.Max(1.5f, (visibleAngle + width * AudienceWordFlight.InitialScale) * 0.5f + 0.6f);
+                }
                 // Keep the whole fan away from ordinary chart words; consecutive volley shots
                 // may use opposite sides of the fan once their visible centers have separated.
                 if (separation < width + (_creatureWords.Contains(target) ? 0f : 18f)) return false;
@@ -47,7 +60,7 @@ namespace Gameplay.Rhythm.Factories
         }
 
         public TargetView CreateCreatureWord(Vector3 mouth, int shotIndex, double songTime,
-            MusicalActivityProfile motionProfile = null)
+            MusicalActivityProfile motionProfile = null, float? launchClearance = null)
         {
             if (!_model.IsPlaying || _model.IsPaused || !_conductor.IsPlaying || _conductor.IsPaused) return null;
             if (_config.WordPrefabs == null || _config.WordPrefabs.Length == 0)
@@ -74,14 +87,16 @@ namespace Gameplay.Rhythm.Factories
             float originAngle = Mathf.Abs(Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg);
             float spread = Mathf.Clamp(_config.Placement.MaximumSideAngle - originAngle, 0f, 18f);
             var word = Create(_config.WordPrefabs[prefabIndex], mouth,
-                new TargetTiming(songTime, arrival, motionProfile, shotIndex % 2 == 0 ? spread : -spread), kind, false);
+                new TargetTiming(songTime, arrival, motionProfile, shotIndex % 2 == 0 ? spread : -spread), kind, false,
+                audienceClearance: launchClearance ?? 0f, distantLaunch: launchClearance.HasValue);
             if (word != null) _creatureWords.Add(word);
             return word;
         }
 
         public TargetFactory(IObjectResolver resolver, RhythmGameConfig config,
             RhythmGameModel model, Transform playerTarget, AudioConductorService conductor,
-            FalseWordEffectService falseWordEffects, BullicioSessionService bullicio, WordLaunchLayout launchLayout = null)
+            FalseWordEffectService falseWordEffects, BullicioSessionService bullicio, WordLaunchLayout launchLayout = null,
+            AudienceWordSelector audienceSelector = null)
         {
             _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
             _config = config ?? throw new ArgumentNullException(nameof(config));
@@ -93,11 +108,13 @@ namespace Gameplay.Rhythm.Factories
             _falseWordEffects = falseWordEffects ?? throw new ArgumentNullException(nameof(falseWordEffects));
             _bullicio = bullicio ?? throw new ArgumentNullException(nameof(bullicio));
             _launchLayout = launchLayout;
+            _audienceSelector = audienceSelector;
         }
 
         public TargetView CreateRandomPosition(TargetTiming timing = null)
         {
-            return CreateAtAngle(UnityEngine.Random.Range(-135f, 135f), timing);
+            float side = _audienceSelector == null ? 135f : _config.Placement.MaximumSideAngle;
+            return CreateAtAngle(UnityEngine.Random.Range(-side, side), timing);
         }
 
         public int ActiveTargetCount
@@ -128,6 +145,32 @@ namespace Gameplay.Rhythm.Factories
                 throw new ArgumentOutOfRangeException(nameof(angleDegrees));
 
             int index = UnityEngine.Random.Range(0, _config.WordPrefabs.Length);
+            if (_audienceSelector != null)
+            {
+                _ = ActiveTargetCount;
+                _occupiedAudienceDirections.Clear();
+                foreach (var target in _targets)
+                    _occupiedAudienceDirections.Add(target.SourceEmitter != null ? target.LaunchPosition : target.Position);
+                float yaw = _launchLayout == null ? 0f : _launchLayout.transform.eulerAngles.y;
+                if (!_audienceSelector.TrySelect(angleDegrees, _playerTarget.position, yaw, _occupiedAudienceDirections, out var emitter, timing))
+                {
+                    AudienceSkippedCount++;
+                    if (!_reportedMissingAudience)
+                    {
+                        Debug.LogWarning("No hay un emisor del publico disponible para esta direccion; se omite la palabra sin usar el origen anterior. " + _audienceSelector.RouteStatus);
+                        _reportedMissingAudience = true;
+                    }
+                    return null;
+                }
+                var word = Create(_config.WordPrefabs[index], emitter.WordOrigin.position, timing, null, true, emitter,
+                    _audienceSelector.LastSelectionClearance);
+                if (word != null)
+                {
+                    AudienceSpawnedCount++;
+                    if (_audienceSelector.LastSelectionRedirected) AudienceRedirectedCount++;
+                }
+                return word;
+            }
             // Arco de 270 grados centrado en el norte (+Z) de la arena.
             // Excluye los 90 grados del sur (-Z), independientemente del giro de la camara.
             float angle = angleDegrees * Mathf.Deg2Rad;
@@ -138,7 +181,8 @@ namespace Gameplay.Rhythm.Factories
         }
 
         public TargetView Create(GameObject prefab, Vector3 position, TargetTiming timing = null,
-            WordTargetKind? forcedKind = null, bool showSpawnRing = true)
+            WordTargetKind? forcedKind = null, bool showSpawnRing = true, AudienceWordEmitter audienceEmitter = null,
+            float audienceClearance = 0f, bool distantLaunch = false)
         {
             if (!_model.IsPlaying)
                 return null;
@@ -151,8 +195,15 @@ namespace Gameplay.Rhythm.Factories
             try
             {
                 var view = instance.GetComponent<TargetView>();
-                if (timing != null && _config.Placement != null && _config.Placement.Enabled)
+                if (_config.WordsPassThroughScenery)
+                {
+                    foreach (var collider in instance.GetComponentsInChildren<Collider>()) collider.isTrigger = true;
+                    var rigidbody = instance.GetComponent<Rigidbody>();
+                    if (rigidbody != null) { rigidbody.isKinematic = true; rigidbody.useGravity = false; }
+                }
+                if ((timing != null || audienceEmitter != null) && _config.Placement != null && _config.Placement.Enabled)
                     view.ConfigureLaunchSize(_playerTarget.position, _config.Placement);
+                if (audienceEmitter != null || distantLaunch) view.ConfigureAudienceLaunch(audienceEmitter, audienceClearance, _config.ImmediateWordGrowth);
                 var kind = forcedKind ?? (timing == null || _config.FalseWords == null ? WordTargetKind.Normal
                     : FalseWordSelector.Select(_config.FalseWords, timing.HitTime,
                         timing.MotionProfile == null ? 0d : timing.MotionProfile.FrenzyAt(timing.SpawnTime), _bullicio.ProbabilityBonus,
@@ -160,7 +211,8 @@ namespace Gameplay.Rhythm.Factories
                 var presenter = new TargetPresenter(view, _model, _playerTarget,
                     _config.TravelSpeed, _config.ArrivalDistance, timing, _conductor,
                     timing == null || _config.Evasion == null ? null : new AimEvasionMotion(_config.Evasion, timing.HitTime), kind,
-                    _falseWordEffects);
+                    _falseWordEffects, audienceEmitter != null || distantLaunch, audienceClearance,
+                    _config.UseDistanceAwareApproach ? _config.ReadableApproachFraction : 0f, _config.ImmediateWordGrowth);
                 view.Initialize(presenter);
                 if (kind != WordTargetKind.Normal)
                     view.ConfigureDistortion(_config.FalseWords, _conductor);
@@ -180,6 +232,11 @@ namespace Gameplay.Rhythm.Factories
 
         public void ClearTargets()
         {
+            _audienceSelector?.Reset();
+            _reportedMissingAudience = false;
+            AudienceSpawnedCount = 0;
+            AudienceSkippedCount = 0;
+            AudienceRedirectedCount = 0;
             foreach (var creature in _creatures) if (creature != null) creature.Cancel();
             _creatures.Clear();
             foreach (var target in _targets)
@@ -216,7 +273,13 @@ namespace Gameplay.Rhythm.Factories
                 var radius = new Vector2(box.size.x * Mathf.Abs(scale.x) * 0.5f + 0.12f,
                     box.size.y * Mathf.Abs(scale.y) * 0.5f + 0.12f);
                 var ring = effect.AddComponent<SpawnRingView>();
-                ring.Initialize(_conductor, radius, _config.SpawnRingDurationSeconds);
+                if (view.SourceEmitter != null)
+                {
+                    effect.name = "Audience mouth pulse - " + view.SourceEmitter.name;
+                    ring.InitializeAudience(_conductor, view.SourceEmitter, _playerTarget.position,
+                        _config.SpawnRingDurationSeconds, view.Timing?.SpawnTime);
+                }
+                else ring.Initialize(_conductor, radius, _config.SpawnRingDurationSeconds);
                 _spawnRings.RemoveAll(item => item == null);
                 _spawnRings.Add(ring);
             }
