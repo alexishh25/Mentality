@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4f70a14b16c23d459b3dc952af5df17, type: 3}
+  m_Name: GameConfig
+  m_EditorClassIdentifier: Assembly-CSharp::GameConfigSO
+  audioConfig: {fileID: 11400000, guid: a61bcabe29d620149a584d898cf6b7eb, type: 2}
+  inputConfig: {fileID: 11400000, guid: 37d284b63e05a7c438de24625c12aedf, type: 2}
+  saveConfig: {fileID: 11400000, guid: 1c2bd4358da3d2345ab12350cf456945, type: 2}
